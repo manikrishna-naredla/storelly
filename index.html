@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Storelly — Digital Business OS & Instant Public Storefront</title>
+    <meta name="description" content="Turn your local business into a digital storefront in minutes. Digital cards, instant WhatsApp ordering, appointment bookings, catalog, and operations dashboard." />
+    <meta property="og:title" content="Storelly — Multi-Business Digital Operating System" />
+    <meta property="og:description" content="Create your digital store, share on WhatsApp, manage products, services, bookings and orders from one central dashboard." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <meta name="theme-color" content="#10b981" />
+    <link rel="icon" type="image/jpeg" href="/main logo-1.jpg" />
+    <link rel="apple-touch-icon" href="/main logo-1.jpg" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,600;1,700;1,800;1,900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+      window.APP_BASE_URL = window.location.origin;
+      
+      // Clean up legacy PWA Service Workers
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          for (let registration of registrations) {
+            registration.unregister();
+            console.log('Unregistered legacy service worker:', registration.scope);
+          }
+        });
+      }
+
+      // Suppress annoying IndexedDB errors before Vite overlay catches them
+      const suppressError = (msg) => {
+        if (!msg) return false;
+        const str = typeof msg === 'string' ? msg : (msg.message || '');
+        return str.includes('Database is closing') || str.includes('hidden') || str.includes('IndexedDB') || str.includes('Database is closed') || str.includes('Could not reach Cloud Firestore backend') || str.includes('code=unavailable') || str.includes('healthy Internet connection') || str.includes('The operation could not be completed');
+      };
+      
+      window.addEventListener('error', (e) => {
+        if (suppressError(e.message) || suppressError(e.error)) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+        }
+      }, true);
+      
+      window.addEventListener('unhandledrejection', (e) => {
+        if (suppressError(e.reason)) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+        }
+      }, true);
+    </script>
+  </head>
+  <body class="bg-[var(--bg)] text-[var(--t1)] font-sans antialiased selection:bg-[var(--g500)] selection:text-white">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

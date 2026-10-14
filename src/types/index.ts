@@ -1,0 +1,1122 @@
+export type BusinessType =
+  | 'retail'
+  | 'restaurant'
+  | 'grocery'
+  | 'bakery'
+  | 'salon'
+  | 'clinic'
+  | 'hotel'
+  | 'rental'
+  | 'real_estate'
+  | 'fashion'
+  | 'jewellery'
+  | 'electronics'
+  | 'furniture'
+  | 'education'
+  | 'services'
+  | 'agency'
+  | 'digital_creator'
+  | 'custom';
+
+export type ModuleKey =
+  | 'products'
+  | 'services'
+  | 'menu'
+  | 'rooms'
+  | 'vehicles'
+  | 'cart_ordering'
+  | 'table_delivery'
+  | 'booking_appointments'
+  | 'stay_booking'
+  | 'rental_booking'
+  | 'inquiries'
+  | 'reviews'
+  | 'offers'
+  | 'digital_card'
+  | 'inventory_tracking'
+  | 'digital_products'
+  | 'universal_links'
+  | 'work_portfolio'
+  | 'events_ticketing'
+  | 'custom_quotes'
+  | 'affiliate_products'
+  | 'analytics';
+
+export interface BusinessModuleConfig {
+  products?: boolean;
+  services?: boolean;
+  menu?: boolean;
+  rooms?: boolean;
+  vehicles?: boolean;
+  cart_ordering?: boolean;
+  table_delivery?: boolean;
+  booking_appointments?: boolean;
+  stay_booking?: boolean;
+  rental_booking?: boolean;
+  inquiries?: boolean;
+  reviews?: boolean;
+  offers?: boolean;
+  digital_card?: boolean;
+  inventory_tracking?: boolean;
+  digital_products?: boolean;
+  universal_links?: boolean;
+  work_portfolio?: boolean;
+  portfolio?: boolean;
+  events_ticketing?: boolean;
+  custom_quotes?: boolean;
+  affiliate_products?: boolean;
+  recommendations?: boolean;
+  analytics?: boolean;
+
+  
+  // Alternative key aliases for backward/cross-module compatibility
+  catalog_products?: boolean;
+  catalog_services?: boolean;
+  catalog_menu?: boolean;
+  catalog_rooms?: boolean;
+  catalog_vehicles?: boolean;
+  cart_orders?: boolean;
+  dine_in_ordering?: boolean;
+  whatsapp_ordering?: boolean;
+  customer_reviews?: boolean;
+  offers_promotions?: boolean;
+  [key: string]: boolean | undefined;
+}
+
+export type BusinessModules = BusinessModuleConfig;
+
+export type ProfileType = 'vendor' | 'creator';
+
+export interface CreatorModuleState {
+  enabled: boolean;
+  published: boolean;
+  updatedAt?: number;
+}
+
+export type CreatorModulesConfig = Record<string, CreatorModuleState>;
+
+export interface BusinessProfile {
+  id: string;
+  ownerId: string;
+  name: string;
+  slug: string;
+  username?: string; // For @username URLs
+  template?: string; // Active layout template id
+  profileType?: ProfileType; // Explicit 'vendor' vs 'creator' separation
+  storeType?: ProfileType; // Backward-compatible alias
+  type: BusinessType;
+  category?: string;
+  tagline?: string;
+  description?: string;
+  bio?: string; // Specific for creators
+  logo?: string;
+  banner?: string;
+  coverImage?: string;
+  profileImage?: string; // Specific for creators
+  phone: string;
+  whatsapp: string;
+  email?: string;
+  ownerEmail?: string;
+  address?: string;
+  pincode?: string;
+  city?: string;
+  state?: string;
+  locationUrl?: string;
+  businessHours?: {
+    openTime: string;
+    closeTime: string;
+    days: string[];
+    isAlwaysOpen?: boolean;
+  };
+  currency: string;
+  currencySymbol: string;
+  deliveryAvailable: boolean;
+  deliveryFee?: number;
+  minOrderAmount?: number;
+  minOrderValue?: number;
+  taxPercent?: number;
+  taxRate?: number;
+  enableCod?: boolean;
+  enableOnlinePayment?: boolean;
+  enableBankTransfer?: boolean;
+  upiId?: string;
+  upiQrImage?: string;
+  bankDetails?: {
+    accountNumber?: string;
+    ifscCode?: string;
+    accountHolderName?: string;
+    bankName?: string;
+    branchName?: string;
+  };
+  paymentInstructions?: string;
+  primaryDestination?: 'portfolio' | 'biolink' | 'store' | 'consultations' | 'events' | 'quotes' | 'reviews' | 'recommendations';
+  socialLinks?:
+    | {
+        instagram?: string;
+        facebook?: string;
+        website?: string;
+        youtube?: string;
+        twitter?: string;
+        telegram?: string;
+        linkedin?: string;
+      }
+    | Array<{ platform: string; url: string }>;
+  socials?: {
+    instagram?: string;
+    facebook?: string;
+    website?: string;
+    youtube?: string;
+    twitter?: string;
+    telegram?: string;
+    linkedin?: string;
+  };
+  seoMetaTitle?: string;
+  seoMetaDescription?: string;
+  seoMetaKeywords?: string;
+  seoMetaImage?: string;
+  modules: BusinessModuleConfig;
+  status: 'active' | 'inactive' | 'draft' | 'suspended' | 'maintenance' | 'deleted';
+  subscriptionStatus?: 'trial' | 'active' | 'inactive' | 'pending' | 'expired';
+  subscriptionPlan?: 'free' | 'starter' | 'trial' | 'pro' | 'growth';
+  maintenanceMode?: boolean;
+  maintenanceMessage?: string;
+  maintenanceImage?: string;
+  themeColor?: string;
+  accentColor?: string; // Specific for creators
+  publicProfileStatus?: 'published' | 'draft'; // Specific for creators
+  shareCount?: number;
+  bioRouting?: 'standalone' | 'storefront' | 'both';
+  bioTheme?: any;
+  showStoreOnBio?: boolean;
+  showPortfolioOnBio?: boolean;
+  showOfficialLinksBadge?: boolean;
+  portfolioSettings?: PortfolioSettings;
+  creatorModulesConfig?: CreatorModulesConfig;
+  moduleStates?: Record<string, CreatorModuleState>;
+  trustCardSettings?: StoreTrustCardSettings;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface StoreTrustCardSettings {
+  enabled?: boolean;
+  headline?: string;
+  subHeadline?: string;
+  badge1?: string;
+  badge2?: string;
+  trustPill1Text?: string;
+  trustPill2Text?: string;
+  trustPill3Text?: string;
+  trustPill4Text?: string;
+  taglineDivider?: string;
+  couponCode?: string;
+  couponDiscount?: string;
+  rating?: number;
+  reviewCount?: number;
+  happyCustomers?: string;
+  brandFooterText?: string;
+}
+
+export interface Category {
+  id: string;
+  businessId: string;
+  ownerId?: string;
+  name: string;
+  slug: string;
+  description?: string;
+  icon?: string;
+  image?: string;
+  color?: string;
+  badgeColor?: string;
+  sortOrder: number;
+  isActive: boolean;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export type CatalogItemType =
+  | 'product'
+  | 'service'
+  | 'menu_item'
+  | 'room'
+  | 'room_stay'
+  | 'vehicle'
+  | 'rental_vehicle'
+  | 'package'
+  | 'property'
+  | 'course'
+  | 'custom';
+
+export interface CatalogItemVariant {
+  id: string;
+  name: string; // e.g. "Size: L" or "500g"
+  price: number;
+  stock?: number;
+  sku?: string;
+}
+
+export interface CatalogItemAddon {
+  id: string;
+  name: string;
+  price: number;
+  isRequired?: boolean;
+}
+
+export interface CatalogItem {
+  id: string;
+  businessId: string;
+  ownerId?: string;
+  type: CatalogItemType;
+  name: string;
+  slug: string;
+  categoryId: string;
+  shortDescription?: string;
+  detailedDescription?: string;
+  price: number;
+  salePrice?: number;
+  unit?: string; // "kg", "pcs", "night", "hour", "day", "session", "plate"
+  sku?: string;
+  images: string[];
+  inStock: boolean;
+  stockQuantity?: number;
+  minStockAlert?: number;
+  isFeatured?: boolean;
+  isOffer?: boolean;
+  offerText?: string;
+  
+  // Specific vertical extensions
+  durationMinutes?: number; // for salon/services/appointments
+  prepTimeMinutes?: number; // for restaurant
+  isVeg?: boolean; // for food
+  spiceLevel?: 'mild' | 'medium' | 'spicy';
+  
+  // Hotel / Stay extensions
+  roomCapacity?: number;
+  bedType?: string;
+  amenities?: string[];
+  
+  // Vehicle rental extensions
+  vehicleModel?: string;
+  fuelType?: 'petrol' | 'diesel' | 'electric' | 'cng';
+  transmission?: 'manual' | 'automatic';
+  seatingCapacity?: number;
+
+  // Digital Creator extensions
+  productType?: 'physical' | 'digital_file' | 'consultation_slot';
+  isFree?: boolean;
+  digitalFileType?: 'pdf' | 'zip' | 'video' | 'audio' | 'document' | 'template' | 'course' | 'images' | 'other';
+  digitalFileUrl?: string; // Secure Cloudinary URL or Signed URL
+  digitalFileId?: string; // Cloudinary Public ID
+  fileName?: string;
+  fileSize?: string;
+  downloadLimit?: number;
+  salesCount?: number;
+  digitalFiles?: {
+    id: string;
+    title: string;
+    url: string;
+    fileId?: string;
+    fileType?: string;
+    fileSize?: string;
+  }[];
+  
+  // Booking/Consultation extensions
+  consultationDuration?: number; // minutes
+  consultationDays?: string[]; // e.g. ["MO", "TU", "WE", "TH", "FR", "SA", "SU"]
+  consultationTimeSlots?: string[]; // e.g. ["17:00", "18:00"]
+  timezone?: string;
+  bufferTime?: number; // minutes
+  
+  // Variations and Addons
+  variants?: CatalogItemVariant[];
+  addons?: CatalogItemAddon[];
+  
+  sortOrder?: number;
+  isActive: boolean;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface CommunityLink {
+  id: string;
+  linkId: string;
+  businessId: string;
+  type: 'whatsapp' | 'telegram' | 'youtube' | 'instagram' | 'google_form' | 'google_sheet' | 'google_doc' | 'gdrive' | 'custom';
+  title: string;
+  description?: string;
+  url: string;
+  clickCount: number;
+  order: number;
+  isActive: boolean;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export type OrderStatus =
+  | 'pending'
+  | 'pending-verification'
+  | 'confirmed'
+  | 'processing'
+  | 'ready'
+  | 'shipped'
+  | 'delivered'
+  | 'cancelled';
+
+export interface OrderItem {
+  itemId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  variantId?: string;
+  variantName?: string;
+  addons?: { name: string; price: number }[];
+  image?: string;
+  unit?: string;
+}
+
+export interface Order {
+  id: string;
+  businessId: string;
+  orderNumber: string;
+  customerName: string;
+  customerPhone: string;
+  customerWhatsApp?: string;
+  customerEmail?: string;
+  customerAddress?: string;
+  customerCity?: string;
+  customerPincode?: string;
+  orderType: 'delivery' | 'pickup' | 'dine_in' | 'digital';
+  tableNumber?: string;
+  items: OrderItem[];
+  subtotal: number;
+  deliveryFee: number;
+  discount: number;
+  tax: number;
+  total: number;
+  status: OrderStatus;
+  paymentMethod: 'cod' | 'upi_on_delivery' | 'online' | 'cash_at_counter';
+  paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
+  razorpayOrderId?: string;
+  razorpayPaymentId?: string;
+  razorpaySignature?: string;
+  webhookProcessed?: boolean;
+  downloadStatus?: 'not_started' | 'completed';
+  digitalAccessUrl?: string; // Temporary signed URL
+  notes?: string;
+  // Shipping & Courier metadata
+  shippingCarrier?: string;
+  trackingNumber?: string;
+  packageWeight?: string;
+  packageDimensions?: string;
+  customerState?: string;
+  customerCountry?: string;
+  shippingLabelGeneratedAt?: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export type BookingStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'completed'
+  | 'cancelled';
+
+export interface Booking {
+  id: string;
+  businessId: string;
+  bookingNumber: string;
+  bookingType: 'appointment' | 'room_stay' | 'vehicle_rental' | 'consultation';
+  itemId: string;
+  itemName: string;
+  itemImage?: string;
+  customerName: string;
+  customerPhone: string;
+  customerEmail?: string;
+  
+  // Date & Time details
+  bookingDate?: string; // YYYY-MM-DD
+  bookingTimeSlot?: string; // e.g. "10:00 AM - 11:00 AM"
+  checkInDate?: string;
+  checkOutDate?: string;
+  startDate?: string;
+  endDate?: string;
+  
+  guestsCount?: number;
+  vehicleQuantity?: number;
+  duration?: string;
+  
+  totalAmount: number;
+  status: BookingStatus;
+  paymentStatus?: 'pending' | 'paid' | 'failed' | 'refunded';
+  meetingUrl?: string; // Google Meet or Zoom
+  notes?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface Customer {
+  id: string;
+  businessId: string;
+  name: string;
+  phone: string;
+  whatsapp?: string;
+  email?: string;
+  address?: string;
+  totalOrders: number;
+  totalBookings: number;
+  totalSpent: number;
+  sourceModule?: 'digital_store' | 'consultation' | 'event' | 'quote' | 'review' | 'storefront' | string;
+  sourceModules?: string[];
+  firstInteractionAt: number;
+  lastInteractionAt: number;
+  notes?: string;
+}
+
+export type CanonicalAnalyticsEventType =
+  | 'profile_view'
+  | 'module_click'
+  | 'conversion'
+  | 'bio_view'
+  | 'bio_click'
+  | 'portfolio_view'
+  | 'project_view'
+  | 'digital_product_view'
+  | 'digital_purchase'
+  | 'digital_download'
+  | 'consultation_view'
+  | 'consultation_booking'
+  | 'event_view'
+  | 'event_registration'
+  | 'event_ticket_purchase'
+  | 'quote_view'
+  | 'quote_request'
+  | 'quote_paid'
+  | 'review_view'
+  | 'review_submitted'
+  | 'affiliate_impression'
+  | 'affiliate_click'
+  | 'whatsapp_click'
+  | 'share'
+  | 'qr_scan'
+  | 'store_view'
+  | 'cart_add';
+
+export interface CreatorAnalyticsSummary {
+  timeRange: 'today' | '7d' | '30d' | '90d' | 'all';
+  totalViews: number;
+  totalClicks: number;
+  overallCtr: number;
+  totalRevenue: number;
+  totalConversions: number;
+  
+  bioLink: {
+    views: number;
+    clicks: number;
+    ctr: number;
+    clicksPerLink: Record<string, number>;
+  };
+  portfolio: {
+    views: number;
+    projectViews: number;
+    enquiries: number;
+    viewsPerProject: Record<string, number>;
+  };
+  digitalStore: {
+    productsCount: number;
+    salesCount: number;
+    revenue: number;
+    downloadsCount: number;
+    conversionRate: number;
+    salesPerProduct: Record<string, { title: string; count: number; revenue: number }>;
+  };
+  consultations: {
+    totalBookings: number;
+    pendingBookings: number;
+    completedBookings: number;
+    revenue: number;
+  };
+  events: {
+    eventsCount: number;
+    ticketsSold: number;
+    attendanceCount: number;
+    revenue: number;
+  };
+  quotes: {
+    enquiriesCount: number;
+    quotesSent: number;
+    quotesAccepted: number;
+    quotesPaid: number;
+    revenue: number;
+  };
+  reviews: {
+    total: number;
+    published: number;
+    pending: number;
+    averageRating: number;
+  };
+  affiliate: {
+    impressions: number;
+    outboundClicks: number;
+    ctr: number;
+    clicksPerProduct: Record<string, { title: string; clicks: number }>;
+  };
+
+  dailyTrends: Array<{
+    dateStr: string;
+    day: string;
+    views: number;
+    clicks: number;
+    conversions: number;
+    revenue: number;
+  }>;
+
+  recentEvents: Array<{
+    id: string;
+    eventType: CanonicalAnalyticsEventType;
+    timestamp: number;
+    title: string;
+    subtitle?: string;
+    metadata?: Record<string, any>;
+  }>;
+}
+
+export interface Review {
+  id: string;
+  businessId: string;
+  customerName: string;
+  customerPhone?: string;
+  rating: number; // 1 to 5
+  comment: string;
+  reply?: string;
+  replyAt?: number;
+  isVerifiedPurchase?: boolean;
+  status: 'published' | 'hidden' | 'pending';
+  createdAt: number;
+}
+
+export type NotificationType =
+  | 'order'
+  | 'booking'
+  | 'payment'
+  | 'quote'
+  | 'event'
+  | 'system'
+  | 'review'
+  | 'digital_product'
+  | 'consultation'
+  | 'inquiry';
+
+export interface Notification {
+  id: string;
+  businessId: string;
+  ownerId?: string;
+  profileType?: 'vendor' | 'creator';
+  type: NotificationType;
+  title: string;
+  message: string;
+  link?: string; // Deep link to the dashboard section
+  entityType?: 'order' | 'booking' | 'payment' | 'quote' | 'event' | 'review' | 'digital_product' | 'consultation' | 'inquiry' | 'system';
+  entityId?: string;
+  read: boolean;
+  createdAt: number;
+  metadata?: Record<string, any>;
+}
+
+export interface Offer {
+  id: string;
+  businessId: string;
+  title: string;
+  code?: string;
+  description: string;
+  discountType: 'percentage' | 'flat';
+  discountValue: number;
+  minOrderValue?: number;
+  startDate?: string;
+  endDate?: string;
+  isActive: boolean;
+  createdAt: number;
+}
+
+export interface AnalyticsSummary {
+  totalOrders: number;
+  totalRevenue: number;
+  totalBookings: number;
+  totalCustomers: number;
+  totalProducts: number;
+  storeViews: number;
+  whatsappClicks: number;
+  conversionRate: number;
+  bioLinkViews?: number;
+  bioLinkClicks?: number;
+  recentOrders: Order[];
+  recentBookings: Booking[];
+}
+
+export interface CartItem {
+  id: string; // unique item key combining itemId + variantId
+  catalogItem: CatalogItem;
+  quantity: number;
+  selectedVariant?: CatalogItemVariant;
+  selectedAddons?: CatalogItemAddon[];
+}
+
+export interface BioLink {
+  id: string;
+  businessId: string;
+  type: string;
+  title: string;
+  subtitle?: string;
+  url: string;
+  icon?: string;
+  highlight?: boolean;
+  order: number;
+  enabled: boolean;
+  clickCount?: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+
+// ==========================================
+// MODULE 3: WORK PORTFOLIO & SHOWCASE TYPES
+// ==========================================
+
+export type PortfolioCategory =
+  | 'Photography'
+  | 'Video/Motion'
+  | 'Design'
+  | 'Development'
+  | 'Writing'
+  | 'Coaching'
+  | 'Events'
+  | 'Beauty'
+  | 'Handmade/Art'
+  | 'Other'
+  | string;
+
+export type PortfolioMediaType =
+  | 'image'
+  | 'gallery'
+  | 'video_file'
+  | 'external_video'
+  | 'external_link';
+
+export type PortfolioProfession =
+  | 'photographer'
+  | 'designer'
+  | 'developer'
+  | 'youtuber'
+  | 'writer'
+  | 'coach'
+  | 'artist'
+  | 'event_planner'
+  | 'beauty'
+  | 'custom';
+
+export type PortfolioThemeColor =
+  | 'default'
+  | 'dark'
+  | 'minimal'
+  | 'photo'
+  | 'rose'
+  | 'indigo'
+  | 'emerald'
+  | 'amber';
+
+export type PortfolioFontStyle = 'sans' | 'serif' | 'mono' | 'display';
+
+export type PortfolioCardStyle = 'minimal' | 'bordered' | 'elevated' | 'glassmorphism' | 'brutalist';
+
+export type PortfolioTemplateId =
+  | 'modern_showcase'
+  | 'minimalist_studio'
+  | 'dark_luxury'
+  | 'bento_grid'
+  | 'creative_masonry'
+  | 'executive_agency';
+
+export type PortfolioBlockType =
+  | 'hero'
+  | 'works'
+  | 'about'
+  | 'skills'
+  | 'services'
+  | 'testimonials'
+  | 'mediakit'
+  | 'contact'
+  | 'custom'
+  | 'custom_cta'
+  | 'custom_rich_text'
+  | 'custom_rich';
+
+export interface PortfolioBlock {
+  id: string;
+  type: PortfolioBlockType;
+  title: string;
+  subtitle?: string;
+  enabled: boolean;
+  order: number;
+  content?: string;
+  customContent?: {
+    badge?: string;
+    bodyText?: string;
+    highlightText?: string;
+    imageUrl?: string;
+    buttonText?: string;
+    buttonUrl?: string;
+    layout?: 'split' | 'centered' | 'banner' | 'card_grid';
+  };
+}
+
+export interface PortfolioThemeConfig {
+  primaryColor: string; // e.g. '#4f46e5'
+  accentColor?: string;
+  backgroundColor?: string;
+  fontFamily: PortfolioFontStyle;
+  cardStyle: PortfolioCardStyle;
+  borderRadius?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
+  colorMode?: 'light' | 'dark' | 'auto';
+}
+
+export type PortfolioLayoutMode = 'grid' | 'masonry' | 'cards' | 'feed';
+
+export interface PortfolioItem {
+  id: string;
+  businessId: string;
+  title: string;
+  category: string;
+  coverImage: string; // Required cover thumbnail
+  mediaType: PortfolioMediaType;
+  mediaUrls?: string[]; // For single image, gallery images, or uploaded video file
+  externalUrl?: string; // For YouTube/Vimeo embed, Figma, GitHub, live site, article
+  description: string;
+  tags?: string[];
+  order: number;
+  isActive: boolean;
+  clientName?: string;
+  projectOutcome?: string;
+  projectYear?: string;
+  year?: string;
+  role?: string;
+  liveDemoUrl?: string;
+  githubUrl?: string;
+  figmaUrl?: string;
+  readTime?: string; // e.g. "5 min read" for writers
+  videoViews?: string; // e.g. "250K views" for YouTubers
+  caseStudyStory?: string;
+  caseStudyNarrative?: string;
+  cloudinaryPublicIds?: string[];
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface PlatformStat {
+  id: string;
+  platform: string; // e.g., 'Instagram', 'YouTube', 'TikTok', 'Twitter / X', 'LinkedIn', 'Spotify', 'Other'
+  count: string; // e.g., '120K', '45.2K', '1.5M'
+  engagementRate?: string; // e.g., '4.8%'
+  label?: string; // e.g., 'Followers', 'Subscribers', 'Monthly Readers'
+  profileUrl?: string;
+}
+
+export interface BrandCollab {
+  id: string;
+  brandName: string;
+  description: string;
+  logoUrl?: string;
+  collabYear?: string;
+  linkUrl?: string;
+}
+
+export interface Testimonial {
+  id: string;
+  businessId: string;
+  clientName: string;
+  clientPhoto?: string;
+  clientRole?: string; // e.g. "Bride & Groom", "Founder at Acme Corp"
+  quote: string;
+  rating?: number; // 1 to 5
+  order: number;
+  isActive: boolean;
+  createdAt: number;
+  updatedAt?: number;
+}
+
+export interface PortfolioSocialLinks {
+  instagram?: string;
+  youtube?: string;
+  twitter?: string;
+  linkedin?: string;
+  github?: string;
+  behance?: string;
+  dribbble?: string;
+  website?: string;
+}
+
+export interface PortfolioServicePackage {
+  id: string;
+  title: string;
+  price: string;
+  description: string;
+  duration?: string;
+  deliverables?: string[];
+  badge?: string;
+  popular?: boolean;
+  buttonText?: string;
+  buttonUrl?: string;
+}
+
+export interface PortfolioSettings {
+  profession?: PortfolioProfession;
+  templateId?: PortfolioTemplateId;
+  themeColor?: PortfolioThemeColor;
+  fontStyle?: PortfolioFontStyle;
+  layoutMode?: PortfolioLayoutMode;
+  themeConfig?: PortfolioThemeConfig;
+  template?: 'default' | 'developer' | 'designer' | 'photographer' | 'youtuber' | 'writer' | 'coach' | 'artist' | 'event_planner' | 'beauty';
+  blocks?: PortfolioBlock[];
+  ctaMode?: 'whatsapp' | 'booking' | 'custom_quote'; // Enquiry mode
+  customCtaText?: string;
+  primaryCtaText?: string;
+  primaryCtaAction?: 'whatsapp' | 'booking' | 'url';
+  primaryCtaUrl?: string;
+  secondaryCtaText?: string;
+  secondaryCtaUrl?: string;
+  tertiaryCtaText?: string;
+  tertiaryCtaUrl?: string;
+  whatsappMessage?: string;
+  bookingItemId?: string; // Optional link to specific consultation service item
+  headline?: string;
+  subheadline?: string;
+  professionTitle?: string;
+  specializations?: string[];
+  slogan?: string;
+  location?: string;
+  aboutStory?: string;
+  experienceYears?: string;
+  completedProjectsCount?: string;
+  satisfactionRate?: string;
+  skillsList?: string[];
+  toolsList?: string[];
+  services?: PortfolioServicePackage[];
+  customNavTabs?: string[];
+  customCategories?: string[];
+  showSocialLinks?: boolean;
+  socialLinks?: PortfolioSocialLinks;
+  enableCustomQuotes?: boolean;
+  customQuoteTitle?: string;
+  customQuoteDescription?: string;
+  mediaKit?: {
+    enabled?: boolean;
+    heading?: string;
+    subheading?: string;
+    platformStats?: PlatformStat[];
+    brandCollabs?: BrandCollab[];
+    pdfUrl?: string;
+  };
+}
+
+// ==========================================
+// MODULE 4: EVENT & WEBINAR TICKETING TYPES
+// ==========================================
+
+export type EventFormat = 'online' | 'offline' | 'hybrid';
+export type EventStatus = 'upcoming' | 'past' | 'sold_out' | 'cancelled';
+export type MeetingPlatform = 'google_meet' | 'zoom' | 'teams' | 'youtube_live' | 'other';
+export type EventScheduleType = 'single' | 'multi_date' | 'custom_dates' | 'recurring';
+
+export interface EventTimeSlot {
+  id: string; // e.g. "slot_1", "slot_1000_1100"
+  startTime: string; // "10:00 AM" or "10:00"
+  endTime?: string; // "11:00 AM" or "11:00"
+  capacity?: number; // Slot specific capacity limit
+  ticketsSold?: number;
+  seatsRemaining?: number;
+  label?: string; // e.g. "Morning Session", "Evening Batch"
+  priceModifier?: number;
+}
+
+export interface EventScheduleDate {
+  id: string; // e.g. "date_2026-10-15" or date string
+  date: string; // YYYY-MM-DD
+  slots: EventTimeSlot[];
+  isCancelled?: boolean;
+}
+
+export interface EventSeat {
+  id: string; // e.g. "A1", "B4", "VIP-1"
+  row: string; // "A", "B", "VIP"
+  number: number;
+  label: string; // "A-1"
+  section?: string; // "VIP", "Premium", "General", "Balcony"
+  priceModifier?: number;
+  status: 'available' | 'held' | 'booked' | 'blocked';
+  bookedByTicketId?: string;
+  bookedByCustomerName?: string;
+}
+
+export interface EventSeatingSection {
+  id: string;
+  name: string;
+  color: string;
+  price?: number;
+  rowsCount: number;
+  seatsPerRow: number;
+}
+
+export interface EventSeatingChart {
+  enabled: boolean;
+  layoutType?: 'theatre' | 'grid' | 'banquet' | 'stadium';
+  sections?: EventSeatingSection[];
+  totalSeats: number;
+  seats: EventSeat[];
+  allowCustomerSelection?: boolean;
+}
+
+export interface EventItem {
+  id: string;
+  businessId: string;
+  title: string;
+  description: string;
+  coverImage: string;
+  eventDate: string; // Primary / start date YYYY-MM-DD
+  eventEndDate?: string; // End date for multi-day / recurring events
+  eventTime: string; // Primary / default start time e.g. "18:00" or "06:00 PM"
+  eventDurationMinutes?: number;
+  timezone?: string; // e.g. "Asia/Kolkata (IST)", "UTC", "America/New_York (EST)"
+  format: EventFormat;
+  meetingUrl?: string; // Google Meet / Zoom link (private, sent only on ticket delivery)
+  meetingPlatform?: MeetingPlatform;
+  venueAddress?: string;
+  venueCity?: string;
+  price: number; // 0 = Free
+  isFree?: boolean;
+  capacity: number; // Global event capacity e.g. 50
+  seatsRemaining: number; // Atomic tracking
+  ticketsSold: number;
+  status: EventStatus;
+  seatingChart?: EventSeatingChart;
+  cancellationReason?: string;
+  cancellationPolicy?: string;
+  registrationStartDate?: string; // YYYY-MM-DD
+  registrationEndDate?: string; // YYYY-MM-DD
+  sendMeetingLinkTiming?: 'immediately' | 'closer_to_event';
+  scheduleType?: EventScheduleType;
+  scheduleDates?: EventScheduleDate[];
+  recurringPattern?: {
+    frequency: 'daily' | 'weekly' | 'weekdays' | 'custom_days';
+    daysOfWeek?: number[]; // 0 = Sun, 1 = Mon, ..., 6 = Sat
+    startDate: string;
+    endDate: string;
+    slots: EventTimeSlot[];
+  };
+  sortOrder?: number;
+  isActive?: boolean;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface EventTicket {
+  id: string;
+  ticketId: string; // Short readable code like "TKT-8X92-A1B4"
+  eventId: string;
+  eventTitle: string;
+  businessId: string;
+  customerName: string;
+  customerPhone: string; // WhatsApp number
+  customerEmail?: string;
+  format: EventFormat;
+  eventDate: string; // Exact selected date YYYY-MM-DD
+  eventTime: string; // Exact selected time slot e.g. "10:00 AM – 11:00 AM"
+  slotId?: string;
+  timezone?: string;
+  price: number;
+  paymentStatus: 'paid' | 'free' | 'refunded' | 'refund_failed';
+  paymentId?: string;
+  razorpayOrderId?: string;
+  refundId?: string;
+  refundError?: string;
+  refundedAt?: number;
+  refundAttemptedAt?: number;
+  seatNumber?: string;
+  seatSection?: string;
+  checkedIn: boolean;
+  checkedInAt?: number;
+  meetingUrl?: string; // Private link stored upon confirmed ticket
+  venueAddress?: string;
+  venueCity?: string;
+  qrCodeUrl?: string;
+  notes?: string;
+  createdAt: number;
+  updatedAt?: number;
+}
+
+// ==========================================
+// MODULE 5: CUSTOM ORDER / QUOTE REQUEST TYPES
+// ==========================================
+
+export type QuoteRequestStatus =
+  | 'new'
+  | 'quoted'
+  | 'accepted'
+  | 'completed'
+  | 'rejected'
+  | 'archived';
+
+export interface CustomQuoteRequest {
+  id: string;
+  businessId: string;
+  requestNumber: string; // e.g. "REQ-1042"
+  customerName: string;
+  customerPhone: string; // WhatsApp number
+  customerEmail?: string;
+  description: string;
+  budgetRange?: string; // e.g. "₹2,000 - ₹5,000", "Under ₹1,000", "Not sure / Open to quote"
+  referenceImages?: string[]; // Cloudinary image URLs
+  
+  // Creator Quote details
+  quotedPrice?: number;
+  quoteNotes?: string;
+  estimatedDeliveryDays?: number;
+  quotedAt?: number;
+  
+  // Payment & Link details
+  paymentLinkId?: string;
+  paymentLinkUrl?: string;
+  paymentStatus?: 'pending' | 'paid';
+  paymentId?: string;
+  paidAt?: number;
+  
+  status: QuoteRequestStatus;
+  isArchived?: boolean;
+  rejectionReason?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+// ==========================================
+// MODULE 8: AFFILIATE & RECOMMENDED PRODUCTS
+// ==========================================
+
+export interface AffiliateProductItem {
+  id: string;
+  businessId: string;
+  title: string;
+  category: string; // e.g. 'Tech & Gear', 'Books', 'Software & Tools', 'Photography', 'Courses', 'Other'
+  description?: string;
+  imageUrl?: string;
+  affiliateUrl: string; // Outbound link
+  platform?: string; // e.g. 'Amazon', 'AppSumo', 'Notion', 'Custom', 'Other'
+  priceDisplay?: string; // e.g. "₹2,499", "$49", "Free Trial"
+  badgeText?: string; // e.g. "Daily Driver", "Top Pick", "10% OFF Code", "Must Have"
+  discountCode?: string; // Optional coupon code e.g. "MANI10"
+  clicks?: number;
+  featured?: boolean;
+  order?: number;
+  status?: 'active' | 'archived';
+  createdAt: number;
+  updatedAt?: number;
+}
+
+
+

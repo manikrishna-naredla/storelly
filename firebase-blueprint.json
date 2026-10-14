@@ -1,0 +1,383 @@
+{
+  "entities": {
+    "BusinessProfile": {
+      "title": "BusinessProfile",
+      "description": "A merchant's digital business profile and storefront settings",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "name": { "type": "string" },
+        "slug": { "type": "string" },
+        "profileType": { "type": "string" },
+        "type": { "type": "string" },
+        "tagline": { "type": "string" },
+        "description": { "type": "string" },
+        "logo": { "type": "string" },
+        "coverImage": { "type": "string" },
+        "banner": { "type": "string" },
+        "phone": { "type": "string" },
+        "whatsapp": { "type": "string" },
+        "email": { "type": "string" },
+        "address": { "type": "string" },
+        "city": { "type": "string" },
+        "currencySymbol": { "type": "string" },
+        "deliveryFee": { "type": "number" },
+        "minOrderValue": { "type": "number" },
+        "taxRate": { "type": "number" },
+        "enableCod": { "type": "boolean" },
+        "enableOnlinePayment": { "type": "boolean" },
+        "upiId": { "type": "string" },
+        "modules": { "type": "object" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["id", "ownerId", "name", "slug", "type", "phone", "whatsapp"]
+    },
+    "CatalogItem": {
+      "title": "CatalogItem",
+      "description": "A product, menu item, service, room, or rental vehicle in the merchant catalog",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "businessId": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string" },
+        "categoryId": { "type": "string" },
+        "shortDescription": { "type": "string" },
+        "detailedDescription": { "type": "string" },
+        "price": { "type": "number" },
+        "salePrice": { "type": "number" },
+        "unit": { "type": "string" },
+        "sku": { "type": "string" },
+        "images": { "type": "array" },
+        "inStock": { "type": "boolean" },
+        "isFeatured": { "type": "boolean" },
+        "isOffer": { "type": "boolean" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["id", "businessId", "name", "type", "price"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Category for organizing catalog items",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "businessId": { "type": "string" },
+        "name": { "type": "string" },
+        "slug": { "type": "string" },
+        "order": { "type": "number" },
+        "isActive": { "type": "boolean" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["id", "businessId", "name", "slug"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "A customer order placed on the digital storefront",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "businessId": { "type": "string" },
+        "orderNumber": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "orderType": { "type": "string" },
+        "status": { "type": "string" },
+        "items": { "type": "array" },
+        "subtotal": { "type": "number" },
+        "total": { "type": "number" },
+        "paymentMethod": { "type": "string" },
+        "paymentStatus": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["id", "businessId", "orderNumber", "customerName", "customerPhone", "total", "status"]
+    },
+    "Booking": {
+      "title": "Booking",
+      "description": "A service appointment, room reservation, or rental booking",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "businessId": { "type": "string" },
+        "bookingNumber": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "bookingType": { "type": "string" },
+        "status": { "type": "string" },
+        "itemId": { "type": "string" },
+        "itemName": { "type": "string" },
+        "totalPrice": { "type": "number" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["id", "businessId", "bookingNumber", "customerName", "customerPhone", "bookingType", "status"]
+    },
+    "BioLink": {
+      "title": "BioLink",
+      "description": "Creator social or portfolio link on bio page",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "businessId": { "type": "string" },
+        "type": { "type": "string" },
+        "title": { "type": "string" },
+        "url": { "type": "string" },
+        "order": { "type": "number" },
+        "enabled": { "type": "boolean" },
+        "clickCount": { "type": "number" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["id", "businessId", "title", "url"]
+    },
+    "DigitalProduct": {
+      "title": "DigitalProduct",
+      "description": "Digital downloadable products, PDFs, video courses, graphic assets, and templates",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "businessId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "salePrice": { "type": "number" },
+        "isFree": { "type": "boolean" },
+        "coverImage": { "type": "string" },
+        "fileUrls": { "type": "array" },
+        "type": { "type": "string", "enum": ["PDF", "Course", "Image", "ZIP", "Video", "Audio", "Template", "Other"] },
+        "status": { "type": "string", "enum": ["active", "inactive"] },
+        "fileName": { "type": "string" },
+        "fileSize": { "type": "string" },
+        "downloadLimit": { "type": "number" },
+        "salesCount": { "type": "number" },
+        "courseLessons": { "type": "array" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["id", "businessId", "title", "price", "coverImage", "type", "status"]
+    },
+    "PortfolioItem": {
+      "title": "PortfolioItem",
+      "description": "Creator work portfolio samples, case studies, showreels, and demo links",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "businessId": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "coverImage": { "type": "string" },
+        "mediaType": { "type": "string" },
+        "mediaUrls": { "type": "array" },
+        "externalUrl": { "type": "string" },
+        "description": { "type": "string" },
+        "tags": { "type": "array" },
+        "order": { "type": "number" },
+        "isActive": { "type": "boolean" },
+        "clientName": { "type": "string" },
+        "projectOutcome": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["id", "businessId", "title", "category", "coverImage", "mediaType"]
+    },
+    "Testimonial": {
+      "title": "Testimonial",
+      "description": "Client testimonials and reviews for portfolio showcase",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "businessId": { "type": "string" },
+        "clientName": { "type": "string" },
+        "clientPhoto": { "type": "string" },
+        "clientRole": { "type": "string" },
+        "quote": { "type": "string" },
+        "rating": { "type": "number" },
+        "order": { "type": "number" },
+        "isActive": { "type": "boolean" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["id", "businessId", "clientName", "quote"]
+    },
+    "EventItem": {
+      "title": "EventItem",
+      "description": "Event or webinar ticketing item with seat capacity and format settings",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "businessId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "coverImage": { "type": "string" },
+        "eventDate": { "type": "string" },
+        "eventTime": { "type": "string" },
+        "format": { "type": "string", "enum": ["online", "offline"] },
+        "meetingUrl": { "type": "string" },
+        "venueAddress": { "type": "string" },
+        "price": { "type": "number" },
+        "capacity": { "type": "number" },
+        "seatsRemaining": { "type": "number" },
+        "ticketsSold": { "type": "number" },
+        "status": { "type": "string", "enum": ["upcoming", "past", "sold_out", "cancelled"] },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["id", "businessId", "title", "eventDate", "format", "price", "capacity", "status"]
+    },
+    "EventTicket": {
+      "title": "EventTicket",
+      "description": "Customer purchased or claimed ticket for an event or webinar",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "ticketId": { "type": "string" },
+        "eventId": { "type": "string" },
+        "eventTitle": { "type": "string" },
+        "businessId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "format": { "type": "string" },
+        "eventDate": { "type": "string" },
+        "eventTime": { "type": "string" },
+        "price": { "type": "number" },
+        "paymentStatus": { "type": "string" },
+        "checkedIn": { "type": "boolean" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["id", "ticketId", "eventId", "businessId", "customerName", "customerPhone", "paymentStatus"]
+    },
+    "CustomQuoteRequest": {
+      "title": "CustomQuoteRequest",
+      "description": "Custom commissioned order and quote request submitted by customer",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "businessId": { "type": "string" },
+        "requestNumber": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "description": { "type": "string" },
+        "budgetRange": { "type": "string" },
+        "referenceImages": { "type": "array" },
+        "quotedPrice": { "type": "number" },
+        "status": { "type": "string", "enum": ["new", "quoted", "accepted", "completed", "rejected", "archived"] },
+        "paymentStatus": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["id", "businessId", "requestNumber", "customerName", "customerPhone", "description", "status"]
+    },
+    "PlatformPaymentTransaction": {
+      "title": "PlatformPaymentTransaction",
+      "description": "Authoritative ledger of payment transactions for subscription upgrades and platform fees",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "businessId": { "type": "string" },
+        "businessName": { "type": "string" },
+        "planId": { "type": "string" },
+        "amount": { "type": "number" },
+        "currency": { "type": "string" },
+        "status": { "type": "string", "enum": ["success", "pending", "failed", "refunded"] },
+        "gateway": { "type": "string" },
+        "razorpayPaymentId": { "type": "string" },
+        "razorpayOrderId": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["id", "businessId", "amount", "status", "createdAt"]
+    },
+    "PlatformAuditLog": {
+      "title": "PlatformAuditLog",
+      "description": "Security and administrative action audit trail",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "adminEmail": { "type": "string" },
+        "action": { "type": "string" },
+        "target": { "type": "string" },
+        "details": { "type": "string" },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["id", "adminEmail", "action", "target", "timestamp"]
+    },
+    "PlatformSupportTicket": {
+      "title": "PlatformSupportTicket",
+      "description": "Customer and vendor support tickets with strict tenant isolation",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "businessId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "senderEmail": { "type": "string" },
+        "subject": { "type": "string" },
+        "message": { "type": "string" },
+        "status": { "type": "string", "enum": ["new", "open", "in_progress", "resolved", "closed"] },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["id", "senderName", "senderEmail", "subject", "message", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/businesses/{businessId}": {
+      "schema": "BusinessProfile",
+      "description": "Public and private profile of a business"
+    },
+    "/businesses/{businessId}/catalog/{itemId}": {
+      "schema": "CatalogItem",
+      "description": "Products, services, menu items, rooms, or vehicles"
+    },
+    "/businesses/{businessId}/digital_products/{digitalProductId}": {
+      "schema": "DigitalProduct",
+      "description": "Digital downloadable items, PDFs, Courses, and Image assets"
+    },
+    "/businesses/{businessId}/events/{eventId}": {
+      "schema": "EventItem",
+      "description": "Events and masterclasses with seat management"
+    },
+    "/businesses/{businessId}/tickets/{ticketId}": {
+      "schema": "EventTicket",
+      "description": "Event ticket registrations and attendee passes"
+    },
+    "/businesses/{businessId}/quote_requests/{requestId}": {
+      "schema": "CustomQuoteRequest",
+      "description": "Custom commission and quote requests"
+    },
+    "/businesses/{businessId}/portfolio/{portfolioId}": {
+      "schema": "PortfolioItem",
+      "description": "Creator work portfolio samples, galleries, and videos"
+    },
+    "/businesses/{businessId}/testimonials/{testimonialId}": {
+      "schema": "Testimonial",
+      "description": "Client reviews and testimonials for creator portfolio"
+    },
+    "/businesses/{businessId}/categories/{categoryId}": {
+      "schema": "Category",
+      "description": "Business categories"
+    },
+    "/businesses/{businessId}/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Store customer orders"
+    },
+    "/businesses/{businessId}/bookings/{bookingId}": {
+      "schema": "Booking",
+      "description": "Customer bookings and appointments"
+    },
+    "/businesses/{businessId}/biolinks/{linkId}": {
+      "schema": "BioLink",
+      "description": "Creator portfolio links"
+    },
+    "/payment_transactions/{transactionId}": {
+      "schema": "PlatformPaymentTransaction",
+      "description": "Private authoritative payment transactions"
+    },
+    "/admin_audit_logs/{logId}": {
+      "schema": "PlatformAuditLog",
+      "description": "Protected admin audit trail"
+    },
+    "/platform_support_tickets/{ticketId}": {
+      "schema": "PlatformSupportTicket",
+      "description": "Tenant isolated support tickets"
+    }
+  }
+}

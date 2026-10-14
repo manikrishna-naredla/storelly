@@ -1,0 +1,497 @@
+import React, { useState, useEffect } from 'react';
+import {
+  CalendarCheck,
+  Search,
+  Filter,
+  Eye,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  MessageCircle,
+  Calendar,
+  User,
+  Phone,
+  BedDouble,
+  Car,
+  Scissors,
+  X,
+  Loader2,
+  QrCode,
+  Mail,
+  Video,
+  Users,
+  CreditCard,
+  ExternalLink,
+} from 'lucide-react';
+import { BusinessProfile, Booking, BookingStatus } from '../../types';
+import { getBookings, updateBookingStatus, getModuleDeepUrl } from '../../services/firebaseService';
+import { ModuleQrModal } from '../common/ModuleQrModal';
+import { isCreatorProfile } from '../../utils/profileHelper';
+
+interface BookingManagerProps {
+  business: BusinessProfile;
+}
+
+export const BookingManager: React.FC<BookingManagerProps> = ({ business }) => {
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+
+  const isCreator = isCreatorProfile(business);
+
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      const fetched = await getBookings(business.id);
+      setBookings(fetched);
+    } catch (err) {
+      console.error('Error loading bookings:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, [business.id]);
+
+  const handleStatusChange = async (bookingId: string, newStatus: BookingStatus) => {
+    try {
+      setIsUpdating(true);
+      await updateBookingStatus(business.id, bookingId, newStatus);
+      setBookings((prev) =>
+        prev.map((b) => (b.id === bookingId ? { ...b, status: newStatus } : b))
+      );
+      if (selectedBooking && selectedBooking.id === bookingId) {
+        setSelectedBooking({ ...selectedBooking, status: newStatus });
+      }
+    } catch (err) {
+      console.error('Error updating booking status:', err);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleSendWhatsAppUpdate = (booking: Booking) => {
+    if (!booking.customerPhone) return;
+    const cleanPhone = booking.customerPhone.replace(/\D/g, '');
+    const text = encodeURIComponent(
+      `Hello ${booking.customerName}!\n\n` +
+      `Regarding your ${isCreator ? 'consultation' : 'booking'} *${booking.bookingNumber}* for *${booking.itemName}* with *${business.name}*:\n` +
+      `Date: ${booking.bookingDate || booking.checkInDate || booking.startDate}\n` +
+      `${booking.bookingTimeSlot ? `Time Slot: ${booking.bookingTimeSlot}\n` : ''}` +
+      `Status: *${booking.status.toUpperCase()}*\n\n` +
+      `We look forward to serving you! Feel free to reply if you need any adjustments.`
+    );
+    window.open(`https://wa.me/${cleanPhone}?text=${text}`, '_blank');
+  };
+
+  const filteredBookings = bookings.filter((b) => {
+    const matchesQuery =
+      b.bookingNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      b.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      b.itemName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      b.customerPhone.includes(searchQuery);
+    const matchesStatus = statusFilter === 'all' || b.status === statusFilter;
+    return matchesQuery && matchesStatus;
+  });
+
+  return (
+    <div className="space-y-6 animate-in fade-in duration-200">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-bold text-[var(--t1)] font-heading">
+            {isCreator ? 'Consultations & 1:1 Bookings' : 'Appointments & Bookings'}
+          </h2>
+          <p className="text-xs sm:text-sm text-[var(--t2)] mt-0.5">
+            {isCreator 
+              ? 'Manage your scheduled mentorship sessions, consultations, and event bookings.'
+              : 'Manage scheduled customer appointments, stay reservations, and vehicle rentals.'
+            }
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <button
+            type="button"
+            onClick={() => setIsQrModalOpen(true)}
+            className="ds-btn-secondary min-h-[44px] px-3.5 text-xs font-bold shadow-[var(--shadow-xs)] flex items-center gap-1.5 cursor-pointer"
+            title={isCreator ? 'QR code for 1:1 Consultations' : 'QR code for Bookings'}
+          >
+            <QrCode className="w-4 h-4 text-[var(--g600)]" />
+            <span>{isCreator ? 'Consultation QR' : 'Booking Page QR'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={loadData}
+            className="ds-btn-secondary min-h-[44px] px-3 text-xs font-semibold shadow-[var(--shadow-xs)] cursor-pointer"
+          >
+            Refresh Bookings
+          </button>
+        </div>
+      </div>
+
+      {/* Filter Bar */}
+      <div className="flex flex-col sm:flex-row items-center gap-3 bg-[var(--card)] p-3 rounded-[var(--r12)] border border-[var(--border)] shadow-[var(--shadow-xs)]">
+        <div className="relative flex-1 w-full">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--t3)]" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search bookings by customer, item name, booking #..."
+            className="w-full pl-10 pr-4 py-2 text-xs border border-[var(--border)] rounded-[var(--r8)] focus:outline-[var(--g400)] bg-[var(--bg)] text-[var(--t1)]"
+          />
+        </div>
+
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="w-full sm:w-48 px-3 py-2 text-xs border border-[var(--border)] rounded-[var(--r8)] focus:outline-[var(--g400)] bg-[var(--card)] text-[var(--t1)] font-medium"
+        >
+          <option value="all">All Statuses ({bookings.length})</option>
+          <option value="pending">Pending</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      {/* Bookings List */}
+      {isLoading ? (
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-20 bg-[var(--card)] rounded-[var(--r16)] border border-[var(--border)] animate-pulse" />
+          ))}
+        </div>
+      ) : filteredBookings.length > 0 ? (
+        <div className="bg-[var(--card)] rounded-[var(--r16)] border border-[var(--border)] shadow-[var(--shadow-xs)] divide-y divide-[var(--border)] overflow-hidden">
+          {filteredBookings.map((bk) => (
+            <div
+              key={bk.id}
+              className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[var(--bg)] transition"
+            >
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-heading font-extrabold text-sm text-[var(--t1)]">
+                    {bk.bookingNumber}
+                  </span>
+                  <span
+                    className={`px-2.5 py-0.5 rounded-[var(--r8)] text-[10px] font-bold uppercase tracking-wider border ${
+                      bk.status === 'confirmed'
+                        ? 'bg-[var(--g100)] text-[var(--g700)] border-[var(--g200)]'
+                        : bk.status === 'completed'
+                        ? 'bg-[var(--g100)] text-[var(--g700)] border-[var(--g200)]'
+                        : bk.status === 'cancelled'
+                        ? 'bg-[var(--r100)] text-[var(--r500)] border-rose-200'
+                        : 'bg-[var(--y100)] text-amber-800 border-amber-200'
+                    }`}
+                  >
+                    {bk.status}
+                  </span>
+                  <span className="text-xs font-bold text-[var(--g700)] bg-[var(--g100)] px-2 py-0.5 rounded-[var(--r4)] border border-[var(--g200)]">
+                    {bk.itemName}
+                  </span>
+                </div>
+
+                <div className="text-xs text-[var(--t2)] flex items-center gap-2 flex-wrap pt-0.5">
+                  <span className="font-bold text-[var(--t1)]">{bk.customerName}</span>
+                  <span>•</span>
+                  <span>{bk.customerPhone}</span>
+                  <span>•</span>
+                  <span className="text-[var(--t3)] font-medium">
+                    📅 {bk.bookingDate || bk.checkInDate || bk.startDate}
+                    {bk.bookingTimeSlot ? ` (${bk.bookingTimeSlot})` : ''}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-[var(--border)]">
+                <div className="text-left sm:text-right">
+                  <div className="font-extrabold text-base text-[var(--t1)]">
+                    {business.currencySymbol}{bk.totalAmount}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleSendWhatsAppUpdate(bk)}
+                    className="p-2 text-[var(--g600)] hover:bg-[var(--g100)] border border-[var(--g200)] rounded-[var(--r8)] transition cursor-pointer"
+                    title="Send WhatsApp Update"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedBooking(bk)}
+                    className="px-3 py-2 bg-[var(--g900)] hover:bg-[var(--g800)] text-white text-xs font-bold rounded-[var(--r8)] transition flex items-center gap-1 cursor-pointer shadow-[var(--shadow-xs)]"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>Details</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="p-12 text-center bg-[var(--card)] rounded-[var(--r16)] border border-dashed border-[var(--border)] space-y-3">
+          <div className="w-12 h-12 rounded-[var(--r12)] bg-[var(--g100)] text-[var(--g600)] flex items-center justify-center mx-auto">
+            <CalendarCheck className="w-6 h-6" />
+          </div>
+          <h3 className="text-base font-bold text-[var(--t1)] font-heading">No {isCreator ? 'Consultations' : 'Bookings'} Yet</h3>
+          <p className="text-xs text-[var(--t2)] max-w-sm mx-auto">
+            {isCreator 
+              ? 'Clients can book 1:1 sessions or event tickets directly from your profile.'
+              : 'Customers can book appointments, hotel stays, or vehicles directly from your public storefront.'
+            }
+          </p>
+        </div>
+      )}
+
+      {/* Booking Details Modal */}
+      {selectedBooking && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="relative w-full max-w-lg bg-[var(--card)] rounded-[var(--r16)] shadow-[var(--shadow-xl)] border border-[var(--border)] p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-bold text-[var(--t1)] font-heading">
+                    Booking #{selectedBooking.bookingNumber}
+                  </h3>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    {selectedBooking.bookingType.replace('_', ' ')}
+                  </span>
+                </div>
+                <p className="text-xs text-[var(--g700)] font-semibold mt-0.5">{selectedBooking.itemName}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedBooking(null)}
+                className="p-1.5 text-[var(--t3)] hover:text-[var(--t1)] rounded-[var(--r8)] cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Status switcher */}
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-bold text-[var(--t1)] uppercase tracking-wider font-heading">
+                Update Booking Status
+              </label>
+              <div className="grid grid-cols-4 gap-1.5">
+                {(['pending', 'confirmed', 'completed', 'cancelled'] as BookingStatus[]).map((st) => (
+                  <button
+                    key={st}
+                    type="button"
+                    disabled={isUpdating}
+                    onClick={() => handleStatusChange(selectedBooking.id, st)}
+                    className={`py-1.5 px-2 rounded-[var(--r8)] text-xs font-bold capitalize transition cursor-pointer ${
+                      selectedBooking.status === st
+                        ? 'bg-[var(--g600)] text-white shadow-[var(--shadow-xs)]'
+                        : 'bg-[var(--card)] text-[var(--t2)] hover:bg-[var(--bg)] border border-[var(--border)]'
+                    }`}
+                  >
+                    {st}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Booking & Customer Details Grid */}
+            <div className="space-y-3">
+              {/* Customer Information */}
+              <div className="p-3.5 rounded-[var(--r12)] border border-[var(--border)] bg-[var(--bg)] space-y-2 text-xs">
+                <span className="font-bold uppercase text-[10px] tracking-wider block text-[var(--t3)]">
+                  Customer Contact
+                </span>
+                <div className="flex items-center justify-between">
+                  <div className="font-bold text-[var(--t1)] flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-[var(--t3)]" />
+                    <span>{selectedBooking.customerName}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between gap-2">
+                  <div className="text-[var(--t2)] flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5 text-[var(--t3)]" />
+                    <span>{selectedBooking.customerPhone}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <a
+                      href={`tel:${selectedBooking.customerPhone}`}
+                      className="p-1 text-emerald-600 hover:bg-emerald-50 rounded transition"
+                      title="Call Customer"
+                    >
+                      <Phone className="w-3.5 h-3.5" />
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => handleSendWhatsAppUpdate(selectedBooking)}
+                      className="p-1 text-emerald-600 hover:bg-emerald-50 rounded transition cursor-pointer"
+                      title="Message on WhatsApp"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                {selectedBooking.customerEmail && (
+                  <div className="text-[var(--t2)] flex items-center gap-1.5 truncate">
+                    <Mail className="w-3.5 h-3.5 text-[var(--t3)] shrink-0" />
+                    <a href={`mailto:${selectedBooking.customerEmail}`} className="hover:underline truncate">
+                      {selectedBooking.customerEmail}
+                    </a>
+                  </div>
+                )}
+              </div>
+
+              {/* Schedule Details */}
+              <div className="p-3.5 rounded-[var(--r12)] border border-[var(--border)] bg-[var(--bg)] space-y-2 text-xs">
+                <span className="font-bold uppercase text-[10px] tracking-wider block text-[var(--t3)]">
+                  Schedule & Reservation
+                </span>
+
+                {/* Appointment / Single Date */}
+                {selectedBooking.bookingDate && (
+                  <div className="flex justify-between">
+                    <span className="text-[var(--t3)]">Scheduled Date:</span>
+                    <span className="font-bold text-[var(--t1)]">{selectedBooking.bookingDate}</span>
+                  </div>
+                )}
+
+                {/* Time Slot */}
+                {selectedBooking.bookingTimeSlot && (
+                  <div className="flex justify-between">
+                    <span className="text-[var(--t3)]">Time Slot:</span>
+                    <span className="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                      {selectedBooking.bookingTimeSlot}
+                    </span>
+                  </div>
+                )}
+
+                {/* Check In / Check Out for Hotel stays */}
+                {selectedBooking.checkInDate && (
+                  <div className="flex justify-between">
+                    <span className="text-[var(--t3)]">Check-in:</span>
+                    <span className="font-semibold text-[var(--t1)]">{selectedBooking.checkInDate}</span>
+                  </div>
+                )}
+                {selectedBooking.checkOutDate && (
+                  <div className="flex justify-between">
+                    <span className="text-[var(--t3)]">Check-out:</span>
+                    <span className="font-semibold text-[var(--t1)]">{selectedBooking.checkOutDate}</span>
+                  </div>
+                )}
+                {selectedBooking.guestsCount && (
+                  <div className="flex justify-between">
+                    <span className="text-[var(--t3)]">Guests:</span>
+                    <span className="font-semibold text-[var(--t1)] flex items-center gap-1">
+                      <Users className="w-3.5 h-3.5 text-[var(--t3)]" />
+                      {selectedBooking.guestsCount}
+                    </span>
+                  </div>
+                )}
+
+                {/* Rental Start / End */}
+                {selectedBooking.startDate && (
+                  <div className="flex justify-between">
+                    <span className="text-[var(--t3)]">Pickup / Start:</span>
+                    <span className="font-semibold text-[var(--t1)]">{selectedBooking.startDate}</span>
+                  </div>
+                )}
+                {selectedBooking.endDate && (
+                  <div className="flex justify-between">
+                    <span className="text-[var(--t3)]">Return / End:</span>
+                    <span className="font-semibold text-[var(--t1)]">{selectedBooking.endDate}</span>
+                  </div>
+                )}
+
+                {/* Online Consultation Meeting URL */}
+                {selectedBooking.meetingUrl && (
+                  <div className="pt-2 border-t border-[var(--border)] flex items-center justify-between">
+                    <span className="text-[var(--t3)]">Virtual Meeting:</span>
+                    <a
+                      href={selectedBooking.meetingUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-1 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded font-bold text-[11px] flex items-center gap-1"
+                    >
+                      <Video className="w-3 h-3 text-purple-600" />
+                      <span>Join Meeting</span>
+                      <ExternalLink className="w-2.5 h-2.5" />
+                    </a>
+                  </div>
+                )}
+
+                {/* Financial info */}
+                {selectedBooking.totalAmount !== undefined && (
+                  <div className="pt-2 border-t border-[var(--border)] flex justify-between items-center">
+                    <span className="text-[var(--t3)] font-semibold">Total Fee:</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-extrabold text-sm text-[var(--t1)]">
+                        {business.currencySymbol}{selectedBooking.totalAmount}
+                      </span>
+                      {selectedBooking.paymentStatus && (
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                          selectedBooking.paymentStatus === 'paid'
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                            : 'bg-amber-100 text-amber-800 border border-amber-200'
+                        }`}>
+                          {selectedBooking.paymentStatus}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Notes */}
+                {selectedBooking.notes && (
+                  <div className="pt-2 border-t border-[var(--border)] text-[11px] text-[var(--t2)] bg-amber-50/60 p-2 rounded border border-amber-200">
+                    <span className="font-bold block text-amber-900">Customer Note:</span>
+                    <p className="text-amber-800 mt-0.5">{selectedBooking.notes}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="pt-2 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleSendWhatsAppUpdate(selectedBooking)}
+                className="w-full ds-btn-primary py-2.5 font-bold text-xs shadow-[var(--shadow-xs)] transition flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>WhatsApp Customer</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Booking Page QR Modal */}
+      {isQrModalOpen && (
+        <ModuleQrModal
+          isOpen={isQrModalOpen}
+          onClose={() => setIsQrModalOpen(false)}
+          title="Appointments & Services QR Code"
+          subtitle={`Allow clients and customers to directly book appointments and 1:1 sessions with ${business.name}.`}
+          badge="1:1 Bookings & Appointments"
+          url={getModuleDeepUrl(business, 'services')}
+          businessName={business.name}
+          logoUrl={business.logo || business.profileImage}
+          accentColor="emerald"
+        />
+      )}
+    </div>
+  );
+};

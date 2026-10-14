@@ -1,0 +1,365 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default-deny safety catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // =========================================================================
+    // Core Security Helpers & Role Based Access Control (RBAC)
+    // =========================================================================
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isUser(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Server-controlled Admins Registry and Verified Custom Claims (NO hardcoded emails)
+    function isAdmin() {
+      return isSignedIn() && (
+        (request.auth.token.keys().hasAny(['admin', 'masterAdmin']) &&
+          (request.auth.token.admin == true || request.auth.token.masterAdmin == true)) ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Authoritative Business Ownership anchored strictly to the parent Business record
+    function isBusinessOwner(businessId) {
+      return isSignedIn() && (
+        isAdmin() ||
+        (exists(/databases/$(database)/documents/businesses/$(businessId)) &&
+          get(/databases/$(database)/documents/businesses/$(businessId)).data.ownerId == request.auth.uid)
+      );
+    }
+
+    function isValidClientOrderCreate(businessId) {
+      return request.resource.data.businessId == businessId &&
+             (!('paymentStatus' in request.resource.data) || request.resource.data.paymentStatus == 'pending') &&
+             (!('status' in request.resource.data) || request.resource.data.status in ['pending', 'pending-verification']) &&
+             request.resource.data.items is list &&
+             request.resource.data.items.size() > 0 &&
+             request.resource.data.items.size() <= 50;
+    }
+
+    function isValidClientBookingCreate(businessId) {
+      return request.resource.data.businessId == businessId &&
+             (!('paymentStatus' in request.resource.data) || request.resource.data.paymentStatus == 'pending') &&
+             (!('status' in request.resource.data) || request.resource.data.status == 'pending');
+    }
+
+    // =========================================================================
+    // User Profiles
+    // =========================================================================
+    match /users/{userId} {
+      allow get: if isUser(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isUser(userId) && (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == false);
+      allow update: if (isUser(userId) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['isAdmin', 'role', 'masterAdmin'])) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // =========================================================================
+    // Admins Registry (Server controlled)
+    // =========================================================================
+    match /admins/{adminId} {
+      allow read: if isAdmin() || (isSignedIn() && request.auth.uid == adminId);
+      allow write: if isAdmin();
+    }
+
+    // =========================================================================
+    // Top-Level Public BioLinks
+    // =========================================================================
+    match /biolinks/{linkId} {
+      allow read: if true;
+      allow write: if isSignedIn() && (
+        isAdmin() ||
+        (request.resource.data.ownerId != null && request.resource.data.ownerId == request.auth.uid) ||
+        (resource != null && 'ownerId' in resource.data && resource.data.ownerId == request.auth.uid) ||
+        (resource == null && request.resource.data.businessId != null && 
+          exists(/databases/$(database)/documents/businesses/$(request.resource.data.businessId)) &&
+          get(/databases/$(database)/documents/businesses/$(request.resource.data.businessId)).data.ownerId == request.auth.uid) ||
+        (resource != null && 'businessId' in resource.data &&
+          exists(/databases/$(database)/documents/businesses/$(resource.data.businessId)) &&
+          get(/databases/$(database)/documents/businesses/$(resource.data.businessId)).data.ownerId == request.auth.uid)
+      );
+    }
+
+    // =========================================================================
+    // Businesses & Multi-Tenant Entities
+    // =========================================================================
+    match /businesses/{businessId} {
+      // Public storefront & showcase reads
+      allow read: if true;
+
+      // Create: Authenticated user only, ownerId must equal auth.uid
+      allow create: if isSignedIn() && (
+        isAdmin() ||
+        (request.resource.data.ownerId == request.auth.uid &&
+         (!('subscriptionPlan' in request.resource.data) || request.resource.data.subscriptionPlan in ['free', 'starter']) &&
+         (!('subscriptionStatus' in request.resource.data) || request.resource.data.subscriptionStatus in ['trial', 'inactive', 'pending']))
+      );
+
+      // Update: Verified Owner or Admin only. OwnerId is strictly immutable.
+      allow update: if isSignedIn() && (
+        isAdmin() ||
+        (resource.data.ownerId == request.auth.uid &&
+         request.resource.data.ownerId == resource.data.ownerId &&
+         !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+           'ownerId', 'subscriptionPlan', 'subscriptionStatus', 'planExpiresAt', 'isVerified', 'isPlatformAdmin'
+         ]))
+      );
+
+      // Delete: Owner or Admin only
+      allow delete: if isSignedIn() && (
+        isAdmin() || resource.data.ownerId == request.auth.uid
+      );
+
+      // --- Public Showcase & Catalog Subcollections ---
+      match /catalog/{itemId} {
+        allow read: if true;
+        allow create, delete: if isBusinessOwner(businessId);
+        allow update: if isBusinessOwner(businessId);
+      }
+
+      match /catalogue/{itemId} {
+        allow read: if true;
+        allow create, delete: if isBusinessOwner(businessId);
+        allow update: if isBusinessOwner(businessId);
+      }
+
+      match /categories/{categoryId} {
+        allow read: if true;
+        allow write: if isBusinessOwner(businessId);
+      }
+
+      match /services/{serviceId} {
+        allow read: if true;
+        allow write: if isBusinessOwner(businessId);
+      }
+
+      match /portfolio/{workId} {
+        allow read: if true;
+        allow write: if isBusinessOwner(businessId);
+      }
+
+      match /testimonials/{testimonialId} {
+        allow read: if true;
+        allow write: if isBusinessOwner(businessId);
+      }
+
+      match /offers/{offerId} {
+        allow read: if true;
+        allow write: if isBusinessOwner(businessId);
+      }
+
+      match /reviews/{reviewId} {
+        allow read: if true;
+        allow create: if isBusinessOwner(businessId) || (
+          request.resource.data.businessId == businessId &&
+          (!('status' in request.resource.data) || request.resource.data.status in ['pending', 'hidden']) &&
+          (!('isVerified' in request.resource.data) || request.resource.data.isVerified == false)
+        );
+        allow update, delete: if isBusinessOwner(businessId);
+      }
+
+      match /biolinks/{linkId} {
+        allow read: if true;
+        allow write: if isBusinessOwner(businessId);
+      }
+
+      // --- Affiliate & Recommended Products ---
+      match /affiliate_products/{itemId} {
+        allow read: if true;
+        allow create, delete: if isBusinessOwner(businessId);
+        allow update: if isBusinessOwner(businessId) || 
+          (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['clicks', 'updatedAt']));
+      }
+
+      // --- Events & Ticketing Subcollections ---
+      match /events/{eventId} {
+        allow read: if true;
+        allow create, delete: if isBusinessOwner(businessId);
+        allow update: if isBusinessOwner(businessId);
+
+        match /seat_holds/{holdId} {
+          allow read: if true;
+          allow create: if request.resource.data.businessId == businessId;
+          allow update: if isBusinessOwner(businessId) || (
+            resource.data.holderId == request.auth.uid &&
+            request.resource.data.status in ['released', 'cancelled']
+          );
+          allow delete: if isBusinessOwner(businessId);
+        }
+      }
+
+      match /tickets/{ticketId} {
+        allow list: if isBusinessOwner(businessId);
+        allow get: if isBusinessOwner(businessId) || (isSignedIn() && resource.data.customerId == request.auth.uid);
+        allow create: if isBusinessOwner(businessId) || (
+          request.resource.data.businessId == businessId &&
+          request.resource.data.price == 0 &&
+          (!('paymentStatus' in request.resource.data) || request.resource.data.paymentStatus in ['pending', 'paid']) &&
+          exists(/databases/$(database)/documents/businesses/$(businessId)/events/$(request.resource.data.eventId)) &&
+          get(/databases/$(database)/documents/businesses/$(businessId)/events/$(request.resource.data.eventId)).data.isFree == true
+        );
+        allow update, delete: if isBusinessOwner(businessId);
+      }
+
+      match /event_tickets/{ticketId} {
+        allow list: if isBusinessOwner(businessId);
+        allow get: if isBusinessOwner(businessId) || (isSignedIn() && resource.data.customerId == request.auth.uid);
+        allow create: if isBusinessOwner(businessId) || (
+          request.resource.data.businessId == businessId &&
+          request.resource.data.price == 0 &&
+          (!('paymentStatus' in request.resource.data) || request.resource.data.paymentStatus in ['pending', 'paid']) &&
+          exists(/databases/$(database)/documents/businesses/$(businessId)/events/$(request.resource.data.eventId)) &&
+          get(/databases/$(database)/documents/businesses/$(businessId)/events/$(request.resource.data.eventId)).data.isFree == true
+        );
+        allow update, delete: if isBusinessOwner(businessId);
+      }
+
+      // --- Digital Products ---
+      match /digital_products/{productId} {
+        allow read, write: if isBusinessOwner(businessId);
+      }
+
+      // --- Orders & Transactional Collections ---
+      match /orders/{orderId} {
+        allow list: if isBusinessOwner(businessId);
+        allow get: if isBusinessOwner(businessId) || (isSignedIn() && resource.data.customerId == request.auth.uid);
+        allow create: if isValidClientOrderCreate(businessId);
+        allow update, delete: if isBusinessOwner(businessId);
+      }
+
+      match /bookings/{bookingId} {
+        allow list: if isBusinessOwner(businessId);
+        allow get: if isBusinessOwner(businessId) || (isSignedIn() && resource.data.customerId == request.auth.uid);
+        allow create: if isValidClientBookingCreate(businessId);
+        allow update, delete: if isBusinessOwner(businessId);
+      }
+
+      match /slot_reservations/{slotId} {
+        allow read: if true;
+        allow create: if request.resource.data.businessId == businessId;
+        allow update, delete: if isBusinessOwner(businessId) || (
+          (resource.data.customerId == request.auth.uid || resource.data.reserverId == request.auth.uid) &&
+          request.resource.data.status in ['cancelled', 'released']
+        );
+      }
+
+      match /quote_requests/{quoteId} {
+        allow list: if isBusinessOwner(businessId);
+        allow get: if isBusinessOwner(businessId) || (isSignedIn() && resource.data.customerId == request.auth.uid);
+        allow create: if request.resource.data.businessId == businessId &&
+                         (!('paymentStatus' in request.resource.data) || request.resource.data.paymentStatus == 'pending') &&
+                         (!('quotedPrice' in request.resource.data)) &&
+                         (!('status' in request.resource.data) || request.resource.data.status in ['new', 'pending']);
+        allow update, delete: if isBusinessOwner(businessId);
+      }
+
+      match /quotes/{quoteId} {
+        allow list: if isBusinessOwner(businessId);
+        allow get: if isBusinessOwner(businessId) || (isSignedIn() && resource.data.customerId == request.auth.uid);
+        allow write: if isBusinessOwner(businessId);
+      }
+
+      match /analyticsEvents/{eventId} {
+        allow create: if request.resource.data.businessId == businessId &&
+                         request.resource.data.eventType is string &&
+                         request.resource.data.eventType.size() > 0 &&
+                         request.resource.data.eventType.size() <= 60 &&
+                         (!('revenue' in request.resource.data) || request.resource.data.revenue == 0) &&
+                         (!('paymentStatus' in request.resource.data));
+        allow read: if isBusinessOwner(businessId);
+        allow update, delete: if false;
+      }
+
+      // --- Private Merchant Subcollections ---
+      match /customers/{customerId} {
+        allow list: if isBusinessOwner(businessId);
+        allow get: if isBusinessOwner(businessId) || (isSignedIn() && request.auth.uid == customerId);
+        allow create: if (request.resource.data.businessId == businessId) || isBusinessOwner(businessId);
+        allow update, delete: if isBusinessOwner(businessId);
+      }
+
+      match /notifications/{notificationId} {
+        allow read, write: if isBusinessOwner(businessId);
+      }
+
+      match /expenses/{expenseId} {
+        allow read, write: if isBusinessOwner(businessId);
+      }
+
+      match /analytics/{docId} {
+        allow read, write: if isBusinessOwner(businessId);
+      }
+
+      match /settings/{docId} {
+        allow read, write: if isBusinessOwner(businessId);
+      }
+
+      match /payouts/{payoutId} {
+        allow read, write: if isBusinessOwner(businessId);
+      }
+    }
+
+    // =========================================================================
+    // Platform Settings, Plans, and CMS Content
+    // =========================================================================
+    match /system_settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /platform_pricing_plans/{planId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /platform_settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /platform_clients/{clientId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /platform_announcements/{announcementId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /payment_transactions/{transactionId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /admin_audit_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    match /platform_support_tickets/{ticketId} {
+      allow create: if true;
+      allow read: if isAdmin() || (
+        isSignedIn() && (
+          (request.auth.token.email != null && resource.data.senderEmail == request.auth.token.email) ||
+          ('businessId' in resource.data && isBusinessOwner(resource.data.businessId))
+        )
+      );
+      allow update, delete: if isAdmin();
+    }
+  }
+}

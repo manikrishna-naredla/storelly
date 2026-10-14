@@ -1,0 +1,234 @@
+import React from 'react';
+import {
+  ShoppingBag,
+  Link2,
+  Briefcase,
+  QrCode,
+  MessageCircle,
+  Phone,
+  ArrowLeft,
+  ShieldCheck,
+  ShieldAlert,
+  AlertCircle,
+  Globe,
+} from 'lucide-react';
+import { BusinessProfile } from '../../types';
+
+interface PublicModuleUnavailableViewProps {
+  business?: BusinessProfile | null;
+  moduleType:
+    | 'store'
+    | 'bio'
+    | 'portfolio'
+    | 'card'
+    | 'consultations'
+    | 'events'
+    | 'quotes'
+    | 'reviews'
+    | 'recommendations'
+    | 'general';
+  title?: string;
+  message?: string;
+  isExplicitPreview?: boolean;
+  onBackToDashboard?: () => void;
+}
+
+export const PublicModuleUnavailableView: React.FC<PublicModuleUnavailableViewProps> = ({
+  business,
+  moduleType,
+  title,
+  message,
+  isExplicitPreview = false,
+  onBackToDashboard,
+}) => {
+  const getIcon = () => {
+    if (business?.status === 'suspended') {
+      return <ShieldAlert className="w-8 h-8 text-[var(--r500)]" />;
+    }
+    switch (moduleType) {
+      case 'store':
+        return <ShoppingBag className="w-8 h-8 text-[var(--g600)]" />;
+      case 'bio':
+        return <Link2 className="w-8 h-8 text-[var(--g600)]" />;
+      case 'portfolio':
+        return <Briefcase className="w-8 h-8 text-[var(--g600)]" />;
+      case 'card':
+        return <QrCode className="w-8 h-8 text-[var(--g600)]" />;
+      default:
+        return <AlertCircle className="w-8 h-8 text-amber-500" />;
+    }
+  };
+
+  const getHeading = () => {
+    if (title) return title;
+    switch (moduleType) {
+      case 'store':
+        return 'Storefront Unavailable';
+      case 'bio':
+        return 'Bio Link Unavailable';
+      case 'portfolio':
+        return 'Portfolio Unavailable';
+      case 'consultations':
+        return 'Consultations Unavailable';
+      case 'events':
+        return 'Events & Tickets Unavailable';
+      case 'quotes':
+        return 'Custom Quotes Unavailable';
+      case 'reviews':
+        return 'Reviews Unavailable';
+      case 'recommendations':
+        return 'Recommendations Unavailable';
+      case 'card':
+        return 'Visiting Card Unavailable';
+      default:
+        return 'Page Unavailable';
+    }
+  };
+
+  const getDescription = () => {
+    if (message) return message;
+    const name = business?.name || 'the creator';
+    switch (moduleType) {
+      case 'store':
+        return `The digital store for ${name} is currently not published or is temporarily offline.`;
+      case 'bio':
+        return `The universal bio links page for ${name} is currently disabled or has not been published yet.`;
+      case 'portfolio':
+        return `The portfolio showcase for ${name} is currently private or disabled.`;
+      case 'consultations':
+        return `1:1 consultations for ${name} are currently not accepting bookings.`;
+      case 'events':
+        return `Events and workshops for ${name} are not currently active or published.`;
+      case 'quotes':
+        return `Custom project quotes for ${name} are not currently open for briefs.`;
+      case 'reviews':
+        return `Client reviews for ${name} are currently inactive.`;
+      case 'recommendations':
+        return `Recommended products for ${name} are not currently published.`;
+      case 'card':
+        return `The digital trust card for ${name} is not currently active.`;
+      default:
+        return `This page is currently unavailable or has not been published.`;
+    }
+  };
+
+  const logoUrl = business?.logo || business?.profileImage;
+  const whatsappNumber = business?.whatsapp || business?.phone;
+
+  return (
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--t1)] flex flex-col justify-between selection:bg-[var(--g200)] selection:text-[var(--g900)] font-sans">
+      {/* Explicit Owner Preview Warning Banner */}
+      {isExplicitPreview && business?.status !== 'suspended' && business?.status !== 'deleted' && (
+        <aside
+          aria-label="Owner preview notice"
+          className="bg-amber-50 border-b border-amber-200 text-amber-900 px-4 py-2.5 flex items-center justify-between text-xs sticky top-0 z-50 backdrop-blur-md"
+        >
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+            <span className="font-bold">Owner Preview Mode:</span>
+            <span className="hidden sm:inline text-amber-800">
+              This module is unpublished. Public visitors see this exact unavailable screen.
+            </span>
+          </div>
+          {onBackToDashboard && (
+            <button
+              type="button"
+              onClick={onBackToDashboard}
+              className="px-3 py-1 bg-amber-200 hover:bg-amber-300 text-amber-950 font-bold rounded-[var(--r8)] transition cursor-pointer flex items-center gap-1.5"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to Dashboard</span>
+            </button>
+          )}
+        </aside>
+      )}
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6">
+        <main className="max-w-md w-full bg-[var(--card)] border border-[var(--border)] rounded-[var(--r16)] p-6 sm:p-8 shadow-[var(--shadow)] text-center space-y-6">
+          {/* Business / Profile Header */}
+          {business && (
+            <div className="flex flex-col items-center gap-3">
+              {logoUrl ? (
+                <div className="w-16 h-16 rounded-[var(--r12)] overflow-hidden border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-xs)]">
+                  <img
+                    src={logoUrl}
+                    alt={business.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = 'none';
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="w-14 h-14 rounded-[var(--r12)] bg-[var(--g100)] border border-[var(--g200)] text-[var(--g700)] font-black text-xl flex items-center justify-center shadow-inner">
+                  {business.name.slice(0, 1).toUpperCase()}
+                </div>
+              )}
+
+              <div>
+                <div className="flex items-center justify-center gap-1.5">
+                  <h2 className="text-base font-bold text-[var(--t1)] font-heading">{business.name}</h2>
+                  {business.isVerified && (
+                    <ShieldCheck className="w-4 h-4 text-[var(--g600)] shrink-0" />
+                  )}
+                </div>
+                {business.tagline && (
+                  <p className="text-xs text-[var(--t2)] line-clamp-1 mt-0.5">{business.tagline}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Icon Badge */}
+          <div className="w-16 h-16 rounded-[var(--r12)] bg-[var(--g100)] border border-[var(--g200)] flex items-center justify-center mx-auto shadow-inner">
+            {getIcon()}
+          </div>
+
+          {/* Heading and Message */}
+          <div className="space-y-2">
+            <h1 className="text-xl sm:text-2xl font-black text-[var(--t1)] font-heading tracking-tight">
+              {getHeading()}
+            </h1>
+            <p className="text-xs sm:text-sm text-[var(--t2)] leading-relaxed max-w-sm mx-auto">
+              {getDescription()}
+            </p>
+          </div>
+
+          {/* Public Contact Actions */}
+          {whatsappNumber && business?.status !== 'suspended' && (
+            <div className="pt-2 border-t border-[var(--border)] space-y-2">
+              <p className="text-[11px] text-[var(--t3)]">Need immediate assistance from this business?</p>
+              <div className="flex items-center justify-center gap-2">
+                <a
+                  href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ds-btn-primary px-4 py-2 text-xs font-bold flex items-center gap-1.5 shadow-[var(--shadow-xs)] cursor-pointer"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>Chat on WhatsApp</span>
+                </a>
+                {business?.phone && (
+                  <a
+                    href={`tel:${business.phone}`}
+                    className="ds-btn-secondary px-4 py-2 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Phone className="w-3.5 h-3.5" />
+                    <span>Call</span>
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* Powered by Storelly Footer */}
+      <footer className="py-4 text-center text-xs text-[var(--t3)]">
+        <span>Powered by </span>
+        <span className="font-bold text-[var(--t1)]">Storelly</span>
+      </footer>
+    </div>
+  );
+};
