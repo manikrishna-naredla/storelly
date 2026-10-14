@@ -114,7 +114,7 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between text-white">
               <span className="text-[11px] font-bold flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-emerald-400" />
                 Live Order Dispatch
               </span>
               <span className="text-[10px] bg-[#25D366] text-white font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -401,7 +401,7 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
           <div className="p-3">
             <div className="flex items-center justify-between text-[10px] font-bold text-slate-500 mb-2">
               <span className="flex items-center gap-1 text-emerald-600 font-extrabold">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> 14 live shoppers now
+                <span className="w-2 h-2 rounded-full bg-emerald-500" /> 14 live shoppers now
               </span>
               <span>184 Orders</span>
             </div>
@@ -464,7 +464,7 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
           {/* Automated Delivery Strip */}
           <div className="p-3 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between text-[10px]">
             <span className="text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
               Automated WhatsApp PDF in 5 Secs
             </span>
             <span className="text-slate-500 font-bold">2,140 Sold</span>
@@ -588,34 +588,46 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
     <div className="min-h-screen bg-[var(--bg)] font-sans text-[var(--t1)] selection:bg-[var(--g100)] selection:text-[var(--g900)] overflow-x-hidden scroll-smooth">
       
       {/* NAVBAR */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[var(--card)]/95 backdrop-blur-md border-b border-[var(--border)] py-4 shadow-[var(--shadow-sm)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-[var(--card)]/95 backdrop-blur-md border-b border-[var(--border)] py-3.5 shadow-[var(--shadow-sm)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-8">
+          <div className="flex items-center gap-2.5 cursor-pointer shrink-0" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
             <div className="w-8 h-8 rounded-[var(--r8)] overflow-hidden border border-[var(--border)] shadow-[var(--shadow-xs)] flex items-center justify-center bg-[var(--card)]">
               <img src={getAppLogo()} alt={`${getAppName()} Logo`} className="w-full h-full object-cover" />
             </div>
-            <span className="text-xl font-heading font-black text-[var(--t1)] tracking-tight">{getAppName()}</span>
+            <span className="text-xl font-heading font-black text-[var(--t1)] tracking-tight whitespace-nowrap">{getAppName()}</span>
           </div>
 
-          <div className="hidden lg:flex items-center gap-8">
-            <a href="#" className="text-sm font-semibold text-[var(--t1)] hover:text-[var(--g600)] transition">Home</a>
-            <a href="#features" className="text-sm font-semibold text-[var(--t2)] hover:text-[var(--g600)] transition">Features</a>
-            <a href="#vendors" className="text-sm font-semibold text-[var(--t2)] hover:text-[var(--g600)] transition">For Vendors</a>
-            <a href="#creators" className="text-sm font-semibold text-[var(--t2)] hover:text-[var(--g600)] transition">For Creators</a>
-            <a href="#pricing" className="text-sm font-semibold text-[var(--t2)] hover:text-[var(--g600)] transition">Pricing</a>
-            <a href="#faq" className="text-sm font-semibold text-[var(--t2)] hover:text-[var(--g600)] transition">FAQ</a>
+          <div className="hidden lg:flex items-center gap-6 xl:gap-8">
+            <a href="#" className="text-sm font-semibold text-[var(--t1)] hover:text-[var(--g600)] transition whitespace-nowrap shrink-0">Home</a>
+            <a href="#features" className="text-sm font-semibold text-[var(--t2)] hover:text-[var(--g600)] transition whitespace-nowrap shrink-0">Features</a>
+            <a href="#vendors" className="text-sm font-semibold text-[var(--t2)] hover:text-[var(--g600)] transition whitespace-nowrap shrink-0">For Vendors</a>
+            <a href="#creators" className="text-sm font-semibold text-[var(--t2)] hover:text-[var(--g600)] transition whitespace-nowrap shrink-0">For Creators</a>
+            <a href="#pricing" className="text-sm font-semibold text-[var(--t2)] hover:text-[var(--g600)] transition whitespace-nowrap shrink-0">Pricing</a>
+            <a href="#faq" className="text-sm font-semibold text-[var(--t2)] hover:text-[var(--g600)] transition whitespace-nowrap shrink-0">FAQ</a>
           </div>
 
-          <div className="hidden lg:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-3 shrink-0">
+            <button 
+              onClick={() => onOpenAuth('login')}
+              className="text-sm font-bold text-[var(--t1)] hover:text-[var(--g600)] transition px-4 py-2 rounded-[var(--r8)] cursor-pointer whitespace-nowrap shrink-0"
+            >
+              Log In
+            </button>
             <button 
               onClick={() => onOpenAuth('signup')}
-              className="bg-[var(--g600)] hover:bg-[var(--g700)] text-white text-sm font-bold px-6 py-2.5 rounded-[var(--r8)] shadow-[var(--shadow-sm)] transition-all active:scale-95 cursor-pointer"
+              className="bg-[var(--g600)] hover:bg-[var(--g700)] text-white text-sm font-bold px-5 py-2.5 rounded-[var(--r8)] shadow-[var(--shadow-sm)] transition-all active:scale-95 cursor-pointer whitespace-nowrap shrink-0"
             >
               Get Started Free
             </button>
           </div>
           
-          <div className="lg:hidden flex items-center">
+          <div className="lg:hidden flex items-center gap-2">
+             <button 
+               onClick={() => onOpenAuth('login')}
+               className="text-xs font-bold text-[var(--t1)] hover:text-[var(--g600)] px-3 py-1.5 rounded-[var(--r8)] border border-[var(--border)] cursor-pointer"
+             >
+               Log In
+             </button>
              <button
                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                className="p-2 text-[var(--t2)] hover:text-[var(--t1)] rounded-[var(--r8)] cursor-pointer"
@@ -634,20 +646,31 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
             initial={{ opacity: 0, y: -20 }} 
             animate={{ opacity: 1, y: 0 }} 
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-40 bg-[var(--card)] pt-24 px-6 flex flex-col gap-6"
+            className="fixed inset-0 z-40 bg-[var(--card)] pt-20 px-6 pb-8 flex flex-col justify-between overflow-y-auto"
           >
-            <a href="#" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-heading font-bold text-[var(--t1)]">Home</a>
-            <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-heading font-bold text-[var(--t2)]">Features</a>
-            <a href="#vendors" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-heading font-bold text-[var(--t2)]">For Vendors</a>
-            <a href="#creators" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-heading font-bold text-[var(--t2)]">For Creators</a>
-            <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-heading font-bold text-[var(--t2)]">Pricing</a>
-            <a href="#faq" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-heading font-bold text-[var(--t2)]">FAQ</a>
-            <button 
-              onClick={() => { setIsMobileMenuOpen(false); onOpenAuth('signup'); }}
-              className="mt-6 bg-[var(--g600)] hover:bg-[var(--g700)] text-white text-lg font-bold px-6 py-4 rounded-[var(--r8)] w-full transition cursor-pointer"
-            >
-              Get Started Free
-            </button>
+            <div className="flex flex-col gap-5 pt-4">
+              <a href="#" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-heading font-bold text-[var(--t1)]">Home</a>
+              <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-heading font-bold text-[var(--t2)]">Features</a>
+              <a href="#vendors" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-heading font-bold text-[var(--t2)]">For Vendors</a>
+              <a href="#creators" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-heading font-bold text-[var(--t2)]">For Creators</a>
+              <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-heading font-bold text-[var(--t2)]">Pricing</a>
+              <a href="#faq" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-heading font-bold text-[var(--t2)]">FAQ</a>
+            </div>
+
+            <div className="flex flex-col gap-3 pt-6 border-t border-[var(--border)] mt-6">
+              <button 
+                onClick={() => { setIsMobileMenuOpen(false); onOpenAuth('signup'); }}
+                className="bg-[var(--g600)] hover:bg-[var(--g700)] text-white text-base font-bold px-6 py-3.5 rounded-[var(--r8)] w-full transition cursor-pointer shadow-md"
+              >
+                Get Started Free
+              </button>
+              <button 
+                onClick={() => { setIsMobileMenuOpen(false); onOpenAuth('login'); }}
+                className="bg-[var(--bg)] hover:bg-[var(--g100)] text-[var(--t1)] text-base font-bold px-6 py-3.5 rounded-[var(--r8)] w-full transition cursor-pointer border border-[var(--border)]"
+              >
+                Log In to Your Store
+              </button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -1027,7 +1050,7 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
 
                    <div className="flex-1 min-w-0">
                       <div className="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest flex items-center gap-1.5">
-                         <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span> Digital Study Guide
+                         <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Digital Study Guide
                       </div>
                       <div className="text-[14px] font-heading font-black text-[var(--t1)] truncate">TSPSC &amp; UPSC Prelims 2026 Complete Notes</div>
                       <div className="text-[12px] font-black text-[var(--g600)] mt-0.5 flex items-center gap-1.5">

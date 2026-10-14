@@ -119,7 +119,7 @@ export const ZigzagGallerySection: React.FC<Props> = ({ onOpenAuth }) => {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                           <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full">Live Sync</span>
                         </div>
                       </div>

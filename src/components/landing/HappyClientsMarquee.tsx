@@ -131,7 +131,7 @@ export const HappyClientsMarquee: React.FC = () => {
                         </span>
                       </div>
                       <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Verified
+                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Verified
                       </span>
                     </div>
                   )}
@@ -145,7 +145,7 @@ export const HappyClientsMarquee: React.FC = () => {
 
                   {/* Testimonial Quote */}
                   {brand.reviewText && (
-                    <div className="mt-3 p-3 rounded-xl bg-[var(--bg)] border-l-4 border-[var(--g500)] text-xs italic text-[var(--t2)] leading-relaxed">
+                    <div className="mt-3 p-3 rounded-xl bg-[var(--bg)] border border-[var(--border)] text-xs italic text-[var(--t2)] leading-relaxed">
                       "{brand.reviewText}"
                       {brand.reviewAuthor && (
                         <span className="block not-italic font-bold text-[var(--t1)] mt-1 text-[11px]">
