@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { BusinessProfile, Order } from '../../types';
 import { updateOrder } from '../../services/firebaseService';
+import { parseAndNormalizeAddress } from '../../utils/dataNormalization';
 
 interface ShippingLabelModalProps {
   isOpen: boolean;
@@ -62,14 +63,21 @@ export const ShippingLabelModal: React.FC<ShippingLabelModalProps> = ({
 
   useEffect(() => {
     if (order) {
-      const initialName = order.customerName || '';
-      const initialPhone = order.customerPhone || '';
+      const normalized = parseAndNormalizeAddress(order, {
+        city: business.city,
+        state: business.state,
+        pincode: business.pincode,
+      });
+
+      const initialName = order.customerName || normalized.recipientName;
+      const initialPhone = order.customerPhone || normalized.recipientPhone;
       const initialAddress =
         order.customerAddress ||
+        normalized.streetAddress ||
         (order.orderType === 'pickup' ? 'Store Pickup / Counter Collection' : '');
-      const initialCity = order.customerCity || '';
-      const initialState = order.customerState || '';
-      const initialPincode = order.customerPincode || '';
+      const initialCity = order.customerCity || (normalized.city !== 'N/A' ? normalized.city : '');
+      const initialState = order.customerState || (normalized.state !== 'N/A' ? normalized.state : '');
+      const initialPincode = order.customerPincode || (normalized.pincode !== 'N/A' ? normalized.pincode : '');
 
       setRecipientName(initialName);
       setRecipientPhone(initialPhone);
@@ -88,7 +96,7 @@ export const ShippingLabelModal: React.FC<ShippingLabelModalProps> = ({
       setAddressSavedSuccess(false);
       setValidationErrors(null);
     }
-  }, [order]);
+  }, [order, business]);
 
   // Real authoritative barcode reference (Order Number or ID)
   const barcodeValue = order?.orderNumber || order?.id || 'ORD';
@@ -608,7 +616,13 @@ export const ShippingLabelModal: React.FC<ShippingLabelModalProps> = ({
                     <p className="text-[9px] text-neutral-700 truncate leading-tight mt-0.5">
                       {business.address}
                       {business.city ? `, ${business.city}` : ''}
+                      {business.state ? `, ${business.state}` : ''}
                       {business.pincode ? ` - ${business.pincode}` : ''}
+                    </p>
+                  )}
+                  {(business.gstin || business.sellerGstin) && (
+                    <p className="text-[8px] font-mono font-bold text-black leading-tight">
+                      GSTIN: {business.gstin || business.sellerGstin}
                     </p>
                   )}
                   {business.phone && (
@@ -741,13 +755,19 @@ export const ShippingLabelModal: React.FC<ShippingLabelModalProps> = ({
                 <div className="font-bold text-black uppercase truncate">
                   {business.name}
                 </div>
-                <div className="truncate">
+                {(business.gstin || business.sellerGstin) && (
+                  <div className="font-mono text-[8px] font-bold text-black">
+                    GSTIN: {business.gstin || business.sellerGstin}
+                  </div>
+                )}
+                <div className="truncate font-medium">
                   {business.address || 'Vendor Fulfillment Center'}
                   {business.city ? `, ${business.city}` : ''}
+                  {business.state ? `, ${business.state}` : ''}
                   {business.pincode ? ` - ${business.pincode}` : ''}
                 </div>
                 <div>
-                  Helpline: {business.phone || business.whatsapp || 'N/A'}
+                  Helpline: {business.phone || business.whatsapp || 'N/A'} {business.email ? `| ${business.email}` : ''}
                 </div>
               </div>
 

@@ -104,6 +104,9 @@ export const StoreSettings: React.FC<StoreSettingsProps> = ({
   const [email, setEmail] = useState(business.email || '');
   const [address, setAddress] = useState(business.address || '');
   const [city, setCity] = useState(business.city || '');
+  const [state, setState] = useState(business.state || '');
+  const [pincode, setPincode] = useState(business.pincode || '');
+  const [gstin, setGstin] = useState(business.gstin || business.sellerGstin || '');
   const [currencySymbol, setCurrencySymbol] = useState(business.currencySymbol || '₹');
   const [deliveryFee, setDeliveryFee] = useState(business.deliveryFee ?? 0);
   const [minOrderValue, setMinOrderValue] = useState(business.minOrderValue ?? 0);
@@ -224,6 +227,10 @@ export const StoreSettings: React.FC<StoreSettingsProps> = ({
       email: email.trim() || undefined,
       address: address.trim() || undefined,
       city: city.trim() || undefined,
+      state: state.trim() || undefined,
+      pincode: pincode.trim() || undefined,
+      gstin: gstin.trim() || undefined,
+      sellerGstin: gstin.trim() || undefined,
       currencySymbol: currencySymbol.trim() || '₹',
       deliveryFee: Number(deliveryFee) || 0,
       minOrderValue: Number(minOrderValue) || 0,
@@ -379,6 +386,10 @@ export const StoreSettings: React.FC<StoreSettingsProps> = ({
         email: email.trim() || undefined,
         address: address.trim() || undefined,
         city: city.trim() || undefined,
+        state: state.trim() || undefined,
+        pincode: pincode.trim() || undefined,
+        gstin: gstin.trim() || undefined,
+        sellerGstin: gstin.trim() || undefined,
         currencySymbol: currencySymbol.trim() || '₹',
         deliveryFee: Number(deliveryFee) || 0,
         minOrderValue: Number(minOrderValue) || 0,
@@ -704,6 +715,47 @@ export const StoreSettings: React.FC<StoreSettingsProps> = ({
                 onChange={(e) => setCity(e.target.value)}
                 placeholder="e.g. Hyderabad, Bengaluru, Mumbai"
                 className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                State / Province
+              </label>
+              <input
+                type="text"
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+                placeholder="e.g. Telangana, Karnataka"
+                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                PIN / Postal Code
+              </label>
+              <input
+                type="text"
+                value={pincode}
+                onChange={(e) => setPincode(e.target.value)}
+                placeholder="e.g. 500081"
+                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-emerald-500 font-mono"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                GSTIN / Reg No. (Optional)
+              </label>
+              <input
+                type="text"
+                value={gstin}
+                onChange={(e) => setGstin(e.target.value)}
+                placeholder="e.g. 36AAAAA0000A1Z5"
+                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-emerald-500 font-mono uppercase"
               />
             </div>
           </div>

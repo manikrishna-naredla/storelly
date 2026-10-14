@@ -37,6 +37,7 @@ import { isCreatorProfile, getProfileTypeLabel } from "../../utils/profileHelper
 import { isCreatorModuleEnabled } from "../../utils/creatorModuleManager";
 import { SafeImage } from "../common/SafeImage";
 import { getBusinessLogo } from "../../utils/branding";
+import { StorellyLogo } from "../common/StorellyLogo";
 
 export type DashboardTab =
   | "overview"
@@ -279,33 +280,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onClose();
               }}
               title={isCreator ? "Click to view live creator portfolio" : "Click to view live storefront"}
-              className="touch-target-accessible min-h-[44px] flex items-center gap-2.5 text-left group cursor-pointer"
+              className="touch-target-accessible min-h-[44px] flex items-center text-left group cursor-pointer"
             >
-              <div className="w-9 h-9 rounded-[var(--r8)] bg-[var(--card)] border border-[var(--border)] group-hover:border-[var(--g500)] overflow-hidden flex items-center justify-center shadow-[var(--shadow-xs)] transition">
-                {getBusinessLogo(business) ? (
-                  <img
-                    src={getBusinessLogo(business)!}
-                    alt={business?.name || "Logo"}
-                    referrerPolicy="no-referrer"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).style.display = 'none';
-                    }}
-                    className="w-full h-full object-contain object-center group-hover:scale-105 transition"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center font-black text-xs text-white bg-[var(--g600)]">
-                    {(business?.name || 'S').slice(0, 2).toUpperCase()}
-                  </div>
-                )}
-              </div>
-              <div>
-                <span className="font-heading font-extrabold text-lg text-[var(--t1)] tracking-tight flex items-center gap-1 transition group-hover:text-[var(--g700)]">
-                  Storelly
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-[var(--r4)] border text-[var(--g600)] bg-[var(--g100)] border-[var(--g200)]">
-                    {isCreator ? 'CREATOR' : 'OS'}
-                  </span>
-                </span>
-              </div>
+              <StorellyLogo size="sm" badge={isCreator ? 'CREATOR' : 'OS'} />
             </button>
             <button
               onClick={onClose}

@@ -90,6 +90,7 @@ import {
 import { getStorefrontUrl } from '../../services/firebaseService';
 import { AdminPricingManager } from './AdminPricingManager';
 import { AdminClientsManager } from './AdminClientsManager';
+import { StorellyLogo } from '../common/StorellyLogo';
 
 interface MasterAdminDashboardProps {
   adminEmail: string;
@@ -625,19 +626,7 @@ export const MasterAdminDashboard: React.FC<MasterAdminDashboardProps> = ({ admi
         <div>
           {/* Brand Header */}
           <div className="h-16 px-6 flex items-center justify-between border-b border-slate-100 bg-slate-900 text-white">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl overflow-hidden border border-slate-700 shadow-md flex items-center justify-center bg-white">
-                <img src="/main logo-1.jpg" alt="Storelly Logo" className="w-full h-full object-cover" />
-              </div>
-              <div>
-                <span className="font-heading font-black text-base tracking-tight flex items-center gap-1.5">
-                  Storelly
-                  <span className="text-[9px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/30">
-                    Master Admin
-                  </span>
-                </span>
-              </div>
-            </div>
+            <StorellyLogo size="sm" badge="MASTER ADMIN" />
             <button
               onClick={() => setIsSidebarOpen(false)}
               className="lg:hidden p-1 text-slate-400 hover:text-white"

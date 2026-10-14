@@ -558,7 +558,9 @@ export const OrderManager: React.FC<any> = ({ business }) => {
                       <span>
                         {selectedOrder.customerAddress}
                         {selectedOrder.customerCity ? `, ${selectedOrder.customerCity}` : ''}
+                        {selectedOrder.customerState ? `, ${selectedOrder.customerState}` : ''}
                         {selectedOrder.customerPincode ? ` - ${selectedOrder.customerPincode}` : ''}
+                        {selectedOrder.customerCountry && selectedOrder.customerCountry !== 'India' ? `, ${selectedOrder.customerCountry}` : ''}
                       </span>
                     </div>
                   )}

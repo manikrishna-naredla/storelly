@@ -13,6 +13,7 @@ import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 
 import { motion, AnimatePresence } from 'motion/react';
 import { getAppLogo, getAppName, getBusinessLogo } from './utils/branding';
 import { useDynamicBranding } from './utils/dynamicBranding';
+import { StorellyLogo } from './components/common/StorellyLogo';
 import {
   Store,
   Briefcase,
@@ -844,13 +845,30 @@ function MainContent() {
       currentProfileType
     );
 
-    return () => {
-      unsubscribe();
-      seenNotificationIdsRef.current.clear();
-      notifInitializedRef.current = false;
-      setActiveAlertNotification(null);
-    };
-  }, [currentUser?.uid, selectedBusiness?.id, selectedBusiness?.profileType, publicStoreSlug, viewMode]);
+      return () => {
+        unsubscribe();
+        seenNotificationIdsRef.current.clear();
+        notifInitializedRef.current = false;
+        setActiveAlertNotification(null);
+      };
+    }, [currentUser?.uid, selectedBusiness?.id, selectedBusiness?.profileType, publicStoreSlug, viewMode]);
+
+  // Dynamic Browser Tab Title Management
+  useEffect(() => {
+    if (typeof document === 'undefined' || publicRouteInfo.isPublicRoute || publicStoreSlug) return;
+
+    if (isMasterAdminMode) {
+      document.title = 'Storelly — Master Admin Portal';
+    } else if (isOnboardingOpen) {
+      document.title = 'Storelly — Merchant & Creator Setup';
+    } else if (!currentUser) {
+      document.title = 'Storelly — Digital Business OS & Instant Public Storefront';
+    } else if (selectedBusiness) {
+      const isCreator = isCreatorProfile(selectedBusiness);
+      const profileLabel = isCreator ? 'Creator Studio' : 'Merchant Hub';
+      document.title = `${selectedBusiness.name} — ${profileLabel} | Storelly`;
+    }
+  }, [isMasterAdminMode, isOnboardingOpen, currentUser, selectedBusiness?.id, selectedBusiness?.name, selectedBusiness?.profileType, publicRouteInfo.isPublicRoute, publicStoreSlug]);
 
   // Business Selector Handler
   const handleSelectBusiness = (biz: BusinessProfile) => {
@@ -1081,14 +1099,9 @@ function MainContent() {
   // ==========================================
   if (authLoading || (currentUser && businessLoading)) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-6 overflow-hidden">
-        <div className="w-48 h-48 sm:w-64 sm:h-64 flex items-center justify-center">
-          <img
-            src={getAppLogo()}
-            alt="Storelly"
-            className="w-full h-full object-contain"
-          />
-        </div>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 overflow-hidden select-none space-y-4">
+        <StorellyLogo size="xl" badge="OS" />
+        <div className="w-8 h-8 rounded-full border-3 border-emerald-200 border-t-emerald-600 animate-spin" />
       </div>
     );
   }
@@ -1180,14 +1193,9 @@ function MainContent() {
     return (
       <Suspense
         fallback={
-          <div className="min-h-screen bg-white flex items-center justify-center p-6">
-            <div className="w-48 h-48 sm:w-64 sm:h-64 flex items-center justify-center">
-              <img
-                src={getAppLogo()}
-                alt="Storelly"
-                className="w-full h-full object-contain"
-              />
-            </div>
+          <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 select-none space-y-4">
+            <StorellyLogo size="xl" badge="SETUP" />
+            <div className="w-8 h-8 rounded-full border-3 border-emerald-200 border-t-emerald-600 animate-spin" />
           </div>
         }
       >

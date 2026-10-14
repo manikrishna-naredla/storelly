@@ -121,6 +121,8 @@ export interface BusinessProfile {
   pincode?: string;
   city?: string;
   state?: string;
+  gstin?: string;
+  sellerGstin?: string;
   locationUrl?: string;
   businessHours?: {
     openTime: string;

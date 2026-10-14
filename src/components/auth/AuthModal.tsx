@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { getAppLogo } from '../../utils/branding';
+import { StorellyLogo } from '../common/StorellyLogo';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -137,8 +138,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         {/* Header */}
         <div className="mb-6">
-          <div className="w-12 h-12 rounded-2xl overflow-hidden border border-slate-200 shadow-md flex items-center justify-center bg-white mb-3">
-            <img src={getAppLogo()} alt="Storelly Logo" className="w-full h-full object-cover" />
+          <div className="mb-3">
+            <StorellyLogo size="md" />
           </div>
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-heading">
             {mode === 'login'
@@ -158,7 +159,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <div className="mt-3 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-[11px] text-emerald-900 flex items-start gap-2">
               <Sparkles className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
               <div>
-                <span className="font-bold">Master Admin Note:</span> If you are logging in with <span className="font-mono font-bold">localride369@gmail.com</span> (or maninaredla218@gmail.com) for the first time, click <button type="button" onClick={() => setMode('signup')} className="underline font-bold text-emerald-700 hover:text-emerald-800">Sign up free</button> to create your password, or use <span className="font-bold">Continue with Google</span> above!
+                <span className="font-bold">Master Admin Note:</span> If you are logging in with <span className="font-mono font-bold">localride369@gmail.com</span> for the first time, click <span onClick={() => setMode('signup')} className="underline font-bold text-emerald-700 hover:text-emerald-800 cursor-pointer">Sign up free</span> to create your password, or use <span className="font-bold">Continue with Google</span>!
               </div>
             </div>
           )}

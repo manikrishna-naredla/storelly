@@ -57,6 +57,8 @@ export const StorefrontCartDrawer: React.FC<StorefrontCartDrawerProps> = ({
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
+  const [customerCity, setCustomerCity] = useState('');
+  const [customerState, setCustomerState] = useState('');
   const [customerPincode, setCustomerPincode] = useState('');
   const [orderNotes, setOrderNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'upi_on_delivery' | 'online' | 'cash_at_counter'>('online');
@@ -86,6 +88,18 @@ export const StorefrontCartDrawer: React.FC<StorefrontCartDrawerProps> = ({
 
         const savedName = localStorage.getItem(`storelly_customer_name_${business.id}`);
         if (savedName) setCustomerName(savedName);
+
+        const savedAddress = localStorage.getItem(`storelly_customer_address_${business.id}`);
+        if (savedAddress) setCustomerAddress(savedAddress);
+
+        const savedCity = localStorage.getItem(`storelly_customer_city_${business.id}`);
+        if (savedCity) setCustomerCity(savedCity);
+
+        const savedState = localStorage.getItem(`storelly_customer_state_${business.id}`);
+        if (savedState) setCustomerState(savedState);
+
+        const savedPincode = localStorage.getItem(`storelly_customer_pincode_${business.id}`);
+        if (savedPincode) setCustomerPincode(savedPincode);
         
         const savedTable = localStorage.getItem(`storelly_table_${business.id}`);
         if (savedTable && business.modules.table_delivery) {
@@ -193,13 +207,26 @@ export const StorefrontCartDrawer: React.FC<StorefrontCartDrawerProps> = ({
     try {
       setIsSubmitting(true);
 
+      try {
+        localStorage.setItem(`storelly_customer_name_${business.id}`, customerName.trim());
+        localStorage.setItem(`storelly_customer_phone_${business.id}`, customerPhone.trim());
+        if (customerEmail) localStorage.setItem(`storelly_customer_email_${business.id}`, customerEmail.trim());
+        if (customerAddress) localStorage.setItem(`storelly_customer_address_${business.id}`, customerAddress.trim());
+        if (customerCity) localStorage.setItem(`storelly_customer_city_${business.id}`, customerCity.trim());
+        if (customerState) localStorage.setItem(`storelly_customer_state_${business.id}`, customerState.trim());
+        if (customerPincode) localStorage.setItem(`storelly_customer_pincode_${business.id}`, customerPincode.trim());
+      } catch (e) {}
+
       const orderData = {
         customerName: customerName.trim(),
         customerPhone: customerPhone.trim(),
         customerWhatsApp: customerPhone.trim(),
         customerEmail: customerEmail.trim() || undefined,
         customerAddress: customerAddress.trim() || undefined,
+        customerCity: customerCity.trim() || undefined,
+        customerState: customerState.trim() || undefined,
         customerPincode: customerPincode.trim() || undefined,
+        customerCountry: 'India',
         orderType,
         tableNumber: tableNumber.trim() || undefined,
         items: items.map((cartItem) => {
@@ -787,25 +814,52 @@ export const StorefrontCartDrawer: React.FC<StorefrontCartDrawerProps> = ({
                       )}
 
                       {orderType === 'delivery' && (
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                           <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Delivery Address</label>
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
+                              Flat / Door No., Building, Street & Landmark <span className="text-rose-500">*</span>
+                            </label>
                             <textarea
                               value={customerAddress}
                               onChange={(e) => setCustomerAddress(e.target.value)}
-                              placeholder="House No, Building, Area, Landmark"
-                              rows={3}
-                              className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 focus:outline-none transition-all text-sm font-bold text-slate-900 resize-none"
+                              placeholder="e.g. Flat 402, Sunshine Apts, Road No 12, Jubilee Hills"
+                              rows={2}
+                              className="w-full p-3 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 focus:outline-none transition-all text-sm font-bold text-slate-900 resize-none"
                             />
                           </div>
+
+                          <div className="grid grid-cols-2 gap-2.5">
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">City / Town</label>
+                              <input
+                                type="text"
+                                value={customerCity}
+                                onChange={(e) => setCustomerCity(e.target.value)}
+                                placeholder="e.g. Hyderabad"
+                                className="w-full h-11 px-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 focus:outline-none transition-all text-sm font-bold text-slate-900"
+                              />
+                            </div>
+
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">State</label>
+                              <input
+                                type="text"
+                                value={customerState}
+                                onChange={(e) => setCustomerState(e.target.value)}
+                                placeholder="e.g. Telangana"
+                                className="w-full h-11 px-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 focus:outline-none transition-all text-sm font-bold text-slate-900"
+                              />
+                            </div>
+                          </div>
+
                           <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Pincode</label>
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">PIN / Postal Code</label>
                             <input
                               type="text"
                               value={customerPincode}
                               onChange={(e) => setCustomerPincode(e.target.value)}
-                              placeholder="e.g. 560001"
-                              className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 focus:outline-none transition-all text-sm font-bold text-slate-900"
+                              placeholder="e.g. 500033"
+                              className="w-full h-11 px-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 focus:outline-none transition-all text-sm font-bold text-slate-900 font-mono"
                             />
                           </div>
                         </div>
