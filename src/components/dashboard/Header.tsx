@@ -161,7 +161,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-30 h-16 sm:h-[68px] bg-[var(--card)]/90 backdrop-blur-md border-b border-[var(--border)] px-4 sm:px-6 lg:px-8 flex items-center justify-between transition-colors shadow-xs">
+    <header className="sticky top-0 z-30 h-16 sm:h-[68px] bg-[var(--card)]/90 backdrop-blur-md border-b border-[var(--border)] px-3 sm:px-6 lg:px-8 flex items-center justify-between transition-colors shadow-xs w-full max-w-full">
       
       {/* Toast Notification for Link Copy */}
       {showCopiedToast && (
@@ -178,22 +178,22 @@ export const Header: React.FC<HeaderProps> = ({
       )}
 
       {/* LEFT SECTION: Hamburger & Store Selector */}
-      <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+      <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1 sm:flex-initial">
         <button
           type="button"
           onClick={onToggleSidebar}
           aria-label="Toggle navigation menu"
-          className="lg:hidden p-2 rounded-xl text-[var(--t2)] hover:text-[var(--t1)] hover:bg-[var(--bg)] transition cursor-pointer"
+          className="lg:hidden p-2 rounded-xl text-[var(--t2)] hover:text-[var(--t1)] hover:bg-[var(--bg)] transition cursor-pointer touch-target-accessible shrink-0"
         >
           <Menu className="w-5 h-5" />
         </button>
 
         {/* Business Selector Pill */}
-        <div className="relative" ref={bizMenuRef}>
+        <div className="relative min-w-0" ref={bizMenuRef}>
           <button
             type="button"
             onClick={() => setBizDropdownOpen(!bizDropdownOpen)}
-            className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--card)] hover:border-[var(--g400)] hover:bg-[var(--bg)] transition-all shadow-xs cursor-pointer select-none group"
+            className="flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--card)] hover:border-[var(--g400)] hover:bg-[var(--bg)] transition-all shadow-xs cursor-pointer select-none group max-w-[170px] xs:max-w-[210px] sm:max-w-none"
             title="Switch store or create new profile"
           >
             {/* Store Monogram / Logo */}
@@ -212,14 +212,14 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
 
             {/* Store Title & Badge */}
-            <div className="text-left min-w-0">
-              <span className="block font-heading font-bold text-xs sm:text-sm text-[var(--t1)] truncate max-w-[110px] sm:max-w-[180px] md:max-w-[220px]">
+            <div className="text-left min-w-0 flex-1">
+              <span className="block font-heading font-bold text-xs sm:text-sm text-[var(--t1)] truncate">
                 {business ? business.name : t("header.selectStore")}
               </span>
             </div>
 
             {/* Role Badge */}
-            <span className="hidden sm:inline-flex items-center text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[var(--g100)] text-[var(--g700)] border border-[var(--g200)]">
+            <span className="hidden md:inline-flex items-center text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[var(--g100)] text-[var(--g700)] border border-[var(--g200)] shrink-0">
               {isCreator ? 'Creator' : 'Store'}
             </span>
 
@@ -228,7 +228,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Business Switcher Dropdown Menu */}
           {bizDropdownOpen && (
-            <div className="absolute left-0 mt-2 w-80 bg-[var(--card)] rounded-2xl shadow-xl border border-[var(--border)] p-2.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div className="absolute left-0 mt-2 w-[calc(100vw-2rem)] sm:w-80 max-w-sm bg-[var(--card)] rounded-2xl shadow-xl border border-[var(--border)] p-2.5 z-50 animate-in fade-in zoom-in-95 duration-150">
               <div className="px-3 py-2 flex items-center justify-between border-b border-[var(--border)] mb-1">
                 <span className="text-[11px] font-bold text-[var(--t3)] uppercase tracking-wider">
                   {t("header.myBusinesses")} ({userBusinesses.length})
@@ -391,13 +391,13 @@ export const Header: React.FC<HeaderProps> = ({
               requestFcmNotificationPermission();
             }
           }}
-          className="relative p-2 sm:p-2.5 rounded-xl text-[var(--t2)] hover:text-[var(--t1)] hover:bg-[var(--bg)] border border-transparent hover:border-[var(--border)] transition cursor-pointer"
+          className="relative p-1.5 sm:p-2 rounded-xl text-[var(--t2)] hover:text-[var(--t1)] hover:bg-[var(--bg)] border border-transparent hover:border-[var(--border)] transition cursor-pointer touch-target-accessible shrink-0"
           title="Notifications & Orders"
           aria-label="Notifications"
         >
           <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
           {unreadNotificationsCount > 0 && (
-            <span className="absolute top-1 right-1 min-w-[16px] h-[16px] px-1 bg-red-500 text-white rounded-full flex items-center justify-center text-[9px] font-extrabold border-2 border-[var(--card)] shadow-xs animate-pulse">
+            <span className="absolute top-0.5 right-0.5 min-w-[15px] h-[15px] px-1 bg-red-500 text-white rounded-full flex items-center justify-center text-[9px] font-extrabold border-2 border-[var(--card)] shadow-xs animate-pulse">
               {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
             </span>
           )}
@@ -405,72 +405,72 @@ export const Header: React.FC<HeaderProps> = ({
 
         {business && (
           <>
-            {/* Share & QR Standee Button */}
+            {/* Share & QR Standee Button: compact icon on mobile */}
             <button
               type="button"
               onClick={onOpenShareModal}
               title="Share store link & counter QR standee"
-              className={`flex items-center gap-1.5 px-3 py-1.5 sm:py-2 text-xs font-semibold rounded-xl border transition shadow-xs cursor-pointer ${
+              className={`flex items-center gap-1.5 p-1.5 sm:px-3 sm:py-2 text-xs font-semibold rounded-xl border transition shadow-xs cursor-pointer touch-target-accessible shrink-0 ${
                 isCreator
                   ? 'text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 border-purple-200 dark:border-purple-800'
                   : 'text-[var(--g700)] bg-[var(--g100)] hover:bg-[var(--g200)] border-[var(--g200)]'
               }`}
             >
-              <QrCode className="w-3.5 h-3.5 shrink-0" />
-              <span className="hidden sm:inline">Share &amp; QR</span>
+              <QrCode className="w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0" />
+              <span className="hidden md:inline">Share &amp; QR</span>
             </button>
 
             {/* Primary Action: Live Storefront Button */}
-            <div className="flex items-center">
+            <div className="flex items-center shrink-0">
               <button
                 type="button"
                 onClick={onOpenStorefront}
                 title={isCreator ? "Open public creator profile" : "Preview digital storefront in-app"}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 sm:py-2 text-xs font-bold text-white rounded-l-xl transition shadow-xs cursor-pointer active:scale-95 ${
+                className={`flex items-center gap-1 px-2 sm:px-3.5 py-1.5 sm:py-2 text-xs font-bold text-white rounded-l-xl transition shadow-xs cursor-pointer active:scale-95 touch-target-accessible ${
                   isCreator
                     ? 'bg-purple-600 hover:bg-purple-700 shadow-purple-600/20'
                     : 'bg-[var(--g600)] hover:bg-[var(--g700)] shadow-emerald-600/20'
                 }`}
               >
-                <Store className="w-3.5 h-3.5" />
-                <span>{isCreator ? 'Live Profile' : 'Visit Store'}</span>
+                <Store className="w-3.5 h-3.5 sm:w-3.5 sm:h-3.5 shrink-0" />
+                <span className="hidden sm:inline">{isCreator ? 'Profile' : 'Store'}</span>
               </button>
               <button
                 type="button"
                 onClick={handleOpenInNewTab}
                 title="Open storefront in new browser tab"
                 aria-label="Open storefront in new tab"
-                className={`flex items-center justify-center px-2 py-1.5 sm:py-2 text-white text-xs rounded-r-xl border-l border-white/20 transition cursor-pointer ${
+                className={`flex items-center justify-center px-1.5 sm:px-2 py-1.5 sm:py-2 text-white text-xs rounded-r-xl border-l border-white/20 transition cursor-pointer touch-target-accessible ${
                   isCreator
                     ? 'bg-purple-700 hover:bg-purple-800'
                     : 'bg-[var(--g700)] hover:bg-[var(--g800)]'
                 }`}
               >
-                <ExternalLink className="w-3.5 h-3.5" />
+                <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </button>
             </div>
           </>
         )}
 
         {/* User Account Menu Hub */}
-        <div className="relative pl-1 sm:pl-2 border-l border-[var(--border)]" ref={userMenuRef}>
+        <div className="relative pl-1 border-l border-[var(--border)] shrink-0" ref={userMenuRef}>
           <button
             type="button"
             onClick={() => setUserMenuOpen(!userMenuOpen)}
-            className="flex items-center gap-2 p-1 rounded-xl hover:bg-[var(--bg)] transition cursor-pointer select-none group"
+            className="flex items-center gap-1 sm:gap-2 p-1 rounded-xl hover:bg-[var(--bg)] transition cursor-pointer select-none group touch-target-accessible"
             title="Account & Profile Settings"
             aria-label="User account menu"
             aria-expanded={userMenuOpen}
           >
-            <div className="w-8 h-8 rounded-full bg-[var(--g100)] border border-[var(--border)] text-[var(--g700)] flex items-center justify-center font-bold text-xs shadow-xs group-hover:border-[var(--g400)] transition">
-              {userName ? userName.slice(0, 1).toUpperCase() : <User className="w-4 h-4 text-[var(--t3)]" />}
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[var(--g100)] border border-[var(--border)] text-[var(--g700)] flex items-center justify-center font-bold text-xs shadow-xs group-hover:border-[var(--g400)] transition">
+              {userName ? userName.slice(0, 1).toUpperCase() : <User className="w-3.5 h-3.5 text-[var(--t3)]" />}
             </div>
             <ChevronDown className={`w-3.5 h-3.5 text-[var(--t3)] group-hover:text-[var(--t1)] transition-transform duration-200 hidden sm:block ${userMenuOpen ? 'rotate-180' : ''}`} />
           </button>
 
           {/* User Profile Dropdown Menu */}
           {userMenuOpen && (
-            <div className="absolute right-0 top-full mt-2 w-72 bg-[var(--card)] rounded-2xl shadow-xl border border-[var(--border)] p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div className="fixed sm:absolute right-2 sm:right-0 top-16 sm:top-full mt-1 w-[calc(100vw-1rem)] sm:w-72 max-w-xs bg-[var(--card)] rounded-2xl shadow-xl border border-[var(--border)] p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
               
               {/* Account Header */}
               <div className="p-3 border-b border-[var(--border)] bg-[var(--bg)]/50 rounded-xl mb-1">

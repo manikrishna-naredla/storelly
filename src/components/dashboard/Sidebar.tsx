@@ -114,6 +114,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
     return () => unsubscribe();
   }, [business?.id]);
 
+  // Lock body scroll on mobile when sidebar drawer is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  // Close sidebar on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   const bizMeta = business
     ? BUSINESS_TYPES[business.type] || BUSINESS_TYPES.retail
     : BUSINESS_TYPES.retail;
@@ -261,14 +284,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {isOpen && (
         <div
           onClick={onClose}
-          className="fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-xs lg:hidden"
+          className="fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-xs lg:hidden"
         />
       )}
 
-      {/* Sidebar Container */}
+      {/* Sidebar Container: z-50 on mobile with shadow-2xl, lg:z-30 lg:w-64 on desktop */}
       <aside
-        className={`fixed top-0 left-0 z-40 h-screen w-64 bg-[var(--card)] border-r border-[var(--border)] flex flex-col transition-transform duration-200 ease-in-out lg:translate-x-0 ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
+        className={`fixed top-0 left-0 z-50 h-screen w-72 max-w-[85vw] bg-[var(--card)] border-r border-[var(--border)] flex flex-col transition-transform duration-200 ease-in-out lg:z-30 lg:w-64 lg:translate-x-0 ${
+          isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
         }`}
       >
         {/* Brand Header */}

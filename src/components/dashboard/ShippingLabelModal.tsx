@@ -327,17 +327,17 @@ export const ShippingLabelModal: React.FC<ShippingLabelModalProps> = ({
       {/* Modal Dialog Container */}
       <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col max-h-[95vh] overflow-hidden">
         {/* Top Control Bar */}
-        <div className="px-5 py-3.5 border-b border-slate-200 bg-slate-50 flex items-center justify-between shrink-0 print-hide-action">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shadow-xs">
+        <div className="px-3 sm:px-5 py-3 sm:py-3.5 border-b border-slate-200 bg-slate-50 flex items-center justify-between shrink-0 print-hide-action gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shadow-xs shrink-0">
               <Truck className="w-4 h-4" />
             </div>
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 font-heading">
-                4×6 Thermal Courier Shipping Label
+            <div className="min-w-0">
+              <h3 className="text-xs sm:text-sm font-bold text-slate-900 font-heading truncate">
+                4×6 Courier Shipping Label
               </h3>
-              <p className="text-[11px] text-slate-500">
-                Order #{order.orderNumber} • Standard 4" × 6" Portrait (Thermal & Laser Ready)
+              <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">
+                Order #{order.orderNumber}
               </p>
             </div>
           </div>
@@ -350,7 +350,8 @@ export const ShippingLabelModal: React.FC<ShippingLabelModalProps> = ({
               title="Print directly to 4x6 thermal shipping printer"
             >
               <Printer className="w-3.5 h-3.5" />
-              <span>One-Click Print (4×6)</span>
+              <span className="hidden sm:inline">One-Click Print (4×6)</span>
+              <span className="sm:hidden">Print</span>
             </button>
 
             <button

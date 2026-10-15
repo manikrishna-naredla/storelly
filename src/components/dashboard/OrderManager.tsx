@@ -408,7 +408,7 @@ export const OrderManager: React.FC<any> = ({ business }) => {
 
       {/* ORDER DETAILS MODAL */}
       {selectedOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs animate-in fade-in duration-150 print:p-0 print:static print:bg-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/50 backdrop-blur-xs animate-in fade-in duration-150 print:p-0 print:static print:bg-white">
           <style>{`
             @media print {
               body * {
@@ -433,11 +433,11 @@ export const OrderManager: React.FC<any> = ({ business }) => {
               }
             }
           `}</style>
-          <div className="relative w-full max-w-xl max-h-[90vh] bg-[var(--card)] rounded-[var(--r16)] shadow-[var(--shadow-xl)] border border-[var(--border)] flex flex-col overflow-hidden printable-order-modal print:max-h-none print:overflow-visible">
+          <div className="relative w-full max-w-xl max-h-[92vh] bg-[var(--card)] rounded-[var(--r16)] shadow-[var(--shadow-xl)] border border-[var(--border)] flex flex-col overflow-hidden printable-order-modal print:max-h-none print:overflow-visible">
             {/* Header */}
-            <div className="p-5 border-b border-[var(--border)] flex items-center justify-between shrink-0">
+            <div className="p-3.5 sm:p-5 border-b border-[var(--border)] flex items-center justify-between shrink-0">
               <div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <h3 className="text-base font-bold text-[var(--t1)] font-heading">
                     Order {selectedOrder.orderNumber}
                   </h3>
@@ -456,14 +456,14 @@ export const OrderManager: React.FC<any> = ({ business }) => {
               <button
                 type="button"
                 onClick={() => setSelectedOrder(null)}
-                className="p-1.5 text-[var(--t3)] hover:text-[var(--t1)] rounded-[var(--r8)] print-hide"
+                className="p-1.5 text-[var(--t3)] hover:text-[var(--t1)] rounded-[var(--r8)] print-hide cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Body */}
-            <div className="p-6 overflow-y-auto space-y-5 flex-1">
+            <div className="p-3.5 sm:p-6 overflow-y-auto space-y-4 sm:space-y-5 flex-1">
               {/* Store & Receipt Title for Print */}
               <div className="hidden print:block text-center border-b pb-4 mb-2">
                 <h2 className="text-lg font-extrabold text-[var(--t1)] font-heading">{business.name}</h2>
@@ -485,7 +485,7 @@ export const OrderManager: React.FC<any> = ({ business }) => {
                       {statusError}
                     </div>
                   )}
-                  <div className="grid grid-cols-3 sm:grid-cols-7 gap-1.5">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-1.5">
                     {(['pending', 'pending-verification', 'confirmed', 'processing', 'ready', 'delivered', 'cancelled'] as OrderStatus[]).map(
                       (st) => (
                         <button
@@ -493,7 +493,7 @@ export const OrderManager: React.FC<any> = ({ business }) => {
                           type="button"
                           disabled={isUpdatingStatus}
                           onClick={() => handleStatusChange(selectedOrder, st)}
-                          className={`py-1.5 px-2 rounded-[var(--r8)] text-[11px] font-bold capitalize transition cursor-pointer ${
+                          className={`py-1.5 px-2 rounded-[var(--r8)] text-[11px] font-bold capitalize transition cursor-pointer text-center truncate ${
                             selectedOrder.status === st
                               ? 'bg-[var(--g600)] text-white shadow-[var(--shadow-xs)]'
                               : 'bg-[var(--card)] text-[var(--t2)] hover:bg-[var(--bg)] border border-[var(--border)]'

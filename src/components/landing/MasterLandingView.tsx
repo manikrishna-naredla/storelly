@@ -314,29 +314,22 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
 
       {/* HERO SECTION */}
       <section className="pt-32 pb-16 lg:pt-36 lg:pb-24 bg-[var(--card)] relative overflow-hidden">
-        {/* Full 45-Degree Diagonal Triangle Creator Theme Background */}
-        <div className="absolute top-0 right-0 bottom-0 w-full lg:w-[60%] pointer-events-none z-0 overflow-hidden">
-          <div 
-            className="hidden lg:block absolute inset-0 bg-gradient-to-bl from-indigo-700 via-purple-700 to-violet-950 opacity-95 shadow-2xl"
-            style={{ clipPath: 'polygon(35% 0%, 100% 0%, 100% 100%, 0% 100%)' }}
-          />
-          <div 
-            className="lg:hidden absolute bottom-0 right-0 left-0 h-[65%] bg-gradient-to-t from-indigo-950 via-purple-800 to-transparent opacity-90"
-            style={{ clipPath: 'polygon(0% 18%, 100% 0%, 100% 100%, 0% 100%)' }}
-          />
-          <div className="absolute top-10 right-10 w-96 h-96 bg-indigo-500/30 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-10 right-20 w-96 h-96 bg-purple-600/30 rounded-full blur-3xl pointer-events-none" />
+        {/* Soft Ambient Blend matching illustration's warm cream & pastel sky-blue palette */}
+        <div className="absolute top-0 right-0 bottom-0 w-full lg:w-[65%] pointer-events-none z-0 overflow-hidden">
+          <div className="absolute -top-16 -right-16 w-[620px] h-[520px] bg-[#f9f2d8]/95 dark:bg-amber-950/20 rounded-full blur-3xl" />
+          <div className="absolute -bottom-16 -right-10 w-[620px] h-[520px] bg-[#d7f2fd]/95 dark:bg-sky-950/20 rounded-full blur-3xl" />
+          <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-emerald-100/40 dark:bg-emerald-950/20 rounded-full blur-3xl" />
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex flex-col lg:flex-row items-center gap-14 lg:gap-8">
+          <div className="flex flex-col lg:flex-row items-center gap-12 sm:gap-16 lg:gap-16 xl:gap-20">
             
             {/* Left Headline & Pitch */}
             <motion.div 
               initial={{ opacity: 0, x: -30 }} 
               animate={{ opacity: 1, x: 0 }} 
               transition={{ duration: 0.6 }}
-              className="lg:w-1/2 space-y-7 z-10 text-center lg:text-left"
+              className="w-full lg:w-[46%] xl:w-[44%] space-y-7 z-10 text-center lg:text-left shrink-0"
             >
 
               {/* Main Headline */}
@@ -443,37 +436,28 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
               </div>
             </motion.div>
 
-            {/* Right Interactive Mockup with Real Visuals & Badges */}
+            {/* Right Interactive Showcase with Enlarged Visuals & Device-Friendly Spacing */}
             <motion.div 
               initial={{ opacity: 0, y: 30 }} 
               animate={{ opacity: 1, y: 0 }} 
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="lg:w-1/2 flex justify-center lg:justify-end relative mt-8 lg:mt-0"
+              className="w-full lg:w-[54%] xl:w-[56%] flex justify-center lg:justify-end relative mt-8 sm:mt-12 lg:mt-0"
             >
-               <div className="relative w-full max-w-2xl mx-auto z-10 flex flex-col gap-5 p-2 sm:p-4">
-                  {/* Top Live Storefront Showcase */}
-                  <div className="w-full relative overflow-hidden transform hover:scale-[1.02] transition-transform duration-500 rounded-[var(--r16)] shadow-[var(--shadow-xl)] border border-white/40 bg-[var(--card)] p-2">
+               <div className="relative w-full max-w-xl sm:max-w-2xl md:max-w-3xl lg:max-w-none mx-auto z-10 flex flex-col items-center px-1 sm:px-0">
+                  {/* Clean Borderless Showcase with Enlarged Prominence & Seamless Blend */}
+                  <div className="w-full relative overflow-hidden transition-transform duration-500 hover:scale-[1.01] flex items-center justify-center">
                     <img 
                       src="/landingpage.jpeg" 
-                      alt="Storefront Interface" 
-                      className="w-full h-auto object-contain rounded-[var(--r12)]" 
-                      style={{ imageRendering: "high-quality" }} 
-                    />
-                  </div>
-                  
-                  {/* Bottom Creator Link Showcase */}
-                  <div className="w-full relative overflow-hidden transform hover:scale-[1.02] transition-transform duration-500 rounded-[var(--r16)] shadow-[var(--shadow-xl)] border border-white/40 bg-[var(--card)] p-2">
-                    <img 
-                      src="/cteatorlink.jpeg" 
-                      alt="Creator Link Interface" 
-                      className="w-full h-auto object-contain rounded-[var(--r12)]" 
-                      style={{ imageRendering: "high-quality" }} 
+                      alt="Storefront & Creator Studio Interface" 
+                      className="w-full h-auto object-contain mix-blend-multiply dark:mix-blend-normal max-h-[600px] sm:max-h-[720px] lg:max-h-[820px] scale-100 sm:scale-[1.03] lg:scale-[1.05]" 
+                      style={{ 
+                        imageRendering: "high-quality",
+                        WebkitMaskImage: 'radial-gradient(ellipse 99% 99% at 50% 50%, black 94%, transparent 100%)',
+                        maskImage: 'radial-gradient(ellipse 99% 99% at 50% 50%, black 94%, transparent 100%)'
+                      }} 
                     />
                   </div>
                </div>
-              
-              <div className="absolute top-20 -right-8 w-32 h-32 bg-repeat opacity-20 -z-10" style={{ backgroundImage: 'radial-gradient(#8aaa90 2px, transparent 2px)', backgroundSize: '16px 16px' }}></div>
-              <div className="absolute bottom-20 -left-12 w-24 h-24 bg-repeat opacity-20 -z-10" style={{ backgroundImage: 'radial-gradient(#2d8a45 2px, transparent 2px)', backgroundSize: '16px 16px' }}></div>
             </motion.div>
           </div>
         </div>
@@ -495,12 +479,16 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
               
               {/* Left: Image for Vendor */}
               <div className="lg:w-[52%] flex justify-center items-center relative w-full mx-auto">
-                 <div className="w-full relative rounded-[var(--r20)] overflow-hidden border border-[var(--border)] bg-[var(--card)] p-2 sm:p-3 shadow-[var(--shadow-lg)]">
+                 <div className="w-full relative overflow-hidden flex items-center justify-center">
                     <img 
                       src="/storelly6.jpg" 
                       alt="Storelly for Local Stores & Retailers" 
-                      className="w-full h-auto object-contain rounded-[var(--r16)] transition-transform duration-500 hover:scale-[1.01]"
-                      style={{ imageRendering: "high-quality" }}
+                      className="w-full h-auto object-contain transition-transform duration-500 hover:scale-[1.01] mix-blend-multiply dark:mix-blend-normal"
+                      style={{ 
+                        imageRendering: "high-quality",
+                        WebkitMaskImage: 'radial-gradient(ellipse 98% 98% at 50% 50%, black 86%, transparent 100%)',
+                        maskImage: 'radial-gradient(ellipse 98% 98% at 50% 50%, black 86%, transparent 100%)'
+                      }}
                       onError={(e) => {
                         (e.currentTarget as HTMLImageElement).src = '/storelly6.jpg.jpeg';
                       }}
@@ -673,16 +661,64 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
                 </div>
               </div>
 
-              {/* Right: Image for Creator */}
+              {/* Right: Live Interactive Creator Studio Mockup */}
               <div className="lg:w-1/2 flex justify-center items-center relative w-full mx-auto">
-                 <div className="w-full relative rounded-[var(--r20)] overflow-hidden border border-[var(--border)] bg-[var(--card)] p-2 sm:p-3 shadow-[var(--shadow-lg)]">
-                    <img 
-                      src="/cteatorlink.jpeg" 
-                      alt="Storelly for Creators & Educators" 
-                      className="w-full h-auto object-contain rounded-[var(--r16)] transition-transform duration-500 hover:scale-[1.01]"
-                      style={{ imageRendering: "high-quality" }}
-                    />
-                 </div>
+                <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 shadow-2xl space-y-4">
+                  {/* Creator Header */}
+                  <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white font-black text-xl flex items-center justify-center shadow-md shrink-0">
+                      AR
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <h4 className="font-heading font-black text-slate-900 dark:text-white text-base truncate">Ananya Rao</h4>
+                        <span className="w-4 h-4 rounded-full bg-blue-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                      </div>
+                      <p className="text-xs text-slate-500 truncate">Lifestyle &amp; Fashion • 48K Audience</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 truncate">
+                          storelly.com/ananya
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 1:1 Video Consultation Service Card */}
+                  <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 flex items-center justify-center shrink-0">
+                        <Calendar className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-bold text-xs text-slate-900 dark:text-white truncate">1:1 Video Consultation</div>
+                        <div className="text-[10px] text-slate-500 truncate">Google Meet • Instant Confirm</div>
+                      </div>
+                    </div>
+                    <span className="text-xs font-black text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/60 px-2.5 py-1 rounded-lg shrink-0">₹499</span>
+                  </div>
+
+                  {/* Digital Product E-Book */}
+                  <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0">
+                        <FileText className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-bold text-xs text-slate-900 dark:text-white truncate">Creator Playbook &amp; Presets</div>
+                        <div className="text-[10px] text-slate-500 truncate">PDF E-Book • WhatsApp Delivery</div>
+                      </div>
+                    </div>
+                    <span className="text-xs font-black text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/60 px-2.5 py-1 rounded-lg shrink-0">₹299</span>
+                  </div>
+
+                  {/* Direct Bank Settlement Badge */}
+                  <div className="pt-2 flex items-center justify-between text-[11px] text-slate-500 font-medium">
+                    <span className="flex items-center gap-1.5 text-emerald-600 font-bold">
+                      <ShieldCheck className="w-4 h-4 shrink-0" /> 0% Commission
+                    </span>
+                    <span className="text-slate-400">Direct Bank Settlement</span>
+                  </div>
+                </div>
               </div>
 
             </div>

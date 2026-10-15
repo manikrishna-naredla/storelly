@@ -785,7 +785,7 @@ export const BioProfileManager: React.FC<Props> = ({ business, onBusinessUpdated
         {/* Left 7 Columns: Tabs, Links Management, Customization */}
         <div className="lg:col-span-7 space-y-6">
           {/* Main Navigation Tabs */}
-          <div className="flex gap-2 p-1.5 bg-slate-100 rounded-2xl border border-slate-200 shadow-inner">
+          <div className="flex overflow-x-auto sm:overflow-visible gap-1.5 p-1.5 bg-slate-100 rounded-2xl border border-slate-200 shadow-inner no-scrollbar">
             {[
               { id: 'links', icon: Layers, label: 'Links & Content' },
               { id: 'appearance', icon: Palette, label: 'Customize Everything' },
@@ -797,13 +797,13 @@ export const BioProfileManager: React.FC<Props> = ({ business, onBusinessUpdated
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition flex-1 justify-center ${
+                  className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-bold transition shrink-0 sm:flex-1 justify-center cursor-pointer whitespace-nowrap ${
                     isActive
                       ? 'bg-white shadow-md text-emerald-700'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-600' : 'text-slate-400'}`} />
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-emerald-600' : 'text-slate-400'}`} />
                   <span>{tab.label}</span>
                 </button>
               );
@@ -2239,8 +2239,8 @@ export const BioProfileManager: React.FC<Props> = ({ business, onBusinessUpdated
         </div>
 
         {/* Right 5 Columns: Realistic Smartphone Mockup Preview */}
-        <div className="lg:col-span-5 flex flex-col items-center">
-          <div className="sticky top-20 w-full max-w-sm space-y-4">
+        <div className="lg:col-span-5 flex flex-col items-center w-full min-w-0">
+          <div className="static lg:sticky lg:top-20 w-full max-w-sm space-y-4 px-1 sm:px-0">
             <div className="flex items-center justify-between px-2">
               <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
                 <Smartphone className="w-4 h-4 text-emerald-600" />
@@ -2252,7 +2252,7 @@ export const BioProfileManager: React.FC<Props> = ({ business, onBusinessUpdated
             </div>
 
             {/* Smartphone Outer Casing */}
-            <div className="border-[10px] border-slate-900 rounded-[3rem] overflow-hidden bg-slate-900 shadow-2xl relative h-[680px] ring-4 ring-slate-900/10 flex flex-col">
+            <div className="w-full max-w-full border-[6px] sm:border-[10px] border-slate-900 rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden bg-slate-900 shadow-2xl relative h-[620px] sm:h-[680px] ring-4 ring-slate-900/10 flex flex-col">
               {/* Phone Status Bar (From Reference Image: 9:41, wifi, battery, camera notch) */}
               <div className="h-10 bg-slate-950/40 text-white flex items-center justify-between px-6 text-[11px] font-bold flex-shrink-0 relative z-40">
                 <span>9:41</span>

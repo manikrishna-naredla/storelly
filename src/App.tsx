@@ -1248,7 +1248,7 @@ function MainContent() {
   const biz = selectedBusiness;
 
   return (
-    <div key={biz.id} className="min-h-screen bg-slate-100/70 flex font-sans text-slate-900">
+    <div key={biz.id} className="min-h-screen bg-slate-100/70 flex font-sans text-slate-900 w-full overflow-x-hidden">
       {/* Sidebar Navigation */}
       <Sidebar
         activeTab={activeTab}
@@ -1265,7 +1265,7 @@ function MainContent() {
       />
 
       {/* Main Workspace Area: lg:pl-64 guarantees zero overlap with fixed sidebar on desktop */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-64">
+      <div className="flex-1 flex flex-col min-w-0 w-full lg:pl-64 overflow-x-hidden">
         {/* Top Header */}
         <Header
           business={biz}
@@ -1285,7 +1285,7 @@ function MainContent() {
         />
 
         {/* Tab Content Router */}
-        <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full overflow-y-auto">
+        <main className="flex-1 p-3 sm:p-6 md:p-8 max-w-7xl mx-auto w-full min-w-0 overflow-x-hidden">
           <Suspense fallback={<DashboardTabSkeleton />}>
             {activeTab === 'overview' && (
               <DashboardOverview

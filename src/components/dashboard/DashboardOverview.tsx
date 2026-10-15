@@ -318,11 +318,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </div>
 
             {/* Quick Action Button Group */}
-            <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 shrink-0">
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto shrink-0">
               <button
                 type="button"
                 onClick={() => handleOpenExternal(activeUrl)}
-                className="ds-btn-primary min-h-[44px] px-3.5 py-2 text-xs font-bold flex items-center gap-1.5 shadow-[var(--shadow-xs)] cursor-pointer"
+                className="ds-btn-primary min-h-[44px] px-3 py-2 text-xs font-bold flex items-center justify-center gap-1.5 shadow-[var(--shadow-xs)] cursor-pointer"
                 title="Open live public store in a new browser tab"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -332,7 +332,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <button
                 type="button"
                 onClick={() => setIsTrustCardModalOpen(true)}
-                className="ds-btn-secondary min-h-[44px] px-3.5 py-2 text-xs font-bold shadow-[var(--shadow-xs)] flex items-center gap-1.5 cursor-pointer"
+                className="ds-btn-secondary min-h-[44px] px-3 py-2 text-xs font-bold shadow-[var(--shadow-xs)] flex items-center justify-center gap-1.5 cursor-pointer"
                 title="Open and share high-trust WhatsApp card (Sri Lakshmi style)"
               >
                 <Sparkles className="w-3.5 h-3.5 text-[var(--g600)]" />
@@ -342,7 +342,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <button
                 type="button"
                 onClick={onOpenShareModal}
-                className="ds-btn-secondary min-h-[44px] px-3.5 py-2 text-xs font-bold shadow-[var(--shadow-xs)] flex items-center gap-1.5 cursor-pointer"
+                className="ds-btn-secondary min-h-[44px] px-3 py-2 text-xs font-bold shadow-[var(--shadow-xs)] flex items-center justify-center gap-1.5 cursor-pointer"
                 title="View and print QR code poster"
               >
                 <QrCode className="w-3.5 h-3.5 text-[var(--g600)]" />
@@ -351,12 +351,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
               <button
                 type="button"
-                onClick={() => setIsTrustCardModalOpen(true)}
-                className="ds-btn-primary min-h-[44px] px-3.5 py-2 text-xs font-bold flex items-center gap-1.5 shadow-[var(--shadow-xs)] cursor-pointer"
-                title="Share rich store card directly on WhatsApp"
+                onClick={() => handleCopyLink(activeUrl)}
+                className="ds-btn-secondary min-h-[44px] px-3 py-2 text-xs font-bold flex items-center justify-center gap-1.5 shadow-[var(--shadow-xs)] cursor-pointer"
+                title="Copy public store link"
               >
-                <MessageCircle className="w-3.5 h-3.5" />
-                <span>WhatsApp</span>
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copied ? 'Copied' : 'Copy Link'}</span>
               </button>
             </div>
           </div>
@@ -389,14 +389,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             )}
 
             {/* URL Display & 1-Click Copy */}
-            <div className="flex items-center gap-1.5 bg-[var(--card)] rounded-[var(--r12)] border border-[var(--border)] p-1 shadow-[var(--shadow-xs)] max-w-full sm:max-w-md min-h-[44px]">
+            <div className="flex items-center gap-1.5 bg-[var(--card)] rounded-[var(--r12)] border border-[var(--border)] p-1 shadow-[var(--shadow-xs)] w-full sm:max-w-md min-h-[44px] min-w-0">
               <span className="w-2 h-2 rounded-full inline-block shrink-0 ml-1.5 bg-[var(--g500)] animate-pulse" />
               <input
                 type="text"
                 readOnly
                 value={activeUrl}
                 onClick={(e) => (e.target as HTMLInputElement).select()}
-                className="text-xs font-mono font-medium text-[var(--t1)] bg-transparent border-none focus:outline-none flex-1 truncate px-1 cursor-text"
+                className="text-xs font-mono font-medium text-[var(--t1)] bg-transparent border-none focus:outline-none flex-1 min-w-0 truncate px-1 cursor-text"
               />
               <button
                 type="button"
@@ -800,44 +800,44 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
 
           {/* Quick Metrics Badges */}
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="grid grid-cols-3 sm:flex sm:flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
             {isCreator ? (
               <>
-                <div className="px-3 py-1.5 rounded-[var(--r8)] bg-[var(--bg)] border border-[var(--border)] text-center">
-                  <span className="text-[10px] text-[var(--t3)] font-bold uppercase block">7D Views</span>
-                  <span className="text-xs font-extrabold text-[var(--t1)]">
-                    {creatorSummary?.totalViews ?? 0} views
+                <div className="px-2 py-1 sm:px-3 sm:py-1.5 rounded-[var(--r8)] bg-[var(--bg)] border border-[var(--border)] text-center">
+                  <span className="text-[9px] sm:text-[10px] text-[var(--t3)] font-bold uppercase block truncate">7D Views</span>
+                  <span className="text-[11px] sm:text-xs font-extrabold text-[var(--t1)] truncate block">
+                    {creatorSummary?.totalViews ?? 0}
                   </span>
                 </div>
-                <div className="px-3 py-1.5 rounded-[var(--r8)] border text-center bg-purple-50 border-purple-200 text-purple-800">
-                  <span className="text-[10px] font-bold uppercase block opacity-75">7D Clicks</span>
-                  <span className="text-xs font-extrabold flex items-center justify-center gap-1">
+                <div className="px-2 py-1 sm:px-3 sm:py-1.5 rounded-[var(--r8)] border text-center bg-purple-50 border-purple-200 text-purple-800">
+                  <span className="text-[9px] sm:text-[10px] font-bold uppercase block opacity-75 truncate">7D Clicks</span>
+                  <span className="text-[11px] sm:text-xs font-extrabold flex items-center justify-center gap-1 truncate">
                     {creatorSummary?.totalClicks ?? 0}
                   </span>
                 </div>
-                <div className="px-3 py-1.5 rounded-[var(--r8)] bg-[var(--bg)] border border-[var(--border)] text-center">
-                  <span className="text-[10px] text-[var(--t3)] font-bold uppercase block">7D Revenue</span>
-                  <span className="text-xs font-extrabold text-[var(--t1)]">
+                <div className="px-2 py-1 sm:px-3 sm:py-1.5 rounded-[var(--r8)] bg-[var(--bg)] border border-[var(--border)] text-center">
+                  <span className="text-[9px] sm:text-[10px] text-[var(--t3)] font-bold uppercase block truncate">7D Revenue</span>
+                  <span className="text-[11px] sm:text-xs font-extrabold text-[var(--t1)] truncate block">
                     {business.currencySymbol}{creatorSummary?.totalRevenue ?? 0}
                   </span>
                 </div>
               </>
             ) : (
               <>
-                <div className="px-3 py-1.5 rounded-[var(--r8)] bg-[var(--bg)] border border-[var(--border)] text-center">
-                  <span className="text-[10px] text-[var(--t3)] font-bold uppercase block">Weekly Volume</span>
-                  <span className="text-xs font-extrabold text-[var(--t1)]">{weeklyTotalOrders} orders</span>
+                <div className="px-2 py-1 sm:px-3 sm:py-1.5 rounded-[var(--r8)] bg-[var(--bg)] border border-[var(--border)] text-center">
+                  <span className="text-[9px] sm:text-[10px] text-[var(--t3)] font-bold uppercase block truncate">Weekly Vol</span>
+                  <span className="text-[11px] sm:text-xs font-extrabold text-[var(--t1)] truncate block">{weeklyTotalOrders}</span>
                 </div>
-                <div className="px-3 py-1.5 rounded-[var(--r8)] border text-center bg-[var(--g100)] border-[var(--g200)] text-[var(--g700)]">
-                  <span className="text-[10px] font-bold uppercase block opacity-75">Avg Completion</span>
-                  <span className="text-xs font-extrabold flex items-center justify-center gap-1">
-                    <CheckCircle2 className="w-3 h-3 text-[var(--g600)]" />
+                <div className="px-2 py-1 sm:px-3 sm:py-1.5 rounded-[var(--r8)] border text-center bg-[var(--g100)] border-[var(--g200)] text-[var(--g700)]">
+                  <span className="text-[9px] sm:text-[10px] font-bold uppercase block opacity-75 truncate">Completion</span>
+                  <span className="text-[11px] sm:text-xs font-extrabold flex items-center justify-center gap-0.5 truncate">
+                    <CheckCircle2 className="w-3 h-3 text-[var(--g600)] shrink-0" />
                     {weeklyAvgCompletionRate}%
                   </span>
                 </div>
-                <div className="px-3 py-1.5 rounded-[var(--r8)] bg-[var(--bg)] border border-[var(--border)] text-center">
-                  <span className="text-[10px] text-[var(--t3)] font-bold uppercase block">Week Revenue</span>
-                  <span className="text-xs font-extrabold text-[var(--t1)]">
+                <div className="px-2 py-1 sm:px-3 sm:py-1.5 rounded-[var(--r8)] bg-[var(--bg)] border border-[var(--border)] text-center">
+                  <span className="text-[9px] sm:text-[10px] text-[var(--t3)] font-bold uppercase block truncate">Revenue</span>
+                  <span className="text-[11px] sm:text-xs font-extrabold text-[var(--t1)] truncate block">
                     {business.currencySymbol}{weeklyTotalRevenue.toLocaleString()}
                   </span>
                 </div>
@@ -856,20 +856,20 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart
                 data={creatorSummary?.dailyTrends || []}
-                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                margin={{ top: 10, right: 8, left: -12, bottom: 0 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                 <XAxis
                   dataKey="day"
                   stroke="#94a3b8"
-                  fontSize={11}
+                  fontSize={10}
                   tickLine={false}
                   axisLine={{ stroke: '#e2e8f0' }}
                 />
                 <YAxis
                   yAxisId="left"
                   stroke="#94a3b8"
-                  fontSize={11}
+                  fontSize={10}
                   allowDecimals={false}
                   tickLine={false}
                   axisLine={{ stroke: '#e2e8f0' }}
@@ -963,20 +963,20 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart
                 data={weeklyTrends}
-                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                margin={{ top: 10, right: 8, left: -12, bottom: 0 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                 <XAxis
                   dataKey="day"
                   stroke="#94a3b8"
-                  fontSize={11}
+                  fontSize={10}
                   tickLine={false}
                   axisLine={{ stroke: '#e2e8f0' }}
                 />
                 <YAxis
                   yAxisId="left"
                   stroke="#94a3b8"
-                  fontSize={11}
+                  fontSize={10}
                   allowDecimals={false}
                   tickLine={false}
                   axisLine={{ stroke: '#e2e8f0' }}

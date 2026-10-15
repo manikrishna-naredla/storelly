@@ -619,8 +619,8 @@ export const MasterAdminDashboard: React.FC<MasterAdminDashboardProps> = ({ admi
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-50 h-full w-72 bg-white border-r border-slate-200 flex flex-col justify-between transition-transform duration-200 ease-in-out lg:translate-x-0 ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed top-0 left-0 z-50 h-full w-72 max-w-[85vw] bg-white border-r border-slate-200 flex flex-col justify-between transition-transform duration-200 ease-in-out lg:z-30 lg:translate-x-0 ${
+          isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
         }`}
       >
         <div>
@@ -705,9 +705,9 @@ export const MasterAdminDashboard: React.FC<MasterAdminDashboardProps> = ({ admi
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 lg:pl-72 flex flex-col min-h-screen">
+      <div className="flex-1 lg:pl-72 flex flex-col min-h-screen min-w-0 w-full overflow-x-hidden">
         {/* Top Control Bar */}
-        <header className="h-16 bg-white border-b border-slate-200 px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30 shadow-xs">
+        <header className="h-16 bg-white border-b border-slate-200 px-3 sm:px-8 flex items-center justify-between sticky top-0 z-30 shadow-xs w-full max-w-full">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsSidebarOpen(true)}

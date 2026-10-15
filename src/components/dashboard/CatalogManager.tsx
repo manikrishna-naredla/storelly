@@ -1555,7 +1555,7 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({ business }) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             <button
               type="button"
               onClick={handleShareStoreWhatsApp}
