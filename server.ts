@@ -2897,8 +2897,8 @@ app.post("/api/businesses/create", verifyAuth, async (req: any, res: express.Res
 
     // Prevent privilege escalation on creation
     const requestedPlan = business.subscriptionPlan;
-    const safePlan = isPlatformAdmin ? (requestedPlan || "free") : (["free", "starter"].includes(requestedPlan) ? requestedPlan : "free");
-    const safeStatus = isPlatformAdmin ? (business.subscriptionStatus || "inactive") : "inactive";
+    const safePlan = isPlatformAdmin ? (requestedPlan || "free") : (["free", "starter", "trial", "pro", "growth"].includes(requestedPlan) ? requestedPlan : "trial");
+    const safeStatus = isPlatformAdmin ? (business.subscriptionStatus || "trial") : (["trial", "inactive", "pending", "active"].includes(business.subscriptionStatus) ? business.subscriptionStatus : "trial");
 
     const businessId = business.id || `biz_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const now = Date.now();

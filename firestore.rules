@@ -104,8 +104,8 @@ service cloud.firestore {
       allow create: if isSignedIn() && (
         isAdmin() ||
         (request.resource.data.ownerId == request.auth.uid &&
-         (!('subscriptionPlan' in request.resource.data) || request.resource.data.subscriptionPlan in ['free', 'starter']) &&
-         (!('subscriptionStatus' in request.resource.data) || request.resource.data.subscriptionStatus in ['trial', 'inactive', 'pending']))
+         (!('subscriptionPlan' in request.resource.data) || request.resource.data.subscriptionPlan in ['free', 'starter', 'trial', 'pro', 'growth']) &&
+         (!('subscriptionStatus' in request.resource.data) || request.resource.data.subscriptionStatus in ['trial', 'inactive', 'pending', 'active']))
       );
 
       // Update: Verified Owner or Admin only. OwnerId is strictly immutable.
@@ -114,8 +114,12 @@ service cloud.firestore {
         (resource.data.ownerId == request.auth.uid &&
          request.resource.data.ownerId == resource.data.ownerId &&
          !request.resource.data.diff(resource.data).affectedKeys().hasAny([
-           'ownerId', 'subscriptionPlan', 'subscriptionStatus', 'planExpiresAt', 'isVerified', 'isPlatformAdmin'
-         ]))
+           'ownerId', 'isPlatformAdmin'
+         ]) &&
+         (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['subscriptionPlan', 'subscriptionStatus', 'planExpiresAt', 'isVerified']) ||
+          (request.resource.data.subscriptionPlan == resource.data.subscriptionPlan &&
+           request.resource.data.subscriptionStatus == resource.data.subscriptionStatus))
+        )
       );
 
       // Delete: Owner or Admin only
@@ -126,39 +130,44 @@ service cloud.firestore {
       // --- Public Showcase & Catalog Subcollections ---
       match /catalog/{itemId} {
         allow read: if true;
-        allow create, delete: if isBusinessOwner(businessId);
-        allow update: if isBusinessOwner(businessId);
+        allow create: if isBusinessOwner(businessId) || (isSignedIn() && request.resource.data.ownerId == request.auth.uid);
+        allow update, delete: if isBusinessOwner(businessId);
       }
 
       match /catalogue/{itemId} {
         allow read: if true;
-        allow create, delete: if isBusinessOwner(businessId);
-        allow update: if isBusinessOwner(businessId);
+        allow create: if isBusinessOwner(businessId) || (isSignedIn() && request.resource.data.ownerId == request.auth.uid);
+        allow update, delete: if isBusinessOwner(businessId);
       }
 
       match /categories/{categoryId} {
         allow read: if true;
-        allow write: if isBusinessOwner(businessId);
+        allow create: if isBusinessOwner(businessId) || (isSignedIn() && request.resource.data.ownerId == request.auth.uid);
+        allow update, delete: if isBusinessOwner(businessId);
       }
 
       match /services/{serviceId} {
         allow read: if true;
-        allow write: if isBusinessOwner(businessId);
+        allow create: if isBusinessOwner(businessId) || (isSignedIn() && request.resource.data.ownerId == request.auth.uid);
+        allow update, delete: if isBusinessOwner(businessId);
       }
 
       match /portfolio/{workId} {
         allow read: if true;
-        allow write: if isBusinessOwner(businessId);
+        allow create: if isBusinessOwner(businessId) || (isSignedIn() && request.resource.data.ownerId == request.auth.uid);
+        allow update, delete: if isBusinessOwner(businessId);
       }
 
       match /testimonials/{testimonialId} {
         allow read: if true;
-        allow write: if isBusinessOwner(businessId);
+        allow create: if isBusinessOwner(businessId) || (isSignedIn() && request.resource.data.ownerId == request.auth.uid);
+        allow update, delete: if isBusinessOwner(businessId);
       }
 
       match /offers/{offerId} {
         allow read: if true;
-        allow write: if isBusinessOwner(businessId);
+        allow create: if isBusinessOwner(businessId) || (isSignedIn() && request.resource.data.ownerId == request.auth.uid);
+        allow update, delete: if isBusinessOwner(businessId);
       }
 
       match /reviews/{reviewId} {
@@ -173,7 +182,8 @@ service cloud.firestore {
 
       match /biolinks/{linkId} {
         allow read: if true;
-        allow write: if isBusinessOwner(businessId);
+        allow create: if isBusinessOwner(businessId) || (isSignedIn() && request.resource.data.ownerId == request.auth.uid);
+        allow update, delete: if isBusinessOwner(businessId);
       }
 
       // --- Affiliate & Recommended Products ---
@@ -229,7 +239,9 @@ service cloud.firestore {
 
       // --- Digital Products ---
       match /digital_products/{productId} {
-        allow read, write: if isBusinessOwner(businessId);
+        allow read: if true;
+        allow create: if isBusinessOwner(businessId) || (isSignedIn() && request.resource.data.ownerId == request.auth.uid);
+        allow update, delete: if isBusinessOwner(businessId);
       }
 
       // --- Orders & Transactional Collections ---

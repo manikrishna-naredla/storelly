@@ -661,64 +661,16 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
                 </div>
               </div>
 
-              {/* Right: Live Interactive Creator Studio Mockup */}
+              {/* Right: Image for Creator */}
               <div className="lg:w-1/2 flex justify-center items-center relative w-full mx-auto">
-                <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 shadow-2xl space-y-4">
-                  {/* Creator Header */}
-                  <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white font-black text-xl flex items-center justify-center shadow-md shrink-0">
-                      AR
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <h4 className="font-heading font-black text-slate-900 dark:text-white text-base truncate">Ananya Rao</h4>
-                        <span className="w-4 h-4 rounded-full bg-blue-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
-                      </div>
-                      <p className="text-xs text-slate-500 truncate">Lifestyle &amp; Fashion • 48K Audience</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 truncate">
-                          storelly.com/ananya
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 1:1 Video Consultation Service Card */}
-                  <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 flex items-center justify-center shrink-0">
-                        <Calendar className="w-5 h-5" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="font-bold text-xs text-slate-900 dark:text-white truncate">1:1 Video Consultation</div>
-                        <div className="text-[10px] text-slate-500 truncate">Google Meet • Instant Confirm</div>
-                      </div>
-                    </div>
-                    <span className="text-xs font-black text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/60 px-2.5 py-1 rounded-lg shrink-0">₹499</span>
-                  </div>
-
-                  {/* Digital Product E-Book */}
-                  <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0">
-                        <FileText className="w-5 h-5" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="font-bold text-xs text-slate-900 dark:text-white truncate">Creator Playbook &amp; Presets</div>
-                        <div className="text-[10px] text-slate-500 truncate">PDF E-Book • WhatsApp Delivery</div>
-                      </div>
-                    </div>
-                    <span className="text-xs font-black text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/60 px-2.5 py-1 rounded-lg shrink-0">₹299</span>
-                  </div>
-
-                  {/* Direct Bank Settlement Badge */}
-                  <div className="pt-2 flex items-center justify-between text-[11px] text-slate-500 font-medium">
-                    <span className="flex items-center gap-1.5 text-emerald-600 font-bold">
-                      <ShieldCheck className="w-4 h-4 shrink-0" /> 0% Commission
-                    </span>
-                    <span className="text-slate-400">Direct Bank Settlement</span>
-                  </div>
-                </div>
+                 <div className="w-full relative rounded-[var(--r20)] overflow-hidden border border-[var(--border)] bg-[var(--card)] p-2 sm:p-3 shadow-[var(--shadow-lg)]">
+                    <img 
+                      src="/cteatorlink.jpeg" 
+                      alt="Storelly Universal Bio Link & Digital Store" 
+                      className="w-full h-auto object-contain rounded-[var(--r16)] transition-transform duration-500 hover:scale-[1.01]" 
+                      style={{ imageRendering: "high-quality" }} 
+                    />
+                 </div>
               </div>
 
             </div>

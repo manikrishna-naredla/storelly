@@ -29,6 +29,8 @@
         "enableOnlinePayment": { "type": "boolean" },
         "upiId": { "type": "string" },
         "modules": { "type": "object" },
+        "subscriptionPlan": { "type": "string", "enum": ["free", "starter", "trial", "pro", "growth"] },
+        "subscriptionStatus": { "type": "string", "enum": ["trial", "active", "inactive", "pending", "cancelled"] },
         "createdAt": { "type": "number" },
         "updatedAt": { "type": "number" }
       },
