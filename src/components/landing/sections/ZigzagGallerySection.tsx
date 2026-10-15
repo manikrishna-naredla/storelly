@@ -146,7 +146,10 @@ export const ZigzagGallerySection: React.FC<Props> = ({ onOpenAuth }) => {
                             <div className="w-8 h-8 rounded-full bg-emerald-600/20 text-emerald-400 flex items-center justify-center font-bold">#108</div>
                             <div>
                               <div className="font-bold text-white">Organic Honey & Tea Set</div>
-                              <div className="text-[11px] text-slate-400">Paid via WhatsApp UPI</div>
+                              <div className="text-[11px] text-slate-400 flex items-center gap-1">
+                                <span>Paid via WhatsApp UPI</span>
+                                <img src="/images-1.png" alt="UPI" className="w-3.5 h-3.5 object-contain inline" />
+                              </div>
                             </div>
                           </div>
                           <span className="font-bold text-emerald-400">₹1,299</span>

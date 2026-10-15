@@ -16,6 +16,15 @@ import { getAuth } from "firebase-admin/auth";
 import { getFirestore as getAdminFirestore } from "firebase-admin/firestore";
 import appletConfig from "./firebase-applet-config.json";
 
+// Prevent unhandled promise rejections and uncaught exceptions from terminating the server process
+process.on("uncaughtException", (err) => {
+  console.error("CRITICAL: Uncaught Exception in server process:", err);
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("CRITICAL: Unhandled Rejection at:", promise, "reason:", reason);
+});
+
 // Initialize Firebase Client for canonical server-side data verification
 const firebaseApp = !getApps().length
   ? initializeApp({
@@ -434,7 +443,8 @@ function verifyDownloadToken(token: string): {
 export const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // --- API ROUTES ---
 
@@ -2913,8 +2923,7 @@ app.post("/api/businesses/create", verifyAuth, async (req: any, res: express.Res
       updatedAt: now,
     };
 
-    const bizDocRef = doc(serverDb, "businesses", businessId);
-    await setDoc(bizDocRef, finalBusiness);
+    await adminDb.collection("businesses").doc(businessId).set(finalBusiness);
 
     res.json({ success: true, business: finalBusiness });
   } catch (err: any) {
@@ -2958,45 +2967,219 @@ app.get("/api/businesses/owner/:ownerId", verifyAuth, async (req: any, res: expr
   }
 });
 
+// =========================================================================
+// Dynamic Open Graph / WhatsApp Preview Meta Tags Helper
+// =========================================================================
+function escapeHtmlMeta(str: string): string {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+async function getStoreMetaForPath(reqPath: string, host: string, protocol: string): Promise<{
+  title: string;
+  description: string;
+  image: string;
+  url: string;
+  name: string;
+} | null> {
+  const cleanPath = reqPath.split("?")[0].replace(/^\/+|\/+$/g, "");
+  if (!cleanPath || cleanPath.startsWith("api") || cleanPath.includes(".")) {
+    return null;
+  }
+
+  let slug = "";
+  if (cleanPath.startsWith("@")) {
+    slug = decodeURIComponent(cleanPath.slice(1));
+  } else {
+    const parts = cleanPath.split("/");
+    const prefix = parts[0];
+    if (["store", "p", "portfolio", "creator", "card", "quote", "reviews", "events", "consult"].includes(prefix) && parts[1]) {
+      slug = decodeURIComponent(parts[1]);
+    } else if (parts.length === 1 && !["login", "signup", "admin", "dashboard", "settings", "onboarding"].includes(prefix)) {
+      slug = decodeURIComponent(parts[0]);
+    }
+  }
+
+  if (!slug) return null;
+
+  try {
+    let bizData: any = null;
+    try {
+      const snap = await getDoc(doc(serverDb, "businesses", slug));
+      if (snap.exists()) {
+        bizData = snap.data();
+      } else {
+        const qSnap = await getDocs(query(collection(serverDb, "businesses"), where("slug", "==", slug), limit(1)));
+        if (!qSnap.empty) {
+          bizData = qSnap.docs[0].data();
+        } else {
+          const uSnap = await getDocs(query(collection(serverDb, "businesses"), where("username", "==", slug), limit(1)));
+          if (!uSnap.empty) {
+            bizData = uSnap.docs[0].data();
+          }
+        }
+      }
+    } catch (e1) {
+      try {
+        const docSnap = await adminDb.collection("businesses").doc(slug).get();
+        if (docSnap.exists) {
+          bizData = docSnap.data();
+        } else {
+          const qSnap = await adminDb.collection("businesses").where("slug", "==", slug).limit(1).get();
+          if (!qSnap.empty) {
+            bizData = qSnap.docs[0].data();
+          }
+        }
+      } catch (e2) {}
+    }
+
+    if (!bizData || bizData.status === "deleted") return null;
+
+    const name = bizData.name || "Store";
+    const isCreator = bizData.profileType === "creator" || bizData.storeType === "creator";
+    const tagline = bizData.tagline || (isCreator ? "Creator Studio & Portfolio" : "Live & Verified Digital Storefront");
+    const description = bizData.description || (isCreator ? `${tagline} • Connect, explore digital works, and book consultations.` : `${tagline} • Browse catalog, check offers, and order directly on WhatsApp.`);
+    const title = `${name} • ${isCreator ? "Creator Studio" : "Live Online Store"} | Storelly`;
+
+    let rawImage = bizData.logo || bizData.profileImage || bizData.banner || bizData.coverImage || "/main logo.jpg";
+    let fullImage = rawImage;
+    if (rawImage.startsWith("/")) {
+      fullImage = `${protocol}://${host}${rawImage}`;
+    }
+
+    const fullUrl = `${protocol}://${host}/${cleanPath}`;
+
+    return {
+      title,
+      description,
+      image: fullImage,
+      url: fullUrl,
+      name,
+    };
+  } catch (err) {
+    console.warn("[Meta Injection] Error resolving store metadata:", err);
+    return null;
+  }
+}
+
+function injectOpenGraphMeta(html: string, meta: { title: string; description: string; image: string; url: string; name: string } | null): string {
+  if (!meta) return html;
+
+  let result = html;
+  const title = meta.title;
+  const description = meta.description;
+  const image = meta.image;
+  const url = meta.url;
+
+  result = result.replace(/<title>.*?<\/title>/i, `<title>${escapeHtmlMeta(title)}</title>`);
+  result = result.replace(/<meta\s+name=["']description["']\s+content=["'][^"']*["']\s*\/?>/i, `<meta name="description" content="${escapeHtmlMeta(description)}" />`);
+  result = result.replace(/<meta\s+property=["']og:title["']\s+content=["'][^"']*["']\s*\/?>/i, `<meta property="og:title" content="${escapeHtmlMeta(title)}" />`);
+  result = result.replace(/<meta\s+property=["']og:description["']\s+content=["'][^"']*["']\s*\/?>/i, `<meta property="og:description" content="${escapeHtmlMeta(description)}" />`);
+  result = result.replace(/<meta\s+property=["']og:image["']\s+content=["'][^"']*["']\s*\/?>/i, `<meta property="og:image" content="${escapeHtmlMeta(image)}" />\n    <meta property="og:image:secure_url" content="${escapeHtmlMeta(image)}" />\n    <meta property="og:image:width" content="1200" />\n    <meta property="og:image:height" content="630" />\n    <meta property="og:image:alt" content="${escapeHtmlMeta(title)}" />`);
+  result = result.replace(/<meta\s+property=["']og:url["']\s+content=["'][^"']*["']\s*\/?>/i, `<meta property="og:url" content="${escapeHtmlMeta(url)}" />`);
+  result = result.replace(/<meta\s+name=["']twitter:title["']\s+content=["'][^"']*["']\s*\/?>/i, `<meta name="twitter:title" content="${escapeHtmlMeta(title)}" />`);
+  result = result.replace(/<meta\s+name=["']twitter:description["']\s+content=["'][^"']*["']\s*\/?>/i, `<meta name="twitter:description" content="${escapeHtmlMeta(description)}" />`);
+  result = result.replace(/<meta\s+name=["']twitter:image["']\s+content=["'][^"']*["']\s*\/?>/i, `<meta name="twitter:image" content="${escapeHtmlMeta(image)}" />`);
+
+  return result;
+}
+
 const startServer = async () => {
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: { middlewareMode: true, hmr: false },
       appType: "spa",
     });
-    app.use(vite.middlewares);
 
-    // Single-Page Application (SPA) HTML fallback for development routes (e.g. /store/:slug, /@:slug, /portfolio/:slug)
+    // Single-Page Application (SPA) HTML handler for development routes (e.g. /store/:slug, /@:slug, /portfolio/:slug)
     app.use(async (req, res, next) => {
-      if (req.method === "GET" && !req.path.startsWith("/api")) {
+      const isViteInternal =
+        req.path.startsWith("/@vite") ||
+        req.path.startsWith("/@fs") ||
+        req.path.startsWith("/@id") ||
+        req.path.startsWith("/node_modules") ||
+        req.path.startsWith("/src") ||
+        req.path.startsWith("/api");
+
+      if (req.method === "GET" && !isViteInternal && !req.path.includes(".")) {
         try {
           const indexHtmlPath = path.resolve(process.cwd(), "index.html");
           if (fs.existsSync(indexHtmlPath)) {
             let template = fs.readFileSync(indexHtmlPath, "utf-8");
-            template = await vite.transformIndexHtml(req.originalUrl, template);
+            try {
+              const host = req.get("host") || "localhost:3000";
+              const protocol = req.headers["x-forwarded-proto"] ? String(req.headers["x-forwarded-proto"]) : req.protocol;
+              const meta = await getStoreMetaForPath(req.path, host, protocol);
+              if (meta) {
+                template = injectOpenGraphMeta(template, meta);
+              }
+            } catch (metaErr) {
+              console.warn('[Meta Resolution Warning]:', metaErr);
+            }
+            try {
+              template = await vite.transformIndexHtml(req.originalUrl, template);
+            } catch (viteErr) {
+              console.warn('[Vite Transform Warning]:', viteErr);
+            }
             return res.status(200).set({ "Content-Type": "text/html; charset=utf-8" }).end(template);
           }
         } catch (e) {
-          return next(e);
+          console.error('[SPA Route Fallback Error]:', e);
+          return next();
         }
       }
       next();
     });
+
+    app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
-    app.use((req, res, next) => {
+    app.use(async (req, res, next) => {
       if (req.method === "GET" && !req.path.startsWith("/api")) {
-        return res.sendFile(path.join(distPath, "index.html"));
+        try {
+          const indexHtmlPath = path.join(distPath, "index.html");
+          if (fs.existsSync(indexHtmlPath)) {
+            let template = fs.readFileSync(indexHtmlPath, "utf-8");
+            try {
+              const host = req.get("host") || "storelly.app";
+              const protocol = req.headers["x-forwarded-proto"] ? String(req.headers["x-forwarded-proto"]) : req.protocol;
+              const meta = await getStoreMetaForPath(req.path, host, protocol);
+              if (meta) {
+                template = injectOpenGraphMeta(template, meta);
+              }
+            } catch (e) {}
+            return res.status(200).set({ "Content-Type": "text/html; charset=utf-8" }).end(template);
+          }
+        } catch (e) {
+          return res.sendFile(path.join(distPath, "index.html"));
+        }
       }
       next();
     });
   }
 
-  app.listen(Number(PORT), "0.0.0.0", () => {
+  // Global Express Error Handler
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error('[Express Global Internal Error]:', err);
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Internal Server Error', message: err?.message || 'Unexpected server error' });
+    }
+  });
+
+  const server = app.listen(Number(PORT), "0.0.0.0", () => {
     console.log(`Server running on http://0.0.0.0:${PORT}`);
   });
+  
+  // Set generous keep-alive timeouts to prevent connection drops behind Cloud Run reverse proxies
+  server.keepAliveTimeout = 65000;
+  server.headersTimeout = 66000;
 };
 
 if (!process.env.VERCEL && process.env.NODE_ENV !== "test") {

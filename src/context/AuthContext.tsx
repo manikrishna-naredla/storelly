@@ -112,7 +112,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
+    // Safety fallback: prevent white screen if Firebase Auth hangs or is blocked in iframe sandbox
+    const safetyTimer = setTimeout(() => {
+      setAuthLoading((prev) => {
+        if (prev) {
+          console.warn('[AuthContext] Auth initialization timer expired; allowing guest view to render');
+          return false;
+        }
+        return prev;
+      });
+    }, 3500);
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      clearTimeout(safetyTimer);
       setCurrentUser(user);
       setAuthLoading(false);
 
@@ -128,7 +140,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      clearTimeout(safetyTimer);
+      unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, pass: string) => {

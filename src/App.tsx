@@ -1219,28 +1219,19 @@ function MainContent() {
   if (!selectedBusiness && businesses.length > 0) {
     selectBusiness(businesses[0]);
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-6">
-        <div className="w-48 h-48 sm:w-64 sm:h-64 flex items-center justify-center">
-          <img
-            src={getAppLogo()}
-            alt="Storelly"
-            className="w-full h-full object-contain"
-          />
-        </div>
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 space-y-4">
+        <StorellyLogo size="xl" badge="HUB" />
+        <div className="w-8 h-8 rounded-full border-3 border-emerald-200 border-t-emerald-600 animate-spin" />
       </div>
     );
   }
 
   if (!selectedBusiness) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-6">
-        <div className="w-48 h-48 sm:w-64 sm:h-64 flex items-center justify-center">
-          <img
-            src={getAppLogo()}
-            alt="Storelly"
-            className="w-full h-full object-contain"
-          />
-        </div>
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 space-y-4">
+        <StorellyLogo size="xl" badge="HUB" />
+        <div className="w-8 h-8 rounded-full border-3 border-emerald-200 border-t-emerald-600 animate-spin" />
+        <p className="text-xs text-slate-500 font-medium">Preparing workspace...</p>
       </div>
     );
   }

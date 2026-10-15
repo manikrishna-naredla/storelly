@@ -99,8 +99,8 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
     },
     { 
       icon: (
-        <div className="flex items-center justify-center p-1 bg-white/20 rounded-xl">
-          <UpiLogo size={32} />
+        <div className="flex items-center justify-center p-1.5 bg-white rounded-xl shadow-xs">
+          <img src="/images-1.png" alt="Direct UPI Payments" className="w-8 h-8 object-contain" />
         </div>
       ), 
       iconGradient: 'from-violet-600 to-indigo-700', 
@@ -212,7 +212,7 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
     { 
       title: 'Direct UPI Bank Settlements', 
       desc: 'NPCI-compliant direct transfers. 100% of customer payments deposit straight into your bank account.',
-      icon: <UpiLogo size={24} />
+      icon: <img src="/images-1.png" alt="Direct UPI Bank Settlements" className="w-8 h-8 object-contain" />
     },
     { 
       title: 'Zero Sales Commission', 
@@ -412,26 +412,11 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
                 <ShieldCheck className="w-4 h-4 text-[var(--g500)]" /> No app download required for customers. 100% money in your bank.
               </p>
 
-              {/* Store & Creator Quick Cards */}
-              <div className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-4">
-                <div className="flex items-center gap-3 px-4 py-3 rounded-[var(--r12)] bg-[var(--card)] border border-[var(--border)] shadow-[var(--shadow-xs)]">
-                  <div className="w-10 h-10 rounded-[var(--r8)] bg-[var(--g100)] text-[var(--g700)] flex items-center justify-center font-bold shrink-0">
-                    <Store className="w-5 h-5" />
-                  </div>
-                  <div className="text-left">
-                    <div className="text-xs font-heading font-black text-[var(--t1)]">Local Stores &amp; Retail</div>
-                    <div className="text-[11px] text-[var(--t2)] font-medium">Food, sweets, apparel &amp; services</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 px-4 py-3 rounded-[var(--r12)] bg-[var(--card)] border border-[var(--border)] shadow-[var(--shadow-xs)]">
-                  <div className="w-10 h-10 rounded-[var(--r8)] bg-[var(--p100)] text-[var(--p500)] flex items-center justify-center font-bold shrink-0">
-                    <Sparkles className="w-5 h-5" />
-                  </div>
-                  <div className="text-left">
-                    <div className="text-xs font-heading font-black text-[var(--t1)]">Creators &amp; Educators</div>
-                    <div className="text-[11px] text-[var(--t2)] font-medium">Bio links, digital files &amp; consultations</div>
-                  </div>
+              {/* Direct UPI Payments Badge */}
+              <div className="pt-3 flex flex-wrap items-center justify-center lg:justify-start gap-3">
+                <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-[var(--r12)] bg-[var(--card)] border border-[var(--border)] shadow-[var(--shadow-xs)] text-xs font-bold text-[var(--t1)]">
+                  <img src="/images-1.png" alt="Direct UPI Payments" className="w-5 h-5 object-contain shrink-0" />
+                  <span>Direct UPI Payments Accepted (Google Pay, PhonePe, Paytm, BHIM)</span>
                 </div>
               </div>
             </motion.div>
@@ -532,11 +517,14 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
                   </div>
 
                   <div className="bg-[var(--card)] rounded-[var(--r12)] p-5 shadow-[var(--shadow-sm)] border border-[var(--border)] flex items-start gap-4 hover:shadow-[var(--shadow)] transition">
-                    <div className="w-12 h-12 rounded-[var(--r8)] bg-[var(--p100)] text-[var(--p500)] flex items-center justify-center shrink-0">
-                      <UpiLogo size={24} />
+                    <div className="w-12 h-12 rounded-[var(--r8)] bg-white border border-[var(--border)] flex items-center justify-center shrink-0 p-1.5 shadow-xs">
+                      <img src="/images-1.png" alt="Direct UPI Bank Settlement" className="w-full h-full object-contain" />
                     </div>
                     <div>
-                      <h3 className="font-heading font-bold text-lg text-[var(--t1)]">Direct UPI Bank Settlement</h3>
+                      <h3 className="font-heading font-bold text-lg text-[var(--t1)] flex items-center gap-2">
+                        <span>Direct UPI Bank Settlement</span>
+                        <img src="/images-1.png" alt="UPI" className="h-4 w-4 object-contain inline" />
+                      </h3>
                       <p className="text-[var(--t2)] text-sm mt-1">Accept Google Pay, PhonePe, and Paytm. Keep 100% of every sale with 0% platform cuts.</p>
                     </div>
                   </div>
@@ -635,7 +623,10 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
                       <GoogleMeetIcon size={24} />
                     </div>
                     <div>
-                      <h3 className="font-heading font-bold text-lg text-[var(--t1)]">Book Paid 1:1 Video Consultations</h3>
+                      <h3 className="font-heading font-bold text-lg text-[var(--t1)] flex items-center gap-2">
+                        <span>Book Paid 1:1 Video Consultations</span>
+                        <img src="/images-1.png" alt="UPI" className="h-4 w-4 object-contain inline" />
+                      </h3>
                       <p className="text-[var(--t2)] text-sm mt-1">Clients pick an open time slot and pay upfront via UPI before automated Google Meet links are generated.</p>
                     </div>
                   </div>
@@ -739,7 +730,12 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
                     <step.icon className="w-6 h-6 text-white" />
                   </div>
                 </div>
-                <h3 className="font-heading font-bold text-[var(--t1)] text-xl mb-3">{step.title}</h3>
+                <h3 className="font-heading font-bold text-[var(--t1)] text-xl mb-3 flex items-center justify-center gap-2 flex-wrap">
+                  <span>{step.title}</span>
+                  {step.title.includes('UPI') && (
+                    <img src="/images-1.png" alt="UPI" className="w-5 h-5 object-contain inline shrink-0" />
+                  )}
+                </h3>
                 <p className="text-[var(--t2)] font-medium leading-relaxed">{step.desc}</p>
               </div>
             ))}
@@ -803,7 +799,7 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
                   <Check className="w-4 h-4 text-[var(--g400)]" /> 1-Click Scan to Shop
                 </div>
                 <div className="bg-white/10 px-3.5 py-2 rounded-lg border border-white/10 text-white text-xs font-bold flex items-center gap-2">
-                  <Check className="w-4 h-4 text-[var(--g400)]" /> Direct UPI Payment
+                  <img src="/images-1.png" alt="UPI" className="w-4 h-4 object-contain" /> Direct UPI Payment
                 </div>
               </div>
 
@@ -829,8 +825,14 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
                     <QrCode className="w-36 h-36 text-slate-900" />
                   </div>
                   
-                  <div className="w-full bg-[var(--g600)] text-white font-bold text-xs py-2 rounded-[var(--r8)] text-center mb-3">
+                  <div className="w-full bg-[var(--g600)] text-white font-bold text-xs py-2 rounded-[var(--r8)] text-center mb-2">
                     storelly.com/mayafashion
+                  </div>
+
+                  {/* UPI Supported row on Standee */}
+                  <div className="flex items-center justify-center gap-2 py-1 px-3 bg-slate-50 rounded-lg border border-slate-200 text-[10px] font-bold text-slate-600">
+                    <img src="/images-1.png" alt="UPI" className="w-4 h-4 object-contain shrink-0" />
+                    <span>Instant UPI Payments (0% Fee)</span>
                   </div>
 
 
@@ -1004,10 +1006,17 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
                     {plan.features?.map((feat, i) => (
                       <div key={i} className="flex items-center gap-3">
                         <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 bg-[var(--g100)]">
-                          <Check className="w-4 h-4 text-[var(--g600)] font-bold" />
+                          {feat.toLowerCase().includes('upi') ? (
+                            <img src="/images-1.png" alt="UPI" className="w-4 h-4 object-contain" />
+                          ) : (
+                            <Check className="w-4 h-4 text-[var(--g600)] font-bold" />
+                          )}
                         </div>
-                        <span className={`text-sm sm:text-base ${isRecommended ? 'font-bold text-[var(--t1)]' : 'font-medium text-[var(--t2)]'}`}>
-                          {feat}
+                        <span className={`text-sm sm:text-base ${isRecommended ? 'font-bold text-[var(--t1)]' : 'font-medium text-[var(--t2)]'} flex items-center gap-1.5`}>
+                          <span>{feat}</span>
+                          {feat.toLowerCase().includes('upi') && (
+                            <img src="/images-1.png" alt="UPI" className="w-4 h-4 object-contain inline shrink-0" />
+                          )}
                         </span>
                       </div>
                     ))}
@@ -1062,10 +1071,15 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
                     <motion.div 
                       initial={{ height: 0, opacity: 0 }} 
                       animate={{ height: 'auto', opacity: 1 }} 
-                      exit={{ height: 0, opacity: 0 }}
                       className="px-6 pb-5 text-[var(--t2)] font-medium leading-relaxed"
                     >
-                      {item.a}
+                      <div>{item.a}</div>
+                      {(item.q.includes('UPI') || item.a.includes('UPI')) && (
+                        <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-xs font-bold text-[var(--t1)]">
+                          <img src="/images-1.png" alt="UPI" className="w-5 h-5 object-contain shrink-0" />
+                          <span>Direct UPI Settlements • Zero Fees • Instant Transfer</span>
+                        </div>
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>

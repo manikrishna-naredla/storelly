@@ -2,20 +2,12 @@ import React from 'react';
 
 // Official UPI (Unified Payments Interface) Logo Badge
 export const UpiLogo: React.FC<{ className?: string; size?: number }> = ({ className = '', size = 24 }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 100 100"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`inline-block shrink-0 ${className}`}
-  >
-    {/* UPI Tricolor Angles */}
-    <path d="M52 14L22 86H40L58 42L70 86H88L52 14Z" fill="#097939" />
-    <path d="M58 42L52 14L70 42H58Z" fill="#F47920" />
-    <path d="M40 86L58 42H46L34 72L40 86Z" fill="#097939" />
-    <path d="M12 86H26L36 62L26 40L12 86Z" fill="#F47920" />
-  </svg>
+  <img
+    src="/images-1.png"
+    alt="UPI"
+    className={`inline-block shrink-0 object-contain rounded-xs ${className}`}
+    style={{ width: size, height: size }}
+  />
 );
 
 // Official Google Pay Badge

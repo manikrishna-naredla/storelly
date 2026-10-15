@@ -130,43 +130,43 @@ service cloud.firestore {
       // --- Public Showcase & Catalog Subcollections ---
       match /catalog/{itemId} {
         allow read: if true;
-        allow create: if isBusinessOwner(businessId) || (isSignedIn() && request.resource.data.ownerId == request.auth.uid);
+        allow create: if isBusinessOwner(businessId) || (isSignedIn() && 'ownerId' in request.resource.data && request.resource.data.ownerId == request.auth.uid);
         allow update, delete: if isBusinessOwner(businessId);
       }
 
       match /catalogue/{itemId} {
         allow read: if true;
-        allow create: if isBusinessOwner(businessId) || (isSignedIn() && request.resource.data.ownerId == request.auth.uid);
+        allow create: if isBusinessOwner(businessId) || (isSignedIn() && 'ownerId' in request.resource.data && request.resource.data.ownerId == request.auth.uid);
         allow update, delete: if isBusinessOwner(businessId);
       }
 
       match /categories/{categoryId} {
         allow read: if true;
-        allow create: if isBusinessOwner(businessId) || (isSignedIn() && request.resource.data.ownerId == request.auth.uid);
+        allow create: if isBusinessOwner(businessId) || (isSignedIn() && 'ownerId' in request.resource.data && request.resource.data.ownerId == request.auth.uid);
         allow update, delete: if isBusinessOwner(businessId);
       }
 
       match /services/{serviceId} {
         allow read: if true;
-        allow create: if isBusinessOwner(businessId) || (isSignedIn() && request.resource.data.ownerId == request.auth.uid);
+        allow create: if isBusinessOwner(businessId) || (isSignedIn() && 'ownerId' in request.resource.data && request.resource.data.ownerId == request.auth.uid);
         allow update, delete: if isBusinessOwner(businessId);
       }
 
       match /portfolio/{workId} {
         allow read: if true;
-        allow create: if isBusinessOwner(businessId) || (isSignedIn() && request.resource.data.ownerId == request.auth.uid);
+        allow create: if isBusinessOwner(businessId) || (isSignedIn() && 'ownerId' in request.resource.data && request.resource.data.ownerId == request.auth.uid);
         allow update, delete: if isBusinessOwner(businessId);
       }
 
       match /testimonials/{testimonialId} {
         allow read: if true;
-        allow create: if isBusinessOwner(businessId) || (isSignedIn() && request.resource.data.ownerId == request.auth.uid);
+        allow create: if isBusinessOwner(businessId) || (isSignedIn() && 'ownerId' in request.resource.data && request.resource.data.ownerId == request.auth.uid);
         allow update, delete: if isBusinessOwner(businessId);
       }
 
       match /offers/{offerId} {
         allow read: if true;
-        allow create: if isBusinessOwner(businessId) || (isSignedIn() && request.resource.data.ownerId == request.auth.uid);
+        allow create: if isBusinessOwner(businessId) || (isSignedIn() && 'ownerId' in request.resource.data && request.resource.data.ownerId == request.auth.uid);
         allow update, delete: if isBusinessOwner(businessId);
       }
 
@@ -182,7 +182,7 @@ service cloud.firestore {
 
       match /biolinks/{linkId} {
         allow read: if true;
-        allow create: if isBusinessOwner(businessId) || (isSignedIn() && request.resource.data.ownerId == request.auth.uid);
+        allow create: if isBusinessOwner(businessId) || (isSignedIn() && 'ownerId' in request.resource.data && request.resource.data.ownerId == request.auth.uid);
         allow update, delete: if isBusinessOwner(businessId);
       }
 
@@ -240,7 +240,7 @@ service cloud.firestore {
       // --- Digital Products ---
       match /digital_products/{productId} {
         allow read: if true;
-        allow create: if isBusinessOwner(businessId) || (isSignedIn() && request.resource.data.ownerId == request.auth.uid);
+        allow create: if isBusinessOwner(businessId) || (isSignedIn() && 'ownerId' in request.resource.data && request.resource.data.ownerId == request.auth.uid);
         allow update, delete: if isBusinessOwner(businessId);
       }
 

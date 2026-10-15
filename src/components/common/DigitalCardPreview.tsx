@@ -288,22 +288,22 @@ export const DigitalCardPreview: React.FC<DigitalCardPreviewProps> = ({ business
       {/* =========================================================================
           TOP BANNER: PUBLIC STOREFRONT URL SHARING BAR
          ========================================================================= */}
-      <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-4">
+      <div className="bg-[var(--card)] rounded-3xl p-5 sm:p-6 border border-[var(--border)] shadow-[var(--shadow-xs)] space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-lg ${
-              isCreator ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'
+              isCreator ? 'bg-purple-100 text-purple-700' : 'bg-[var(--g100)] text-[var(--g700)]'
             }`}>
               <Globe className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+              <h3 className="text-sm sm:text-base font-bold text-[var(--t1)] flex items-center gap-2 font-heading">
                 <span>Public Shareable Storefront URL</span>
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" /> Live Online
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--g100)] text-[var(--g800)] border border-[var(--g200)]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--g600)] animate-pulse" /> Live Online
                 </span>
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-[var(--t2)]">
                 Share this link with customers across WhatsApp, Instagram Bio, SMS, or QR Flyers.
               </p>
             </div>
@@ -313,10 +313,10 @@ export const DigitalCardPreview: React.FC<DigitalCardPreviewProps> = ({ business
             <button
               type="button"
               onClick={handleCopyLink}
-              className={`px-4 py-2 text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-sm cursor-pointer ${
+              className={`px-4 py-2 text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-[var(--shadow-xs)] cursor-pointer text-white ${
                 copied
-                  ? 'bg-emerald-600 text-white shadow-emerald-600/30'
-                  : 'bg-slate-900 hover:bg-slate-800 text-white'
+                  ? 'bg-[var(--g600)] shadow-emerald-600/30'
+                  : isCreator ? 'bg-[var(--p500)] hover:bg-purple-700' : 'bg-[var(--g600)] hover:bg-[var(--g700)]'
               }`}
             >
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
@@ -326,7 +326,7 @@ export const DigitalCardPreview: React.FC<DigitalCardPreviewProps> = ({ business
             <button
               type="button"
               onClick={() => window.open(storeUrl, '_blank')}
-              className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition cursor-pointer"
+              className="p-2 bg-[var(--card)] hover:bg-[var(--bg)] text-[var(--t1)] border border-[var(--border)] rounded-xl transition cursor-pointer"
               title="Open storefront in new tab"
             >
               <ExternalLink className="w-4 h-4" />
@@ -335,21 +335,21 @@ export const DigitalCardPreview: React.FC<DigitalCardPreviewProps> = ({ business
         </div>
 
         {/* Full URL Interactive Display Bar */}
-        <div className="flex items-center bg-slate-50 border border-slate-200/90 rounded-2xl p-2 sm:p-2.5 gap-2">
-          <Globe className="w-4 h-4 text-slate-400 shrink-0 ml-1" />
+        <div className="flex items-center bg-[var(--bg)] border border-[var(--border)] rounded-2xl p-2 sm:p-2.5 gap-2">
+          <Globe className="w-4 h-4 text-[var(--t3)] shrink-0 ml-1" />
           <input
             type="text"
             readOnly
             value={storeUrl}
             onClick={(e) => (e.target as HTMLInputElement).select()}
-            className="w-full bg-transparent font-mono text-xs sm:text-sm text-slate-800 font-semibold focus:outline-none select-all"
+            className="w-full bg-transparent font-mono text-xs sm:text-sm text-[var(--t1)] font-semibold focus:outline-none select-all"
           />
           <button
             type="button"
             onClick={handleCopyLink}
-            className="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-1 shrink-0 cursor-pointer shadow-2xs"
+            className="px-3 py-1.5 bg-[var(--card)] hover:bg-[var(--bg)] text-[var(--t1)] border border-[var(--border)] rounded-xl text-xs font-bold transition flex items-center gap-1 shrink-0 cursor-pointer shadow-[var(--shadow-xs)]"
           >
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+            {copied ? <Check className="w-3.5 h-3.5 text-[var(--g600)]" /> : <Copy className="w-3.5 h-3.5 text-[var(--t2)]" />}
             <span>{copied ? 'Copied' : 'Copy'}</span>
           </button>
         </div>
@@ -394,23 +394,10 @@ export const DigitalCardPreview: React.FC<DigitalCardPreviewProps> = ({ business
           ) : (
             <div
               ref={cardRef}
-              className={`relative max-w-md mx-auto bg-white/95 backdrop-blur-md rounded-3xl shadow-xl shadow-slate-900/10 border overflow-hidden ${
+              className={`relative max-w-md mx-auto bg-[var(--card)] rounded-3xl shadow-[var(--shadow-sm)] border overflow-hidden ${
                 isCreator ? 'border-indigo-500/30' : 'border-emerald-500/30'
               }`}
             >
-            {/* Dynamic Background Image Layer */}
-            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-              <img 
-                src={isCreator ? "/cteatorlink.jpeg" : "/storelly6.jpg.jpeg"} 
-                alt={isCreator ? "Creator Background" : "Storelly Background Showcase"} 
-                className="w-full h-full object-cover object-center opacity-25 scale-105" 
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src = isCreator ? "/cteatorlink.jpeg" : "/storelly6.jpg";
-                }}
-              />
-              <div className="absolute inset-0 bg-white/85 backdrop-blur-[2px]"></div>
-            </div>
-
             {/* Banner */}
             <div className={`relative z-10 h-32 overflow-hidden ${
               isCreator ? 'bg-linear-to-r from-indigo-600 to-purple-700' : 'bg-linear-to-r from-emerald-600 to-teal-700'
@@ -547,110 +534,132 @@ export const DigitalCardPreview: React.FC<DigitalCardPreviewProps> = ({ business
             <button
               type="button"
               onClick={handleWhatsAppShare}
-              className="p-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-2xl text-xs font-bold flex flex-col items-center justify-center gap-1.5 transition cursor-pointer shadow-2xs"
+              className={`p-3 rounded-2xl text-xs font-bold flex flex-col items-center justify-center gap-1.5 transition cursor-pointer shadow-[var(--shadow-xs)] ${
+                isCreator
+                  ? 'bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200'
+                  : 'bg-[var(--g100)] hover:bg-[var(--g200)]/60 text-[var(--g800)] border border-[var(--g200)]'
+              }`}
             >
-              <MessageCircle className="w-5 h-5 text-emerald-600" />
+              <MessageCircle className={`w-5 h-5 ${isCreator ? 'text-[var(--p500)]' : 'text-[var(--g600)]'}`} />
               <span>WhatsApp</span>
             </button>
 
             <button
               type="button"
               onClick={handleCopyLink}
-              className="p-3 bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 rounded-2xl text-xs font-bold flex flex-col items-center justify-center gap-1.5 transition cursor-pointer shadow-2xs"
+              className="p-3 bg-[var(--card)] hover:bg-[var(--bg)] text-[var(--t1)] border border-[var(--border)] rounded-2xl text-xs font-bold flex flex-col items-center justify-center gap-1.5 transition cursor-pointer shadow-[var(--shadow-xs)]"
             >
-              {copied ? <Check className="w-5 h-5 text-emerald-600" /> : <Copy className="w-5 h-5 text-slate-600" />}
+              {copied ? <Check className="w-5 h-5 text-[var(--g600)]" /> : <Copy className="w-5 h-5 text-[var(--t2)]" />}
               <span>{copied ? 'Copied!' : 'Copy Link'}</span>
             </button>
 
             <button
               type="button"
               onClick={handleDownloadQR}
-              className="p-3 bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 rounded-2xl text-xs font-bold flex flex-col items-center justify-center gap-1.5 transition cursor-pointer shadow-2xs"
+              className="p-3 bg-[var(--card)] hover:bg-[var(--bg)] text-[var(--t1)] border border-[var(--border)] rounded-2xl text-xs font-bold flex flex-col items-center justify-center gap-1.5 transition cursor-pointer shadow-[var(--shadow-xs)]"
               title="Download high resolution PNG QR code for flyers, standees, and stickers"
             >
-              <Download className="w-5 h-5 text-indigo-600" />
+              <Download className={`w-5 h-5 ${isCreator ? 'text-[var(--p500)]' : 'text-[var(--g600)]'}`} />
               <span>Download QR</span>
             </button>
 
             <button
               type="button"
               onClick={handlePrintCard}
-              className="p-3 bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 rounded-2xl text-xs font-bold flex flex-col items-center justify-center gap-1.5 transition cursor-pointer shadow-2xs"
+              className="p-3 bg-[var(--card)] hover:bg-[var(--bg)] text-[var(--t1)] border border-[var(--border)] rounded-2xl text-xs font-bold flex flex-col items-center justify-center gap-1.5 transition cursor-pointer shadow-[var(--shadow-xs)]"
               title="Print flyer or digital visiting card"
             >
-              <Printer className="w-5 h-5 text-slate-600" />
+              <Printer className="w-5 h-5 text-[var(--t2)]" />
               <span>Print Poster</span>
             </button>
           </div>
 
-          {/* Rich WhatsApp Message Box */}
-          <div className="p-5 bg-gradient-to-br from-emerald-900 via-teal-900 to-slate-900 text-white rounded-3xl shadow-md space-y-3">
+          {/* Formatted WhatsApp Customer Message Box - Clean Theme Design */}
+          <div className={`p-5 sm:p-6 bg-[var(--card)] rounded-3xl border shadow-[var(--shadow-xs)] space-y-3.5 transition-all ${
+            isCreator ? 'border-purple-200/80' : 'border-[var(--border)]'
+          }`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-amber-400" />
-                <span className="text-xs font-bold uppercase tracking-wider">Formatted WhatsApp Customer Message</span>
+                <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
+                  isCreator ? 'bg-purple-100 text-purple-700' : 'bg-[var(--g100)] text-[var(--g700)]'
+                }`}>
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                </div>
+                <div>
+                  <span className="text-xs font-black uppercase tracking-wider text-[var(--t1)]">
+                    Formatted WhatsApp Customer Message
+                  </span>
+                </div>
               </div>
-              <span className="text-[10px] bg-emerald-800 text-emerald-200 px-2.5 py-0.5 rounded-full font-bold">
+              <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${
+                isCreator 
+                  ? 'bg-[var(--p100)] text-[var(--p500)] border border-purple-200' 
+                  : 'bg-[var(--g100)] text-[var(--g700)] border border-[var(--g200)]'
+              }`}>
                 High Conversion
               </span>
             </div>
             
-            <p className="text-xs text-emerald-100/90 leading-relaxed">
+            <p className="text-xs text-[var(--t2)] leading-relaxed">
               Send this pre-formatted pitch to your customers, WhatsApp broadcast lists, or groups with your business catalog link:
             </p>
 
-            <div className="p-3 bg-black/30 rounded-2xl border border-white/10 text-[11px] font-mono text-emerald-200 leading-relaxed whitespace-pre-line max-h-32 overflow-y-auto select-all">
+            <div className="p-3.5 sm:p-4 bg-[var(--bg)] rounded-2xl border border-[var(--border)] text-xs font-mono text-[var(--t1)] leading-relaxed whitespace-pre-line max-h-36 overflow-y-auto select-all">
               {richShareText}
             </div>
 
-            <div className="flex items-center gap-2 pt-1">
+            <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
               <button
                 type="button"
                 onClick={handleWhatsAppShare}
-                className="flex-1 py-2.5 px-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                className={`w-full sm:flex-1 py-3 px-4 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] text-white ${
+                  isCreator
+                    ? 'bg-[var(--p500)] hover:bg-purple-700'
+                    : 'bg-[var(--g600)] hover:bg-[var(--g700)]'
+                }`}
               >
-                <MessageCircle className="w-4 h-4 text-slate-950" />
+                <MessageCircle className="w-4 h-4 text-white" />
                 <span>Open WhatsApp &amp; Send</span>
               </button>
               <button
                 type="button"
                 onClick={handleCopyRichCard}
-                className="py-2.5 px-3.5 bg-white/15 hover:bg-white/25 text-white font-semibold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer shrink-0"
+                className="w-full sm:w-auto py-3 px-4 bg-[var(--card)] hover:bg-[var(--bg)] text-[var(--t1)] border border-[var(--border)] font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer shadow-[var(--shadow-xs)] shrink-0"
               >
-                {copiedRich ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
-                <span>{copiedRich ? 'Copied!' : 'Copy Text'}</span>
+                {copiedRich ? <Check className="w-4 h-4 text-[var(--g600)]" /> : <Copy className="w-4 h-4 text-[var(--t2)]" />}
+                <span>{copiedRich ? 'Copied Message!' : 'Copy Text'}</span>
               </button>
             </div>
           </div>
 
           {/* Social Share One-Click Buttons */}
-          <div className="p-5 bg-white rounded-3xl border border-slate-200 shadow-sm space-y-3">
-            <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+          <div className="p-5 bg-[var(--card)] rounded-3xl border border-[var(--border)] shadow-[var(--shadow-xs)] space-y-3">
+            <h4 className="text-xs font-bold text-[var(--t1)] uppercase tracking-wider">
               Share Direct to Social Channels
             </h4>
             <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={handleWhatsAppShare}
-                className="py-2 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                className="py-2.5 px-3 bg-[var(--g100)] hover:bg-[var(--g200)] text-[var(--g800)] border border-[var(--g200)] rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                <MessageCircle className="w-3.5 h-3.5" />
+                <MessageCircle className="w-3.5 h-3.5 text-[var(--g600)]" />
                 <span>WhatsApp</span>
               </button>
               <button
                 type="button"
                 onClick={handleTwitterShare}
-                className="py-2 px-3 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                className="py-2.5 px-3 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                <Send className="w-3.5 h-3.5" />
+                <Send className="w-3.5 h-3.5 text-sky-600" />
                 <span>X / Twitter</span>
               </button>
               <button
                 type="button"
                 onClick={handleFacebookShare}
-                className="py-2 px-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                className="py-2.5 px-3 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                <Share className="w-3.5 h-3.5" />
+                <Share className="w-3.5 h-3.5 text-blue-600" />
                 <span>Facebook</span>
               </button>
             </div>
@@ -659,31 +668,31 @@ export const DigitalCardPreview: React.FC<DigitalCardPreviewProps> = ({ business
       </div>
 
       {/* =========================================================================
-          MOCK SOCIAL SHARE PREVIEW (WhatsApp, Twitter/X, Facebook, iMessage)
+          MOCK SOCIAL MEDIA LINK PREVIEW (WhatsApp Open Graph, Twitter/X, Facebook)
          ========================================================================= */}
-      <div className="bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-sm space-y-5">
+      <div className="bg-[var(--card)] rounded-3xl p-5 sm:p-7 border border-[var(--border)] shadow-[var(--shadow-xs)] space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-indigo-600 animate-pulse" />
-              <h3 className="text-base sm:text-lg font-bold text-slate-900">
-                Mock Social Media Link Preview
+              <span className={`w-2.5 h-2.5 rounded-full animate-pulse ${isCreator ? 'bg-[var(--p500)]' : 'bg-[var(--g600)]'}`} />
+              <h3 className="text-base sm:text-lg font-bold text-[var(--t1)] font-heading">
+                Live Social Media & WhatsApp Link Preview
               </h3>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Live preview of how your store metadata, rich cards, logo, and description look when pasted into WhatsApp and social feeds.
+            <p className="text-xs text-[var(--t2)] mt-0.5">
+              Live preview of how your verified store metadata, rich Open Graph cards, logo, and tagline appear when shared across WhatsApp and social channels.
             </p>
           </div>
 
           {/* Social Platform Switcher Tabs */}
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200/80 shrink-0">
+          <div className="flex items-center gap-1 bg-[var(--bg)] p-1 rounded-2xl border border-[var(--border)] shrink-0">
             <button
               type="button"
               onClick={() => setActiveSocialTab('whatsapp')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
                 activeSocialTab === 'whatsapp'
                   ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  : 'text-[var(--t2)] hover:text-[var(--t1)]'
               }`}
             >
               WhatsApp
@@ -694,7 +703,7 @@ export const DigitalCardPreview: React.FC<DigitalCardPreviewProps> = ({ business
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
                 activeSocialTab === 'twitter'
                   ? 'bg-slate-900 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  : 'text-[var(--t2)] hover:text-[var(--t1)]'
               }`}
             >
               X / Twitter
@@ -705,7 +714,7 @@ export const DigitalCardPreview: React.FC<DigitalCardPreviewProps> = ({ business
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
                 activeSocialTab === 'facebook'
                   ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  : 'text-[var(--t2)] hover:text-[var(--t1)]'
               }`}
             >
               Facebook
@@ -716,7 +725,7 @@ export const DigitalCardPreview: React.FC<DigitalCardPreviewProps> = ({ business
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
                 activeSocialTab === 'imessage'
                   ? 'bg-sky-500 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  : 'text-[var(--t2)] hover:text-[var(--t1)]'
               }`}
             >
               iMessage
@@ -744,11 +753,11 @@ export const DigitalCardPreview: React.FC<DigitalCardPreviewProps> = ({ business
               <div className="bg-white rounded-xl overflow-hidden border border-slate-200/80 shadow-2xs hover:shadow-xs transition">
                 <div className="h-32 bg-slate-100 overflow-hidden relative">
                   <img
-                    src={previewImage}
+                    src={previewImage || '/main logo.jpg'}
                     alt={business.name}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src = isCreator ? "/cteatorlink.jpeg" : "/storelly6.jpg";
+                      (e.currentTarget as HTMLImageElement).src = '/main logo.jpg';
                     }}
                   />
                   <div className="absolute top-2 right-2 bg-emerald-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-xs">

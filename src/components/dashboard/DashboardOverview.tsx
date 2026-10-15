@@ -230,30 +230,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       <div
         className={`p-6 sm:p-7 rounded-[var(--r20)] relative overflow-hidden border shadow-[var(--shadow-sm)] ${
           isCreator
-            ? 'bg-gradient-to-r from-purple-50 via-[var(--card)] to-purple-50/60 text-[var(--t1)] border-[var(--border)]'
-            : 'bg-gradient-to-r from-[var(--g100)] via-[var(--card)] to-[var(--g100)]/60 text-[var(--t1)] border-[var(--border)]'
+            ? 'bg-gradient-to-r from-purple-50/70 via-[var(--card)] to-purple-50/30 text-[var(--t1)] border-[var(--border)]'
+            : 'bg-gradient-to-r from-[var(--g100)]/60 via-[var(--card)] to-[var(--g100)]/20 text-[var(--t1)] border-[var(--border)]'
         }`}
       >
-        {/* Background image overlay */}
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          <img
-            src={
-              business.coverImage ||
-              business.banner ||
-              (isCreator ? "/cteatorlink.jpeg" : "/storelly6.jpg.jpeg")
-            }
-            alt={isCreator ? "Creator Showcase" : "Vendor Store Showcase"}
-            loading="lazy"
-            className="w-full h-full object-cover object-center opacity-20 transform scale-105 hover:scale-100 transition duration-700"
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = isCreator
-                ? "/cteatorlink.jpeg"
-                : "/storelly6.jpg";
-            }}
-          />
-          <div className="absolute inset-0 bg-[var(--card)]/80 backdrop-blur-[1px]"></div>
-        </div>
-
         <div className="relative z-10 space-y-4">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div className="space-y-1.5 max-w-xl">
@@ -284,11 +264,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 >
                   <SafeImage
                     fallbackType="avatar"
-                    src={
-                      business.logo ||
-                      business.profileImage ||
-                      (isCreator ? "/cteatorlink.jpeg" : "/storelly6.jpg.jpeg")
-                    }
+                    src={business.logo || business.profileImage || ''}
                     alt={business.name}
                     loading="lazy"
                     referrerPolicy="no-referrer"
