@@ -41,8 +41,6 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
   const [pricingPlans, setPricingPlans] = useState<PlatformPricingPlan[]>(DEFAULT_PRICING_PLANS);
   const [pricingCMS, setPricingCMS] = useState<PlatformPricingCMS>(DEFAULT_PRICING_CMS);
   const [copiedLink, setCopiedLink] = useState(false);
-  const [activeThemeSwatch, setActiveThemeSwatch] = useState<string>('emerald');
-  const [selectedSlot, setSelectedSlot] = useState<string>('10:30 AM');
 
   useEffect(() => {
     const loadPricing = async () => {
@@ -101,49 +99,7 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
       iconGradient: 'from-emerald-500 to-green-600', 
       shadow: 'shadow-emerald-500/25', 
       title: 'Instant WhatsApp Orders', 
-      desc: 'Customers browse your interactive storefront and send complete orders with quantities, variant sizes, and delivery address directly to your WhatsApp.',
-      preview: (
-        <div className="mt-4 rounded-2xl overflow-hidden border border-emerald-200/80 dark:border-emerald-800/60 bg-white/95 dark:bg-slate-900/90 shadow-sm text-left">
-          {/* Real Product Image Header */}
-          <div className="relative h-28 w-full overflow-hidden bg-emerald-50">
-            <img 
-              src="https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=500&auto=format&fit=crop&q=80" 
-              alt="Homemade Andhra Pickles" 
-              className="w-full h-full object-cover" 
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-            <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between text-white">
-              <span className="text-[11px] font-bold flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                Live Order Dispatch
-              </span>
-              <span className="text-[10px] bg-[#25D366] text-white font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1">
-                <FaWhatsapp size={11} /> WhatsApp
-              </span>
-            </div>
-          </div>
-
-          {/* Formatted Order Content */}
-          <div className="p-3 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black text-slate-900 dark:text-white">Order #1048 • Maya Store</span>
-              <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">₹648</span>
-            </div>
-            <div className="text-[11px] text-slate-600 dark:text-slate-300 leading-tight">
-              • 1x Homemade Mango Pickle 1kg (₹249)<br />
-              • 1x Pure Ghee Laddus 500g (₹399)
-            </div>
-            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px]">
-              <span className="text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1">
-                <CheckCheck className="w-3.5 h-3.5 text-blue-500" /> Paid via PhonePe UPI
-              </span>
-              <span className="text-slate-500 flex items-center gap-1">
-                <MapPin className="w-3 h-3 text-slate-400" /> Hyderabad
-              </span>
-            </div>
-          </div>
-        </div>
-      )
+      desc: 'Customers browse your interactive storefront and send complete orders with quantities, variant sizes, and delivery address directly to your WhatsApp.'
     },
     { 
       icon: (
@@ -154,179 +110,28 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
       iconGradient: 'from-violet-600 to-indigo-700', 
       shadow: 'shadow-indigo-500/25', 
       title: 'Direct UPI Payments (0% Fee)', 
-      desc: 'Accept payments through Google Pay, PhonePe, Paytm, BHIM, and Cred. 100% of your money deposits straight into your own bank account with zero cuts.',
-      preview: (
-        <div className="mt-4 rounded-2xl overflow-hidden border border-indigo-200/80 dark:border-indigo-800/60 bg-white/95 dark:bg-slate-900/90 shadow-sm text-left">
-          {/* Real Bank Settlement Receipt Banner */}
-          <div className="bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-700 p-3 text-white">
-            <div className="flex items-center justify-between text-[10px] font-bold text-indigo-100 mb-1">
-              <span className="flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-300" /> Instant Bank Settlement
-              </span>
-              <span className="bg-emerald-500/20 text-emerald-200 px-2 py-0.5 rounded-full border border-emerald-400/30">
-                0% Fee
-              </span>
-            </div>
-            <div className="text-lg font-black text-white">₹648.00</div>
-            <div className="text-[10px] text-indigo-200">Deposited into Merchant HDFC Bank A/C</div>
-          </div>
-
-          {/* Real UPI App Badges Strip */}
-          <div className="p-3">
-            <div className="text-[10px] font-bold text-slate-500 mb-2 uppercase tracking-wider">Supported Payment Apps</div>
-            <div className="grid grid-cols-4 gap-1.5">
-              <div className="flex flex-col items-center justify-center p-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 hover:border-blue-400 transition">
-                <GooglePayLogo height={14} />
-              </div>
-              <div className="flex flex-col items-center justify-center p-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 hover:border-purple-400 transition">
-                <PhonePeLogo size={16} />
-              </div>
-              <div className="flex flex-col items-center justify-center p-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 hover:border-sky-400 transition">
-                <PaytmLogo height={16} />
-              </div>
-              <div className="flex flex-col items-center justify-center p-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 hover:border-orange-400 transition">
-                <BhimLogo height={14} />
-              </div>
-            </div>
-          </div>
-        </div>
-      )
+      desc: 'Accept payments through Google Pay, PhonePe, Paytm, BHIM, and Cred. 100% of your money deposits straight into your own bank account with zero cuts.'
     },
     { 
       icon: <ZeroCodingIcon size={34} className="text-white" />, 
       iconGradient: 'from-emerald-600 to-teal-700', 
       shadow: 'shadow-teal-500/25', 
       title: 'Zero Coding Required', 
-      desc: 'No coding, no hosting, no technical setup. Create your product catalog and launch your custom branded storefront in under 2 minutes.',
-      preview: (
-        <div className="mt-4 rounded-2xl overflow-hidden border border-teal-200/80 dark:border-teal-800/60 bg-white/95 dark:bg-slate-900/90 shadow-sm text-left">
-          {/* Real Mobile Store Screenshot Preview */}
-          <div className="relative h-28 w-full overflow-hidden bg-slate-100">
-            <img 
-              src="/storelly1.jpg.jpeg" 
-              alt="Mobile Storefront Interface" 
-              className="w-full h-full object-cover object-top" 
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
-            <div className="absolute top-2 right-2 bg-emerald-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-xs">
-              ⚡ LIVE ON MOBILE
-            </div>
-            <div className="absolute bottom-2 left-3 right-3 text-white">
-              <span className="text-[11px] font-bold">Maya Fashion &amp; Organic Food</span>
-            </div>
-          </div>
-
-          {/* Toggle Switches */}
-          <div className="p-3 space-y-1.5">
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="font-semibold text-slate-700 dark:text-slate-300">Catalog &amp; Products</span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">ONLINE</span>
-            </div>
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="font-semibold text-slate-700 dark:text-slate-300">Instant WhatsApp Checkout</span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">ACTIVE</span>
-            </div>
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="font-semibold text-slate-700 dark:text-slate-300">Direct UPI QR Code</span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">READY</span>
-            </div>
-          </div>
-        </div>
-      )
+      desc: 'No coding, no hosting, no technical setup. Create your product catalog and launch your custom branded storefront in under 2 minutes.'
     },
     { 
       icon: <Globe size={28} className="text-white" />, 
       iconGradient: 'from-blue-500 to-cyan-600', 
       shadow: 'shadow-blue-500/25', 
       title: 'Your Branded Store Link', 
-      desc: 'Get an instant, clean address like storelly.com/mayafashion. Easy for customers to bookmark, share on Instagram bio, and save on WhatsApp.',
-      preview: (
-        <div className="mt-4 rounded-2xl overflow-hidden border border-blue-200/80 dark:border-blue-800/60 bg-white/95 dark:bg-slate-900/90 shadow-sm text-left">
-          {/* Real Browser Address Bar Header */}
-          <div className="bg-slate-100 dark:bg-slate-800 px-3 py-2 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-400" />
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-              <span className="w-2.5 h-2.5 rounded-full bg-green-400" />
-            </div>
-            <div className="flex items-center gap-1 text-[11px] font-mono text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 px-2.5 py-0.5 rounded-md border border-slate-200 dark:border-slate-700">
-              <Lock className="w-3 h-3 text-emerald-500" />
-              <span>storelly.com/<span className="text-blue-600 dark:text-blue-400 font-bold">mayafashion</span></span>
-            </div>
-            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded">SSL</span>
-          </div>
-
-          {/* Mini Storefront Preview Image */}
-          <div className="relative h-24 w-full overflow-hidden bg-slate-50">
-            <img 
-              src="/landingpage.jpeg" 
-              alt="Storefront Banner Preview" 
-              className="w-full h-full object-cover object-top" 
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent" />
-            <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between">
-              <span className="text-white text-[11px] font-bold">1-Click Share Anywhere</span>
-              <button 
-                type="button"
-                onClick={handleCopyLink}
-                className="text-[10px] font-bold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-md transition shadow-xs flex items-center gap-1 cursor-pointer"
-              >
-                {copiedLink ? <Check className="w-3 h-3 text-emerald-300" /> : <Copy className="w-3 h-3" />}
-                {copiedLink ? 'Copied!' : 'Copy Link'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )
+      desc: 'Get an instant, clean address like storelly.com/mayafashion. Easy for customers to bookmark, share on Instagram bio, and save on WhatsApp.'
     },
     { 
       icon: <GoogleMeetIcon size={28} />, 
       iconGradient: 'from-pink-500 to-rose-600', 
       shadow: 'shadow-rose-500/25', 
       title: 'Book Paid 1:1 Consultations', 
-      desc: 'Clients choose an available calendar time slot and pay upfront via UPI before automated Google Meet video consultation invitations.',
-      preview: (
-        <div className="mt-4 rounded-2xl overflow-hidden border border-rose-200/80 dark:border-rose-800/60 bg-white/95 dark:bg-slate-900/90 shadow-sm text-left">
-          {/* Real Consultant Avatar & Header */}
-          <div className="p-3 bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-950/40 dark:to-pink-950/40 border-b border-rose-100 dark:border-rose-900/40 flex items-center gap-3">
-            <img 
-              src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80" 
-              alt="Consultant Mentor" 
-              className="w-11 h-11 rounded-full object-cover border-2 border-white shadow-xs" 
-            />
-            <div className="min-w-0 flex-1">
-              <div className="text-xs font-black text-slate-900 dark:text-white truncate">Dr. Priya Verma</div>
-              <div className="text-[10px] text-rose-700 dark:text-rose-400 font-semibold flex items-center gap-1">
-                <GoogleMeetIcon size={12} /> Google Meet 1:1 Call • ₹499
-              </div>
-            </div>
-          </div>
-
-          {/* Time Slot Selector */}
-          <div className="p-3">
-            <div className="flex items-center justify-between text-[10px] font-bold text-slate-500 mb-2">
-              <span>Select Date &amp; Slot</span>
-              <span className="text-emerald-600 font-extrabold">Instant Confirm</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              {['10:30 AM', '02:00 PM', '05:30 PM'].map((slot) => (
-                <button
-                  type="button"
-                  key={slot}
-                  onClick={() => setSelectedSlot(slot)}
-                  className={`flex-1 text-center py-1.5 rounded-lg text-[10px] font-bold transition cursor-pointer ${
-                    selectedSlot === slot 
-                      ? 'bg-rose-600 text-white shadow-xs' 
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
-                  }`}
-                >
-                  {slot}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )
+      desc: 'Clients choose an available calendar time slot and pay upfront via UPI before automated Google Meet video consultation invitations.'
     },
     { 
       icon: (
@@ -340,192 +145,28 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
       iconGradient: 'from-amber-500 to-orange-600', 
       shadow: 'shadow-amber-500/25', 
       title: 'Universal Bio Link & Socials', 
-      desc: 'Unify Instagram bio, YouTube channels, WhatsApp communities, Telegram groups, and portfolios into one smart page.',
-      preview: (
-        <div className="mt-4 rounded-2xl overflow-hidden border border-amber-200/80 dark:border-amber-800/60 bg-white/95 dark:bg-slate-900/90 shadow-sm text-left">
-          {/* Creator Profile Image Header */}
-          <div className="p-3 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40 border-b border-amber-100 dark:border-amber-900/40 flex items-center gap-3">
-            <img 
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80" 
-              alt="Creator Profile" 
-              className="w-11 h-11 rounded-full object-cover border-2 border-white shadow-xs" 
-            />
-            <div className="min-w-0 flex-1">
-              <div className="text-xs font-black text-slate-900 dark:text-white truncate">Ananya Rao • Lifestyle &amp; Fashion</div>
-              <div className="text-[10px] font-bold text-amber-700 dark:text-amber-400">48K Combined Audience</div>
-            </div>
-          </div>
-
-          {/* Social Channels Pills */}
-          <div className="p-3 grid grid-cols-2 gap-1.5">
-            <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-pink-50 dark:bg-pink-950/40 border border-pink-200/60 text-[10px] font-bold text-pink-700 dark:text-pink-300">
-              <FaInstagram size={14} color="#ec4899" />
-              <span>Instagram • 32K</span>
-            </div>
-            <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200/60 text-[10px] font-bold text-red-700 dark:text-red-300">
-              <FaYoutube size={14} color="#ef4444" />
-              <span>YouTube • 12K</span>
-            </div>
-            <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 text-[10px] font-bold text-emerald-700 dark:text-emerald-300">
-              <FaWhatsapp size={14} color="#10b981" />
-              <span>VIP Community</span>
-            </div>
-            <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-sky-50 dark:bg-sky-950/40 border border-sky-200/60 text-[10px] font-bold text-sky-700 dark:text-sky-300">
-              <FaTelegram size={14} color="#0ea5e9" />
-              <span>Telegram Channel</span>
-            </div>
-          </div>
-        </div>
-      )
+      desc: 'Unify Instagram bio, YouTube channels, WhatsApp communities, Telegram groups, and portfolios into one smart page.'
     },
     { 
       icon: <LineChart size={28} className="text-white" />, 
       iconGradient: 'from-sky-500 to-blue-600', 
       shadow: 'shadow-sky-500/25', 
       title: 'Real-Time Sales & Traffic', 
-      desc: 'Track live page visitors, WhatsApp order clicks, top revenue items, and customer conversion rates in real time without analytics bloat.',
-      preview: (
-        <div className="mt-4 rounded-2xl overflow-hidden border border-sky-200/80 dark:border-sky-800/60 bg-white/95 dark:bg-slate-900/90 shadow-sm text-left">
-          {/* Revenue Metric Card */}
-          <div className="p-3 bg-gradient-to-r from-sky-50 to-blue-50 dark:from-sky-950/40 dark:to-blue-950/40 border-b border-sky-100 dark:border-sky-900/40 flex items-center justify-between">
-            <div>
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Weekly Net Revenue</span>
-              <span className="text-base font-black text-slate-900 dark:text-white">₹48,250</span>
-            </div>
-            <span className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950 px-2 py-0.5 rounded-full border border-emerald-300">
-              +34.8%
-            </span>
-          </div>
-
-          {/* Real Visual Bar Graph with Live Activity */}
-          <div className="p-3">
-            <div className="flex items-center justify-between text-[10px] font-bold text-slate-500 mb-2">
-              <span className="flex items-center gap-1 text-emerald-600 font-extrabold">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" /> 14 live shoppers now
-              </span>
-              <span>184 Orders</span>
-            </div>
-            <div className="flex items-end justify-between gap-1.5 h-12 bg-slate-50 dark:bg-slate-800/80 p-2 rounded-xl border border-slate-100 dark:border-slate-800">
-              <div className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
-                <div className="w-full bg-sky-300 rounded-t h-[40%]" />
-                <span className="text-[8px] font-bold text-slate-400">M</span>
-              </div>
-              <div className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
-                <div className="w-full bg-sky-400 rounded-t h-[65%]" />
-                <span className="text-[8px] font-bold text-slate-400">T</span>
-              </div>
-              <div className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
-                <div className="w-full bg-sky-500 rounded-t h-[50%]" />
-                <span className="text-[8px] font-bold text-slate-400">W</span>
-              </div>
-              <div className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
-                <div className="w-full bg-sky-600 rounded-t h-[85%]" />
-                <span className="text-[8px] font-bold text-slate-400">T</span>
-              </div>
-              <div className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
-                <div className="w-full bg-blue-600 rounded-t h-[100%]" />
-                <span className="text-[8px] font-bold text-slate-400">F</span>
-              </div>
-              <div className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
-                <div className="w-full bg-indigo-600 rounded-t h-[75%]" />
-                <span className="text-[8px] font-bold text-slate-400">S</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )
+      desc: 'Track live page visitors, WhatsApp order clicks, top revenue items, and customer conversion rates in real time without analytics bloat.'
     },
     { 
       icon: <FileDown size={28} className="text-white" />, 
       iconGradient: 'from-red-500 to-rose-600', 
       shadow: 'shadow-red-500/25', 
       title: 'Digital Products Auto-Delivery', 
-      desc: 'Sell study guides, e-books, templates, presets, and recordings with automated instant delivery via WhatsApp and secure direct links.',
-      preview: (
-        <div className="mt-4 rounded-2xl overflow-hidden border border-red-200/80 dark:border-red-800/60 bg-white/95 dark:bg-slate-900/90 shadow-sm text-left">
-          {/* Real Educational Guide Artwork Header */}
-          <div className="p-3 bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-950/40 dark:to-rose-950/40 border-b border-red-100 dark:border-red-900/40 flex items-center gap-3">
-            <div className="w-12 h-14 rounded-lg overflow-hidden border border-red-200 shadow-xs shrink-0 bg-slate-900">
-              <img 
-                src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=200&auto=format&fit=crop&q=80" 
-                alt="TSPSC Study Guide" 
-                className="w-full h-full object-cover" 
-              />
-            </div>
-            <div className="min-w-0 flex-1">
-              <span className="text-[9px] font-black uppercase text-red-600 bg-red-100 dark:bg-red-950/80 px-2 py-0.5 rounded-full inline-block mb-1">
-                PDF E-Book • 540 Pages
-              </span>
-              <div className="text-xs font-black text-slate-900 dark:text-white truncate">TSPSC &amp; UPSC Master Notes</div>
-              <div className="text-[11px] font-black text-emerald-600">₹49 <span className="line-through text-slate-400 text-[10px]">₹299</span></div>
-            </div>
-          </div>
-
-          {/* Automated Delivery Strip */}
-          <div className="p-3 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between text-[10px]">
-            <span className="text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              Automated WhatsApp PDF in 5 Secs
-            </span>
-            <span className="text-slate-500 font-bold">2,140 Sold</span>
-          </div>
-        </div>
-      )
+      desc: 'Sell study guides, e-books, templates, presets, and recordings with automated instant delivery via WhatsApp and secure direct links.'
     },
     { 
       icon: <Palette size={28} className="text-white" />, 
       iconGradient: 'from-purple-500 to-violet-600', 
       shadow: 'shadow-purple-500/25', 
       title: 'Custom Brand Themes', 
-      desc: 'Choose from handcrafted color palettes, typography, and card styles to perfectly mirror your brand identity and creative tone.',
-      preview: (
-        <div className="mt-4 rounded-2xl overflow-hidden border border-purple-200/80 dark:border-purple-800/60 bg-white/95 dark:bg-slate-900/90 shadow-sm text-left">
-          {/* Dynamic Theme Image Preview */}
-          <div className="relative h-24 w-full overflow-hidden bg-slate-100">
-            <img 
-              src={
-                activeThemeSwatch === 'emerald' ? '/storelly1.jpg.jpeg' :
-                activeThemeSwatch === 'violet' ? '/cteatorlink.jpeg' :
-                activeThemeSwatch === 'blue' ? '/storelly3.jpg.jpeg' :
-                activeThemeSwatch === 'rose' ? '/storelly4.jpg.jpeg' :
-                '/storelly5.jpg.jpeg'
-              } 
-              alt="Theme Preview" 
-              className="w-full h-full object-cover object-top transition-all duration-300" 
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
-            <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between text-white">
-              <span className="text-[11px] font-bold capitalize">Active: {activeThemeSwatch} Theme</span>
-              <span className="text-[10px] bg-white/20 backdrop-blur-md px-2 py-0.5 rounded-full font-bold">Live Preview</span>
-            </div>
-          </div>
-
-          {/* Palette Selector */}
-          <div className="p-3">
-            <div className="text-[10px] font-bold text-slate-500 mb-2 uppercase tracking-wider">Click to Switch Palette</div>
-            <div className="flex items-center justify-around bg-slate-50 dark:bg-slate-800/60 p-2 rounded-xl border border-slate-100 dark:border-slate-800">
-              {[
-                { id: 'emerald', bg: 'bg-emerald-600', name: 'Storelly Emerald' },
-                { id: 'violet', bg: 'bg-purple-600', name: 'Creator Violet' },
-                { id: 'blue', bg: 'bg-blue-600', name: 'Ocean Blue' },
-                { id: 'rose', bg: 'bg-rose-600', name: 'Chic Rose' },
-                { id: 'amber', bg: 'bg-amber-500', name: 'Luxe Amber' }
-              ].map((theme) => (
-                <button
-                  type="button"
-                  key={theme.id}
-                  onClick={() => setActiveThemeSwatch(theme.id)}
-                  className={`w-6 h-6 rounded-full ${theme.bg} cursor-pointer transition-transform ${
-                    activeThemeSwatch === theme.id ? 'ring-3 ring-emerald-400 scale-125 shadow-md' : 'hover:scale-110 opacity-80 hover:opacity-100'
-                  }`}
-                  title={theme.name}
-                  aria-label={theme.name}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      )
+      desc: 'Choose from handcrafted color palettes, typography, and card styles to perfectly mirror your brand identity and creative tone.'
     }
   ];
 
@@ -1041,32 +682,6 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
                   </div>
                 </div>
 
-                {/* Example Digital Product Card */}
-                <div className="bg-[var(--bg)] rounded-[var(--r12)] p-4 shadow-md border border-[var(--border)] flex items-center gap-4">
-                   <div className="w-14 h-14 rounded-[var(--r8)] bg-gradient-to-br from-rose-500 to-red-600 text-white flex flex-col items-center justify-center shrink-0 shadow-md">
-                      <FileText className="w-6 h-6 mb-0.5" />
-                      <span className="font-black text-[9px] tracking-wider">PDF</span>
-                   </div>
-
-                   <div className="flex-1 min-w-0">
-                      <div className="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest flex items-center gap-1.5">
-                         <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Digital Study Guide
-                      </div>
-                      <div className="text-[14px] font-heading font-black text-[var(--t1)] truncate">TSPSC &amp; UPSC Prelims 2026 Complete Notes</div>
-                      <div className="text-[12px] font-black text-[var(--g600)] mt-0.5 flex items-center gap-1.5">
-                         ₹49 <span className="text-[10px] font-bold text-[var(--t3)] line-through">₹299</span>
-                         <span className="text-[10px] font-bold text-slate-500">(2,140 downloads)</span>
-                      </div>
-                   </div>
-                   
-                   <button 
-                     onClick={() => onOpenAuth('signup')}
-                     className="bg-[var(--g600)] hover:bg-[var(--g700)] text-white text-xs font-bold px-4 py-2.5 rounded-[var(--r8)] shadow-xs shrink-0 cursor-pointer"
-                   >
-                      Buy via UPI
-                   </button>
-                </div>
-
                 <div>
                   <button 
                     onClick={() => onOpenAuth('signup')} 
@@ -1192,11 +807,6 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
                 </div>
                 <h3 className="font-heading font-bold text-[var(--t1)] text-xl mb-2 relative z-10">{feat.title}</h3>
                 <p className="text-[var(--t2)] text-sm font-medium leading-relaxed relative z-10">{feat.desc}</p>
-                {feat.preview && (
-                  <div className="relative z-10">
-                    {feat.preview}
-                  </div>
-                )}
               </motion.div>
             ))}
           </div>
