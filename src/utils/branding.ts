@@ -4,7 +4,7 @@ import { PlatformBrandingConfig } from '../types/admin';
 export const DEFAULT_BRANDING_CONFIG: PlatformBrandingConfig = {
   siteName: 'Storelly',
   logoUrl: '/main logo.jpg',
-  faviconUrl: '/icons/icon.svg',
+  faviconUrl: '/main logo.jpg',
 };
 
 // In-memory branding cache initialized from localStorage (if any) or defaults
@@ -23,6 +23,19 @@ let cachedBranding: PlatformBrandingConfig = (() => {
   }
   return { ...DEFAULT_BRANDING_CONFIG };
 })();
+
+// Immediately sync favicon to DOM if in browser environment
+if (typeof document !== 'undefined') {
+  try {
+    let link: HTMLLinkElement | null = document.querySelector("link[rel*='icon']");
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.head.appendChild(link);
+    }
+    link.href = cachedBranding.faviconUrl || DEFAULT_BRANDING_CONFIG.faviconUrl;
+  } catch {}
+}
 
 export function setCachedBranding(branding: Partial<PlatformBrandingConfig>) {
   cachedBranding = {

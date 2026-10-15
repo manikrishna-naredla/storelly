@@ -191,8 +191,8 @@ export const MasterAdminDashboard: React.FC<MasterAdminDashboardProps> = ({ admi
   }));
   const [brandingConfig, setBrandingConfig] = useState(() => ({
     siteName: localStorage.getItem('storelly_branding_name') || 'Storelly',
-    logoUrl: localStorage.getItem('storelly_branding_logo') || '/storelly3.jpg.jpeg',
-    faviconUrl: localStorage.getItem('storelly_branding_favicon') || '/icons/icon.svg',
+    logoUrl: localStorage.getItem('storelly_branding_logo') || '/main logo.jpg',
+    faviconUrl: localStorage.getItem('storelly_branding_favicon') || '/main logo.jpg',
   }));
 
   // Custom Domains State

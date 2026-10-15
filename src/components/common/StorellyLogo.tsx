@@ -1,4 +1,5 @@
 import React from 'react';
+import { getAppLogo } from '../../utils/branding';
 
 interface StorellyLogoProps {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -30,8 +31,10 @@ export const StorellyLogo: React.FC<StorellyLogoProps> = ({
 
   const dims = sizeMap[size] || sizeMap.md;
 
+  const activeLogoUrl = logoUrl || getAppLogo();
+
   // Custom Image rendering if provided and not errored
-  const showCustomImg = logoUrl && !imgError && logoUrl.trim().length > 0;
+  const showCustomImg = activeLogoUrl && !imgError && activeLogoUrl.trim().length > 0;
 
   return (
     <div
@@ -46,7 +49,7 @@ export const StorellyLogo: React.FC<StorellyLogoProps> = ({
         >
           {showCustomImg ? (
             <img
-              src={logoUrl}
+              src={activeLogoUrl}
               alt="Storelly Logo"
               onError={() => setImgError(true)}
               className="w-full h-full object-cover"

@@ -3,6 +3,7 @@ import { ShieldCheck, Lock, Mail, ArrowRight, Loader2, AlertCircle, ArrowLeft, K
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../../config/firebase';
 import { verifyAdminInFirestore, isUserAuthorizedAdmin, AUTHORIZED_ADMIN_EMAILS } from '../../services/adminService';
+import { getAppLogo } from '../../utils/branding';
 
 interface MasterAdminLoginProps {
   onLoginSuccess: () => void;
@@ -190,7 +191,7 @@ export const MasterAdminLogin: React.FC<MasterAdminLoginProps> = ({ onLoginSucce
 
         <div className="text-center space-y-2">
           <div className="w-16 h-16 rounded-2xl overflow-hidden border border-slate-700 shadow-xl flex items-center justify-center bg-white mx-auto">
-            <img src="/main logo-1.jpg" alt="Storelly Logo" className="w-full h-full object-cover" />
+            <img src={getAppLogo()} alt="Storelly Logo" className="w-full h-full object-cover" />
           </div>
           <h1 className="text-2xl font-black text-white font-heading tracking-tight">
             Master Admin Control Center
