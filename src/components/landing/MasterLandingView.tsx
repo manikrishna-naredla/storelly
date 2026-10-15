@@ -21,10 +21,6 @@ import {
 import { HappyClientsMarquee } from './HappyClientsMarquee';
 import { 
   UpiLogo, 
-  GooglePayLogo, 
-  PhonePeLogo, 
-  PaytmLogo, 
-  BhimLogo, 
   ZeroCodingIcon, 
   GoogleMeetIcon, 
   WhatsAppBadge 
@@ -401,22 +397,7 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
                 Create your Storelly page, showcase products or digital services, accept direct UPI payments, and receive structured orders on WhatsApp — with zero coding required.
               </p>
 
-              {/* Supported UPI Payments Strip */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 pt-1">
-                <span className="text-xs font-bold text-[var(--t3)] uppercase tracking-wider mr-1">Direct Bank Payments:</span>
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[var(--card)] border border-[var(--border)] shadow-xs">
-                  <GooglePayLogo height={14} />
-                </span>
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[var(--card)] border border-[var(--border)] shadow-xs">
-                  <PhonePeLogo size={15} />
-                </span>
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[var(--card)] border border-[var(--border)] shadow-xs">
-                  <PaytmLogo height={14} />
-                </span>
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[var(--card)] border border-[var(--border)] shadow-xs">
-                  <BhimLogo height={14} />
-                </span>
-              </div>
+
 
               {/* Action Buttons */}
               <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
@@ -864,12 +845,7 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
                     storelly.com/mayafashion
                   </div>
 
-                  {/* UPI strip */}
-                  <div className="w-full pt-2 border-t border-slate-200 flex items-center justify-around text-[10px] font-bold text-slate-600">
-                    <GooglePayLogo height={12} />
-                    <PhonePeLogo size={14} />
-                    <PaytmLogo height={12} />
-                  </div>
+
                </div>
                
                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[var(--g500)] opacity-20 blur-[100px] rounded-full -z-10"></div>
