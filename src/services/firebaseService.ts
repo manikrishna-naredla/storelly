@@ -90,6 +90,7 @@ import {
   AffiliateProductItem,
   CreatorAnalyticsSummary,
   CanonicalAnalyticsEventType,
+  Expense,
 } from '../types';
 
 /**
@@ -952,6 +953,21 @@ export async function createCatalogItem(
   try {
     const sanitized = sanitizeForFirestore(item);
     await setDoc(itemDocRef, sanitized);
+
+    if (data.productType === 'digital_file') {
+      try {
+        const dpRef = doc(db, 'businesses', businessId, 'digital_products', itemId);
+        await setDoc(dpRef, sanitizeForFirestore({
+          ...item,
+          title: item.name,
+          coverImage: item.images?.[0] || '',
+          fileUrl: item.digitalFileUrl || '',
+          fileUrls: item.digitalFiles?.map((f: any) => f.url) || [item.digitalFileUrl || ''],
+        }), { merge: true });
+      } catch (dpErr) {
+        console.warn('Sync notice for digital_products subcollection:', dpErr);
+      }
+    }
   } catch (err) {
     console.error('Firestore createCatalogItem error:', err);
     throw err;
@@ -970,6 +986,22 @@ export async function updateCatalogItem(businessId: string, itemId: string, data
     });
     const docRef = doc(db, 'businesses', businessId, 'catalog', itemId);
     await setDoc(docRef, sanitized, { merge: true });
+
+    if (data.productType === 'digital_file' || data.digitalFileUrl || data.digitalFiles) {
+      try {
+        const dpRef = doc(db, 'businesses', businessId, 'digital_products', itemId);
+        await setDoc(dpRef, sanitizeForFirestore({
+          ...data,
+          ...(data.name ? { title: data.name } : {}),
+          ...(data.images?.[0] ? { coverImage: data.images[0] } : {}),
+          ...(data.digitalFileUrl ? { fileUrl: data.digitalFileUrl } : {}),
+          ...(data.digitalFiles ? { fileUrls: data.digitalFiles.map((f: any) => f.url) } : {}),
+          updatedAt: Date.now(),
+        }), { merge: true });
+      } catch (dpErr) {
+        console.warn('Sync update notice for digital_products subcollection:', dpErr);
+      }
+    }
   } catch (err) {
     console.error('Firestore updateCatalogItem error:', err);
     throw err;
@@ -983,6 +1015,10 @@ export async function deleteCatalogItem(businessId: string, itemId: string): Pro
   try {
     const docRef = doc(db, 'businesses', businessId, 'catalog', itemId);
     await deleteDoc(docRef);
+    try {
+      const dpRef = doc(db, 'businesses', businessId, 'digital_products', itemId);
+      await deleteDoc(dpRef);
+    } catch (_) {}
   } catch (err) {
     console.error('Firestore deleteCatalogItem error:', err);
     throw err;
@@ -4164,3 +4200,61 @@ export async function recordAffiliateProductClick(businessId: string, itemId: st
     console.warn('Non-blocking affiliate click tracking notice:', err);
   }
 }
+
+// ==========================================
+// MODULE 9: EXPENSES TRACKER & P&L
+// ==========================================
+
+export async function getExpenses(businessId: string): Promise<Expense[]> {
+  try {
+    const colRef = collection(db, 'businesses', businessId, 'expenses');
+    const snap = await getDocs(colRef);
+    const list = snap.docs.map((d) => ({
+      id: d.id,
+      businessId,
+      ...d.data(),
+    } as Expense));
+    return list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  } catch (err) {
+    console.error('Firestore getExpenses error:', err);
+    return [];
+  }
+}
+
+export async function createExpense(
+  businessId: string,
+  data: Omit<Expense, 'id' | 'businessId' | 'createdAt' | 'updatedAt'>
+): Promise<Expense> {
+  const colRef = collection(db, 'businesses', businessId, 'expenses');
+  const now = Date.now();
+  const docRef = await addDoc(colRef, {
+    ...data,
+    createdAt: now,
+    updatedAt: now,
+  });
+  return {
+    id: docRef.id,
+    businessId,
+    ...data,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+export async function updateExpense(
+  businessId: string,
+  expenseId: string,
+  data: Partial<Expense>
+): Promise<void> {
+  const docRef = doc(db, 'businesses', businessId, 'expenses', expenseId);
+  await updateDoc(docRef, {
+    ...data,
+    updatedAt: Date.now(),
+  });
+}
+
+export async function deleteExpense(businessId: string, expenseId: string): Promise<void> {
+  const docRef = doc(db, 'businesses', businessId, 'expenses', expenseId);
+  await deleteDoc(docRef);
+}
+

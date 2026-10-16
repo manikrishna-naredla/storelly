@@ -967,16 +967,28 @@ app.post(
       // 2. Webhook Idempotency: Duplicate delivery protection
       if (eventId) {
         const eventRef = doc(serverDb, "system_settings", `webhook_event_${eventId}`);
-        const existingDoc = await getDoc(eventRef);
-        if (existingDoc.exists()) {
-          console.log(`[Webhook] Duplicate event ${eventId} received. Acknowledging with 200 OK.`);
-          return res.status(200).json({ status: "already_processed" });
+        let isDuplicate = false;
+        try {
+          await runTransaction(serverDb, async (transaction) => {
+            const docSnap = await transaction.get(eventRef);
+            if (docSnap.exists()) {
+              isDuplicate = true;
+              return;
+            }
+            transaction.set(eventRef, {
+              eventId,
+              event,
+              processedAt: Date.now(),
+            });
+          });
+        } catch (txErr) {
+          console.warn("[Webhook] Transaction idempotency check warning:", txErr);
         }
-        await setDoc(eventRef, {
-          eventId,
-          event,
-          processedAt: Date.now(),
-        }).catch((e) => console.warn("[Webhook] Could not persist event log:", e));
+
+        if (isDuplicate) {
+          console.log(`[Webhook] Duplicate event ${eventId} received. Acknowledging with 200 OK.`);
+          return res.status(200).json({ status: "already_processed", eventId });
+        }
       }
 
       // 3. Process authoritative event types
@@ -1872,6 +1884,55 @@ app.post("/api/orders/verify-payment", paymentLimiter, async (req, res) => {
   }
 });
 
+// 3b-1. Create Platform Subscription Upgrade Razorpay Order
+app.post("/api/subscription/create-order", paymentLimiter, async (req, res) => {
+  try {
+    const { planId, amount, currency = "INR", businessId, customerName, customerPhone } = req.body;
+    if (!amount || Number(amount) <= 0) {
+      return res.status(400).json({ error: "Invalid plan subscription amount" });
+    }
+
+    const keyId = process.env.RAZORPAY_KEY_ID;
+    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+
+    if (!keyId || !keySecret) {
+      const mockOrderId = "order_sub_" + Date.now() + "_" + Math.random().toString(36).substring(2, 8);
+      return res.json({
+        id: mockOrderId,
+        amount: Math.round(Number(amount) * 100),
+        currency: currency || "INR",
+        keyId: "rzp_test_placeholder",
+      });
+    }
+
+    const instance = new Razorpay({
+      key_id: keyId,
+      key_secret: keySecret,
+    });
+
+    const options = {
+      amount: Math.round(Number(amount) * 100),
+      currency: currency || "INR",
+      receipt: `sub_rcpt_${Date.now()}`,
+      notes: {
+        type: "subscription",
+        planId: planId || "pro",
+        businessId: businessId || "unknown",
+        customerName: customerName || "Merchant",
+      },
+    };
+
+    const order = await instance.orders.create(options);
+    res.json({
+      ...order,
+      keyId,
+    });
+  } catch (err: any) {
+    console.error("[Subscription Order Error]:", err);
+    res.status(500).json({ error: err.message || "Failed to create subscription order" });
+  }
+});
+
 // 3b-2. Verify Platform Subscription Upgrade Payment (FAIL-CLOSED & Authoritative Mutation)
 app.post("/api/subscription/verify-payment", paymentLimiter, async (req, res) => {
   try {
@@ -2676,16 +2737,72 @@ app.post("/api/events/refund-ticket", verifyAuth, async (req: any, res: express.
       });
     }
 
-    // Authoritative State Transition in Firestore
+    // Authoritative State Transition in Firestore via Atomic Transaction
     const now = Date.now();
-    await updateDoc(ticketDocRef, {
-      paymentStatus: "refunded",
-      refundStatus: "refunded",
-      refundId: refund?.id || `rfnd_${now}`,
-      refundedAmount: refundAmount,
-      refundedAt: now,
-      status: "cancelled",
-      updatedAt: now,
+    const eventId = ticketData.eventId;
+    const eventDocRef = eventId ? doc(serverDb, "businesses", businessId, "events", eventId) : null;
+
+    await runTransaction(serverDb, async (transaction) => {
+      // 1. Read event state if associated
+      let eventSnap = null;
+      if (eventDocRef) {
+        eventSnap = await transaction.get(eventDocRef);
+      }
+
+      // 2. Update ticket status
+      transaction.update(ticketDocRef, {
+        paymentStatus: "refunded",
+        refundStatus: "refunded",
+        refundId: refund?.id || `rfnd_${now}`,
+        refundedAmount: refundAmount,
+        refundedAt: now,
+        status: "cancelled",
+        updatedAt: now,
+      });
+
+      // 3. Atomically adjust event seats and capacity
+      if (eventSnap && eventSnap.exists()) {
+        const eventData = eventSnap.data() as any;
+        const currentSold = Number(eventData.ticketsSold) || 0;
+        const capacity = Number(eventData.capacity) || 0;
+        const seatsRemaining = eventData.seatsRemaining !== undefined ? Number(eventData.seatsRemaining) : Math.max(0, capacity - currentSold);
+
+        const nextSold = Math.max(0, currentSold - 1);
+        const nextSeats = seatsRemaining + 1;
+        const nextStatus = nextSeats > 0 ? (eventData.status === "sold_out" ? "upcoming" : (eventData.status || "upcoming")) : eventData.status;
+
+        const eventUpdate: any = {
+          ticketsSold: nextSold,
+          seatsRemaining: nextSeats,
+          status: nextStatus,
+          updatedAt: now,
+        };
+
+        // If slot/schedule date was selected, adjust slot capacity
+        const selectedDate = ticketData.eventDate;
+        const selectedSlotId = ticketData.slotId;
+        const selectedTime = ticketData.eventTime;
+        if (eventData.scheduleDates && selectedDate) {
+          const updatedDates = [...eventData.scheduleDates];
+          const dateIdx = updatedDates.findIndex((d: any) => d.date === selectedDate);
+          if (dateIdx !== -1 && updatedDates[dateIdx].slots) {
+            const slots = [...updatedDates[dateIdx].slots];
+            const slotIdx = slots.findIndex((s: any) => s.id === selectedSlotId || s.startTime === selectedTime || `${s.startTime} - ${s.endTime}` === selectedTime);
+            if (slotIdx !== -1) {
+              const slot = { ...slots[slotIdx] };
+              const slotSold = Number(slot.ticketsSold) || 0;
+              const slotRemaining = Number(slot.seatsRemaining) || 0;
+              slot.ticketsSold = Math.max(0, slotSold - 1);
+              slot.seatsRemaining = slotRemaining + 1;
+              slots[slotIdx] = slot;
+              updatedDates[dateIdx] = { ...updatedDates[dateIdx], slots };
+              eventUpdate.scheduleDates = updatedDates;
+            }
+          }
+        }
+
+        transaction.update(eventDocRef!, eventUpdate);
+      }
     });
 
     // Notify Merchant of verified refund
@@ -3049,7 +3166,7 @@ async function getStoreMetaForPath(reqPath: string, host: string, protocol: stri
     let rawImage = bizData.logo || bizData.profileImage || bizData.banner || bizData.coverImage || "/main logo.jpg";
     let fullImage = rawImage;
     if (rawImage.startsWith("/")) {
-      fullImage = `${protocol}://${host}${rawImage}`;
+      fullImage = `${protocol}://${host}${rawImage.replace(/ /g, "%20")}`;
     }
 
     const fullUrl = `${protocol}://${host}/${cleanPath}`;

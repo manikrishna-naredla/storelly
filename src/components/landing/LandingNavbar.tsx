@@ -39,7 +39,12 @@ export const LandingNavbar: React.FC<Props> = ({ onOpenAuth }) => {
         {/* Logo */}
         <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => window.scrollTo(0,0)}>
           <div className="w-10 h-10 rounded-[var(--r8)] overflow-hidden border border-[var(--border)] shadow-[var(--shadow-xs)] flex items-center justify-center bg-[var(--card)]">
-            <img src={getAppLogo()} alt={`${getAppName()} Logo`} className="w-full h-full object-cover" />
+            <img 
+              src={getAppLogo()} 
+              alt={`${getAppName()} Logo`} 
+              className="w-full h-full object-cover" 
+              onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/main logo.jpg'; }}
+            />
           </div>
           <span className="text-xl font-heading font-extrabold text-[var(--t1)] tracking-tight">{getAppName()}</span>
         </div>

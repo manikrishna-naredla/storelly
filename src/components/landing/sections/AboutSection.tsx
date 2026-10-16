@@ -54,6 +54,9 @@ export const AboutSection: React.FC = () => {
                 src="/storelly1.jpg.jpeg" 
                 alt="Store Owner Managing Business" 
                 className="w-full h-auto max-h-[420px] object-contain rounded-xl mx-auto"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = '/storelly.jpg.jpeg';
+                }}
               />
             </div>
           </div>

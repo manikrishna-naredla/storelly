@@ -31,7 +31,7 @@ interface MasterLandingViewProps {
   onOpenMasterAdmin?: () => void;
 }
 
-export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth }) => {
+export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth, onOpenMasterAdmin }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [pricingPlans, setPricingPlans] = useState<PlatformPricingPlan[]>(DEFAULT_PRICING_PLANS);
@@ -100,7 +100,7 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
     { 
       icon: (
         <div className="flex items-center justify-center p-1.5 bg-white rounded-xl shadow-xs">
-          <img src="/images-1.png" alt="Direct UPI Payments" className="w-8 h-8 object-contain" />
+          <img src="/images-1.png" alt="Direct UPI Payments" className="w-8 h-8 object-contain" onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images.png'; }} />
         </div>
       ), 
       iconGradient: 'from-violet-600 to-indigo-700', 
@@ -212,7 +212,7 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
     { 
       title: 'Direct UPI Bank Settlements', 
       desc: 'NPCI-compliant direct transfers. 100% of customer payments deposit straight into your bank account.',
-      icon: <img src="/images-1.png" alt="Direct UPI Bank Settlements" className="w-8 h-8 object-contain" />
+      icon: <img src="/images-1.png" alt="Direct UPI Bank Settlements" className="w-8 h-8 object-contain" onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images.png'; }} />
     },
     { 
       title: 'Zero Sales Commission', 
@@ -229,7 +229,7 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-8">
           <div className="flex items-center gap-2.5 cursor-pointer shrink-0" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
             <div className="w-8 h-8 rounded-[var(--r8)] overflow-hidden border border-[var(--border)] shadow-[var(--shadow-xs)] flex items-center justify-center bg-[var(--card)]">
-              <img src={getAppLogo()} alt={`${getAppName()} Logo`} className="w-full h-full object-cover" />
+              <img src={getAppLogo()} alt={`${getAppName()} Logo`} className="w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/main logo.jpg'; }} />
             </div>
             <span className="text-xl font-heading font-black text-[var(--t1)] tracking-tight whitespace-nowrap">{getAppName()}</span>
           </div>
@@ -415,7 +415,7 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
               {/* Direct UPI Payments Badge */}
               <div className="pt-3 flex flex-wrap items-center justify-center lg:justify-start gap-3">
                 <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-[var(--r12)] bg-[var(--card)] border border-[var(--border)] shadow-[var(--shadow-xs)] text-xs font-bold text-[var(--t1)]">
-                  <img src="/images-1.png" alt="Direct UPI Payments" className="w-5 h-5 object-contain shrink-0" />
+                  <img src="/images-1.png" alt="Direct UPI Payments" className="w-5 h-5 object-contain shrink-0" onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images.png'; }} />
                   <span>Direct UPI Payments Accepted (Google Pay, PhonePe, Paytm, BHIM)</span>
                 </div>
               </div>
@@ -440,6 +440,9 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
                         WebkitMaskImage: 'radial-gradient(ellipse 99% 99% at 50% 50%, black 94%, transparent 100%)',
                         maskImage: 'radial-gradient(ellipse 99% 99% at 50% 50%, black 94%, transparent 100%)'
                       }} 
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = '/ladingpage-1.jpeg';
+                      }}
                     />
                   </div>
                </div>
@@ -518,12 +521,12 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
 
                   <div className="bg-[var(--card)] rounded-[var(--r12)] p-5 shadow-[var(--shadow-sm)] border border-[var(--border)] flex items-start gap-4 hover:shadow-[var(--shadow)] transition">
                     <div className="w-12 h-12 rounded-[var(--r8)] bg-white border border-[var(--border)] flex items-center justify-center shrink-0 p-1.5 shadow-xs">
-                      <img src="/images-1.png" alt="Direct UPI Bank Settlement" className="w-full h-full object-contain" />
+                      <img src="/images-1.png" alt="Direct UPI Bank Settlement" className="w-full h-full object-contain" onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images.png'; }} />
                     </div>
                     <div>
                       <h3 className="font-heading font-bold text-lg text-[var(--t1)] flex items-center gap-2">
                         <span>Direct UPI Bank Settlement</span>
-                        <img src="/images-1.png" alt="UPI" className="h-4 w-4 object-contain inline" />
+                        <img src="/images-1.png" alt="UPI" className="h-4 w-4 object-contain inline" onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images.png'; }} />
                       </h3>
                       <p className="text-[var(--t2)] text-sm mt-1">Accept Google Pay, PhonePe, and Paytm. Keep 100% of every sale with 0% platform cuts.</p>
                     </div>
@@ -625,7 +628,7 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
                     <div>
                       <h3 className="font-heading font-bold text-lg text-[var(--t1)] flex items-center gap-2">
                         <span>Book Paid 1:1 Video Consultations</span>
-                        <img src="/images-1.png" alt="UPI" className="h-4 w-4 object-contain inline" />
+                        <img src="/images-1.png" alt="UPI" className="h-4 w-4 object-contain inline" onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images.png'; }} />
                       </h3>
                       <p className="text-[var(--t2)] text-sm mt-1">Clients pick an open time slot and pay upfront via UPI before automated Google Meet links are generated.</p>
                     </div>
@@ -660,6 +663,9 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
                       alt="Storelly Universal Bio Link & Digital Store" 
                       className="w-full h-auto object-contain rounded-[var(--r16)] transition-transform duration-500 hover:scale-[1.01]" 
                       style={{ imageRendering: "high-quality" }} 
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = '/storelly3.jpg.jpeg';
+                      }}
                     />
                  </div>
               </div>
@@ -733,7 +739,7 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
                 <h3 className="font-heading font-bold text-[var(--t1)] text-xl mb-3 flex items-center justify-center gap-2 flex-wrap">
                   <span>{step.title}</span>
                   {step.title.includes('UPI') && (
-                    <img src="/images-1.png" alt="UPI" className="w-5 h-5 object-contain inline shrink-0" />
+                    <img src="/images-1.png" alt="UPI" className="w-5 h-5 object-contain inline shrink-0" onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images.png'; }} />
                   )}
                 </h3>
                 <p className="text-[var(--t2)] font-medium leading-relaxed">{step.desc}</p>
@@ -799,7 +805,7 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
                   <Check className="w-4 h-4 text-[var(--g400)]" /> 1-Click Scan to Shop
                 </div>
                 <div className="bg-white/10 px-3.5 py-2 rounded-lg border border-white/10 text-white text-xs font-bold flex items-center gap-2">
-                  <img src="/images-1.png" alt="UPI" className="w-4 h-4 object-contain" /> Direct UPI Payment
+                  <img src="/images-1.png" alt="UPI" className="w-4 h-4 object-contain" onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images.png'; }} /> Direct UPI Payment
                 </div>
               </div>
 
@@ -831,7 +837,7 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
 
                   {/* UPI Supported row on Standee */}
                   <div className="flex items-center justify-center gap-2 py-1 px-3 bg-slate-50 rounded-lg border border-slate-200 text-[10px] font-bold text-slate-600">
-                    <img src="/images-1.png" alt="UPI" className="w-4 h-4 object-contain shrink-0" />
+                    <img src="/images-1.png" alt="UPI" className="w-4 h-4 object-contain shrink-0" onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images.png'; }} />
                     <span>Instant UPI Payments (0% Fee)</span>
                   </div>
 
@@ -1007,7 +1013,7 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
                       <div key={i} className="flex items-center gap-3">
                         <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 bg-[var(--g100)]">
                           {feat.toLowerCase().includes('upi') ? (
-                            <img src="/images-1.png" alt="UPI" className="w-4 h-4 object-contain" />
+                            <img src="/images-1.png" alt="UPI" className="w-4 h-4 object-contain" onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images.png'; }} />
                           ) : (
                             <Check className="w-4 h-4 text-[var(--g600)] font-bold" />
                           )}
@@ -1015,7 +1021,7 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
                         <span className={`text-sm sm:text-base ${isRecommended ? 'font-bold text-[var(--t1)]' : 'font-medium text-[var(--t2)]'} flex items-center gap-1.5`}>
                           <span>{feat}</span>
                           {feat.toLowerCase().includes('upi') && (
-                            <img src="/images-1.png" alt="UPI" className="w-4 h-4 object-contain inline shrink-0" />
+                            <img src="/images-1.png" alt="UPI" className="w-4 h-4 object-contain inline shrink-0" onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images.png'; }} />
                           )}
                         </span>
                       </div>
@@ -1076,7 +1082,7 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
                       <div>{item.a}</div>
                       {(item.q.includes('UPI') || item.a.includes('UPI')) && (
                         <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-xs font-bold text-[var(--t1)]">
-                          <img src="/images-1.png" alt="UPI" className="w-5 h-5 object-contain shrink-0" />
+                          <img src="/images-1.png" alt="UPI" className="w-5 h-5 object-contain shrink-0" onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images.png'; }} />
                           <span>Direct UPI Settlements • Zero Fees • Instant Transfer</span>
                         </div>
                       )}
@@ -1167,7 +1173,18 @@ export const MasterLandingView: React.FC<MasterLandingViewProps> = ({ onOpenAuth
           
           <div className="mt-16 pt-8 border-t border-[var(--g800)] text-center text-[var(--g300)] font-medium flex flex-col md:flex-row justify-between items-center gap-4">
              <p>&copy; {new Date().getFullYear()} Storelly. All rights reserved.</p>
-             <p className="flex items-center gap-1">Made with <span className="text-rose-400">♥</span> for Indian Businesses</p>
+             <div className="flex items-center gap-4 flex-wrap justify-center">
+               {onOpenMasterAdmin && (
+                 <button
+                   type="button"
+                   onClick={onOpenMasterAdmin}
+                   className="text-emerald-300 hover:text-white font-bold flex items-center gap-1 transition cursor-pointer bg-emerald-950/60 border border-emerald-800/60 px-3 py-1 rounded-lg text-xs"
+                 >
+                   <ShieldCheck className="w-3.5 h-3.5" /> Master Admin Portal
+                 </button>
+               )}
+               <p className="flex items-center gap-1">Made with <span className="text-rose-400">♥</span> for Indian Businesses</p>
+             </div>
           </div>
         </div>
       </footer>

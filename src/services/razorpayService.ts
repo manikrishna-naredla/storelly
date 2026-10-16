@@ -139,13 +139,14 @@ export async function initiateRazorpaySubscription(
   // 1. Create order on the server
   let orderId = "";
   try {
-    const orderRes = await fetch("/api/digital/create-order", {
+    const orderRes = await fetch("/api/subscription/create-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        itemId: plan.id,
+        planId: plan.id,
         amount: plan.monthlyPrice,
         currency: config.currency || "INR",
+        businessId: business?.id,
         customerName: customer?.name || business?.name || "Merchant",
         customerPhone: customer?.phone || business?.phone || "",
       }),

@@ -171,6 +171,9 @@ export const HeroSection: React.FC<Props> = ({ onOpenAuth }) => {
                 src={heroConfig.heroImageUrl || "/landingpage.jpeg"} 
                 alt="Storelly Business Showcase" 
                 className="w-full h-auto max-h-[580px] lg:max-h-[640px] object-cover rounded-[var(--r12)] border border-[var(--border)] shadow-[var(--shadow-sm)] mx-auto"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = '/landingpage.jpeg';
+                }}
               />
             </div>
           </div>

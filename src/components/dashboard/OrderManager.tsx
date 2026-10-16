@@ -31,7 +31,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { BusinessProfile, Order, OrderStatus } from '../../types';
-import { getOrders, updateOrderStatus, subscribeToOrders, deleteOrder } from '../../services/firebaseService';
+import { getOrders, updateOrderStatus, updateOrder, subscribeToOrders, deleteOrder } from '../../services/firebaseService';
 import { auth } from '../../config/firebase';
 import { SwipeToDelete } from '../common/SwipeToDelete';
 import { exportToCSV } from '../../utils/export';
@@ -132,6 +132,24 @@ export const OrderManager: React.FC<any> = ({ business }) => {
       }
     } catch (err) {
       console.error('Error updating order status:', err);
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
+  const handlePaymentStatusToggle = async (order: Order) => {
+    const nextStatus = order.paymentStatus === 'paid' ? 'pending' : 'paid';
+    try {
+      setIsUpdatingStatus(true);
+      await updateOrder(business.id, order.id, { paymentStatus: nextStatus });
+      setOrders((prev) =>
+        prev.map((o) => (o.id === order.id ? { ...o, paymentStatus: nextStatus } : o))
+      );
+      if (selectedOrder && selectedOrder.id === order.id) {
+        setSelectedOrder({ ...selectedOrder, paymentStatus: nextStatus });
+      }
+    } catch (err) {
+      console.error('Error toggling payment status:', err);
     } finally {
       setIsUpdatingStatus(false);
     }
@@ -604,17 +622,22 @@ export const OrderManager: React.FC<any> = ({ business }) => {
 
                   <div className="flex items-center justify-between">
                     <span className="text-[var(--t3)]">Payment Status:</span>
-                    <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider ${
+                    <button
+                      type="button"
+                      onClick={() => handlePaymentStatusToggle(selectedOrder)}
+                      disabled={isUpdatingStatus}
+                      title="Click to toggle payment verification status"
+                      className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider cursor-pointer transition flex items-center gap-1 ${
                         selectedOrder.paymentStatus === 'paid'
-                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200'
                           : selectedOrder.paymentStatus === 'failed'
                           ? 'bg-rose-100 text-rose-800 border border-rose-300'
-                          : 'bg-amber-100 text-amber-800 border border-amber-300'
+                          : 'bg-amber-100 text-amber-800 border border-amber-300 hover:bg-amber-200'
                       }`}
                     >
-                      {selectedOrder.paymentStatus || 'Pending'}
-                    </span>
+                      <span>{selectedOrder.paymentStatus === 'paid' ? '✓ Paid' : (selectedOrder.paymentStatus || 'Pending')}</span>
+                      <span className="text-[9px] opacity-75">(Toggle)</span>
+                    </button>
                   </div>
 
                   {selectedOrder.razorpayPaymentId && (

@@ -273,7 +273,7 @@ function injectStoreMetadata(business: BusinessProfile, platformSeo?: PlatformSe
     updateMeta('google-site-verification', seo.googleVerification, false);
   }
 
-  const img = business.banner || business.logo || generateFallbackOgImage(business.name);
+  const img = business.logo || business.profileImage || business.banner || generateFallbackOgImage(business.name);
   const url = window.location.href;
   const imageType = img.startsWith('data:image/svg')
     ? 'image/svg+xml'

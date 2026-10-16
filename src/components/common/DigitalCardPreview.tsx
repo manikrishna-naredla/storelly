@@ -210,15 +210,11 @@ export const DigitalCardPreview: React.FC<DigitalCardPreviewProps> = ({ business
   };
 
   const richShareText = 
-    `🌟 *${business.name.toUpperCase()}* 🌟\n` +
-    `${business.tagline || `Verified ${bizMeta.label} Storefront`}\n\n` +
-    `🛒 *Explore Catalog & Place Orders / Bookings Instantly!*\n` +
-    `${business.description ? `📝 _"${business.description}"_\n\n` : ''}` +
-    `📍 Location: ${business.city || business.address || 'Online Store'}\n` +
-    `📞 WhatsApp/Phone: ${business.whatsapp || business.phone}\n\n` +
-    `👇 *VISIT STORE NOW (100% Secure & Fast)*:\n` +
-    `🔗 ${storeUrl}\n\n` +
-    `✨ _Tap the link above to browse products, check special offers, and order directly!_`;
+    `🏪 *${business.name}*\n` +
+    `✅ Verified ${bizMeta.label} • ${business.tagline || 'Digital Storefront'}\n\n` +
+    `🛒 *Explore Catalog, Special Offers & Order Directly:*\n` +
+    `👉 ${storeUrl}\n\n` +
+    `📍 ${business.city || business.address || 'Pan-India Service'}`;
 
   const handleCopyRichCard = () => {
     navigator.clipboard.writeText(richShareText);

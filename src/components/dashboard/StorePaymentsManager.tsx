@@ -60,6 +60,14 @@ export const StorePaymentsManager: React.FC<StorePaymentsManagerProps> = ({
     business.paymentInstructions || ''
   );
 
+  // Custom Razorpay Credentials
+  const [razorpayKeyId, setRazorpayKeyId] = useState(
+    business.paymentConfig?.razorpayKeyId || ''
+  );
+  const [razorpayKeySecret, setRazorpayKeySecret] = useState(
+    business.paymentConfig?.razorpayKeySecret || ''
+  );
+
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -79,6 +87,8 @@ export const StorePaymentsManager: React.FC<StorePaymentsManagerProps> = ({
     setBankName(business.bankDetails?.bankName || '');
     setBranchName(business.bankDetails?.branchName || '');
     setPaymentInstructions(business.paymentInstructions || '');
+    setRazorpayKeyId(business.paymentConfig?.razorpayKeyId || '');
+    setRazorpayKeySecret(business.paymentConfig?.razorpayKeySecret || '');
     setTouchedFields({});
     setError(null);
   }, [business.id]);
@@ -129,7 +139,15 @@ export const StorePaymentsManager: React.FC<StorePaymentsManagerProps> = ({
       setError(null);
 
       // Sanitize payload strictly for current business.id
-      const payload = getSanitizedPayload(business.id);
+      const basePayload = getSanitizedPayload(business.id);
+      const payload = {
+        ...basePayload,
+        paymentConfig: {
+          ...(business.paymentConfig || {}),
+          razorpayKeyId: razorpayKeyId.trim() || undefined,
+          razorpayKeySecret: razorpayKeySecret.trim() || undefined,
+        },
+      };
 
       await updateBusinessProfile(business.id, payload);
       onBusinessUpdated({
@@ -428,6 +446,50 @@ export const StorePaymentsManager: React.FC<StorePaymentsManagerProps> = ({
               </div>
             </div>
           )}
+
+          {/* Custom Razorpay Gateway Keys Card */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-slate-200/80 space-y-4">
+            <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
+              <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
+                <Zap className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900">Custom Razorpay Merchant Gateway (Optional)</h3>
+                <p className="text-xs text-slate-500">Provide your own Razorpay API keys for direct credit card &amp; netbanking settlements</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Razorpay Key ID
+                </label>
+                <input
+                  type="text"
+                  value={razorpayKeyId}
+                  onChange={(e) => setRazorpayKeyId(e.target.value)}
+                  placeholder="rzp_live_..."
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs text-slate-900 focus:ring-2 focus:ring-amber-500 focus:bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Razorpay Key Secret
+                </label>
+                <input
+                  type="password"
+                  value={razorpayKeySecret}
+                  onChange={(e) => setRazorpayKeySecret(e.target.value)}
+                  placeholder="••••••••••••••••"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs text-slate-900 focus:ring-2 focus:ring-amber-500 focus:bg-white"
+                />
+              </div>
+            </div>
+            <p className="text-[11px] text-slate-400">
+              When configured, store order payments route through your private Razorpay merchant account instead of the platform default gateway.
+            </p>
+          </div>
 
           {/* Payment Notes Card */}
           <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-slate-200/80 space-y-3">

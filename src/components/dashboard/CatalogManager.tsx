@@ -1429,6 +1429,26 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({ business }) => {
     }
   };
 
+  const handleToggleInStock = async (item: CatalogItem) => {
+    try {
+      const nextInStock = !(item.inStock ?? true);
+      await updateCatalogItem(business.id, item.id, { inStock: nextInStock });
+      setItems(prev => prev.map(i => (i.id === item.id ? { ...i, inStock: nextInStock } : i)));
+    } catch (err) {
+      console.error('Error toggling inStock:', err);
+    }
+  };
+
+  const handleToggleFeatured = async (item: CatalogItem) => {
+    try {
+      const nextFeatured = !(item.isFeatured ?? false);
+      await updateCatalogItem(business.id, item.id, { isFeatured: nextFeatured });
+      setItems(prev => prev.map(i => (i.id === item.id ? { ...i, isFeatured: nextFeatured } : i)));
+    } catch (err) {
+      console.error('Error toggling isFeatured:', err);
+    }
+  };
+
   const handleDuplicate = async (item: CatalogItem) => {
     try {
       await duplicateCatalogItem(business.id, item);
@@ -1792,22 +1812,35 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({ business }) => {
                         )}
                       </div>
                     </div>
-                    <button
-                      onClick={() => handleToggleActive(item)}
-                      title={item.isActive ? 'Live on Storefront' : 'Hidden'}
-                      className={`p-1.5 rounded-[var(--r8)] border transition ${
-                        item.isActive
-                          ? 'bg-[var(--g100)] text-[var(--g700)] border-[var(--g200)] hover:bg-[var(--g200)]'
-                          : 'bg-[var(--bg)] text-[var(--t3)] border-[var(--border)] hover:bg-slate-200'
-                      }`}
-                    >
-                      {item.isActive ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => handleToggleFeatured(item)}
+                        title={item.isFeatured ? 'Featured Product (Click to unstar)' : 'Mark as Featured Item'}
+                        className={`p-1.5 rounded-[var(--r8)] border transition cursor-pointer ${
+                          item.isFeatured
+                            ? 'bg-amber-100 text-amber-800 border-amber-300'
+                            : 'bg-[var(--bg)] text-[var(--t3)] border-[var(--border)] hover:bg-amber-50'
+                        }`}
+                      >
+                        <Sparkles className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleToggleActive(item)}
+                        title={item.isActive ? 'Live on Storefront' : 'Hidden'}
+                        className={`p-1.5 rounded-[var(--r8)] border transition cursor-pointer ${
+                          item.isActive
+                            ? 'bg-[var(--g100)] text-[var(--g700)] border-[var(--g200)] hover:bg-[var(--g200)]'
+                            : 'bg-[var(--bg)] text-[var(--t3)] border-[var(--border)] hover:bg-slate-200'
+                        }`}
+                      >
+                        {item.isActive ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
                   </div>
                 </div>
 
                 <div className="pt-2 border-t border-[var(--border)] flex justify-between items-center">
-                  <div className="flex items-center gap-1.5 text-[11px] text-[var(--t2)]">
+                  <div className="flex items-center gap-1.5 text-[11px] text-[var(--t2)] flex-wrap">
                     {item.productType === 'digital_file' && (
                       <span className="px-2 py-0.5 rounded-[var(--r4)] bg-[var(--p100)] text-[var(--p500)] font-bold text-[10px] uppercase">
                         {item.digitalFileType || 'FILE'}
@@ -1819,9 +1852,17 @@ export const CatalogManager: React.FC<CatalogManagerProps> = ({ business }) => {
                       </span>
                     )}
                     {(!item.productType || item.productType === 'physical') && (
-                      <span className="px-2 py-0.5 rounded-[var(--r4)] bg-[var(--bg)] text-[var(--t2)] font-bold text-[10px]">
-                        📦 Physical
-                      </span>
+                      <button
+                        onClick={() => handleToggleInStock(item)}
+                        className={`px-2 py-0.5 rounded-[var(--r4)] font-bold text-[10px] border cursor-pointer transition ${
+                          item.inStock ?? true
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                            : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
+                        }`}
+                        title="Click to toggle stock status"
+                      >
+                        {item.inStock ?? true ? 'In Stock' : 'Out of Stock'}
+                      </button>
                     )}
                   </div>
                   <div className="flex gap-1">

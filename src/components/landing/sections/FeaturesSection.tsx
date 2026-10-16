@@ -53,7 +53,14 @@ export const FeaturesSection: React.FC = () => {
           </div>
           <div className="relative flex items-center justify-center">
              <div className="w-full max-w-md transform hover:scale-105 transition-transform duration-500">
-               <img src="/storelly2.jpg.jpeg" alt="Digital Storefront Showcase" className="w-full h-80 object-cover rounded-2xl shadow-xl border border-slate-200" />
+               <img 
+                 src="/storelly2.jpg.jpeg" 
+                 alt="Digital Storefront Showcase" 
+                 className="w-full h-80 object-cover rounded-2xl shadow-xl border border-slate-200" 
+                 onError={(e) => {
+                   (e.currentTarget as HTMLImageElement).src = '/storelly.jpg.jpeg';
+                 }}
+               />
              </div>
           </div>
         </div>

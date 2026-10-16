@@ -103,15 +103,13 @@ export const VendorTrustShareCard: React.FC<VendorTrustShareCardProps> = ({
   );
 
   const whatsappShareText = encodeURIComponent(
-    `✨ *${headline.toUpperCase()}* ✨\n` +
-    `• ${subHeadline} •\n\n` +
-    `⭐ *${ratingValue}* (${reviewCountValue} Reviews) • ${happyCustomersText}\n` +
-    `🌿 ${pill1} | 🛡️ ${pill2} | 🚚 ${pill3} | ❤️ ${pill4}\n\n` +
-    `🎁 *SPECIAL OFFER:* ${couponDiscount}\n` +
-    `🏷️ Use Coupon Code: *${couponCode}*\n\n` +
-    `👇 *VISIT OUR DIGITAL STORE & ORDER DIRECTLY ON WHATSAPP:*\n` +
-    `🔗 ${storeUrl}\n\n` +
-    `📍 ${business.city || 'Pan-India Delivery'}`
+    `🏪 *${headline}*\n` +
+    `✅ Verified Seller • ⭐ ${ratingValue} (${reviewCountValue} Reviews)\n` +
+    `${subHeadline ? `• ${subHeadline} •\n` : ''}\n` +
+    `🎁 *Special Offer:* ${couponDiscount}\n` +
+    `🏷️ Use Promo Code: *${couponCode}*\n\n` +
+    `🛒 *Visit Official Store & Order Directly:*\n` +
+    `👉 ${storeUrl}`
   );
 
   // 1. Copy Link

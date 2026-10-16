@@ -1120,5 +1120,17 @@ export interface AffiliateProductItem {
   updatedAt?: number;
 }
 
+export interface Expense {
+  id: string;
+  businessId: string;
+  title: string;
+  category: 'inventory' | 'rent' | 'utilities' | 'salaries' | 'marketing' | 'software' | 'logistics' | 'other';
+  amount: number;
+  date: string;
+  notes?: string;
+  createdAt: number;
+  updatedAt?: number;
+}
+
 
 

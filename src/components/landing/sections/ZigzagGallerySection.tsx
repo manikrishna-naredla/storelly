@@ -327,6 +327,9 @@ export const ZigzagGallerySection: React.FC<Props> = ({ onOpenAuth }) => {
                         alt={item.title} 
                         referrerPolicy="no-referrer"
                         className="w-full h-auto max-h-[420px] object-contain rounded-2xl shadow-md transition-transform duration-500 group-hover:scale-[1.02]"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = '/storelly.jpg.jpeg';
+                        }}
                       />
                       <div className="absolute top-6 left-6 bg-slate-900/90 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-bold text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 shadow-lg">
                         <Zap className="w-3.5 h-3.5 text-emerald-400" /> {item.badge}

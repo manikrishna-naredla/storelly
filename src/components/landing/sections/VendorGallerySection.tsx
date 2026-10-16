@@ -55,6 +55,9 @@ export const VendorGallerySection: React.FC = () => {
                   src={item.image} 
                   alt={item.title} 
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/storelly.jpg.jpeg';
+                  }}
                 />
                 <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-full text-[11px] font-extrabold text-[#155330] flex items-center gap-1 shadow-sm">
                   <Award className="w-3 h-3 text-[#2f9e5c]" /> {item.sales}
