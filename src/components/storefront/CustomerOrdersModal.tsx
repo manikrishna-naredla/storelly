@@ -36,6 +36,7 @@ export const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
     return localStorage.getItem(`storelly_customer_phone_${business.id}`) || '';
   });
   const [searchQuery, setSearchQuery] = useState('');
+  const [lookupOrderIdInput, setLookupOrderIdInput] = useState('');
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [orderToCancel, setOrderToCancel] = useState<Order | null>(null);
@@ -43,45 +44,73 @@ export const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
   const fetchStoreOrders = async () => {
     try {
       setIsLoading(true);
-      // Retrieve locally stored order IDs placed by this user/device
+      const activePhone = filterPhone.trim() || localStorage.getItem(`storelly_customer_phone_${business.id}`) || '';
       const localOrderIds: string[] = JSON.parse(
         localStorage.getItem(`storelly_my_order_ids_${business.id}`) || '[]'
       );
 
       const customerOrders: Order[] = [];
 
-      // Securely fetch each permitted order document directly by ID
       for (const orderId of localOrderIds) {
         try {
-          const order = await getOrder(business.id, orderId);
-          if (order) {
-            customerOrders.push(order);
-          }
-        } catch {
-          // ignore individual fetch errors
-        }
-      }
-
-      // If user typed a search query that looks like an order ID not in local list, check order tracking endpoint
-      if (searchQuery.trim().length > 3 && !customerOrders.some(o => o.id === searchQuery.trim() || o.orderNumber === searchQuery.trim())) {
-        try {
-          const res = await fetch(`/api/orders/track?businessId=${encodeURIComponent(business.id)}&orderId=${encodeURIComponent(searchQuery.trim())}${filterPhone ? `&phone=${encodeURIComponent(filterPhone)}` : ''}`);
+          const res = await fetch('/api/orders/track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              businessId: business.id,
+              orderId,
+              customerPhone: activePhone || undefined,
+            }),
+          });
           if (res.ok) {
             const data = await res.json();
             if (data.success && data.order) {
               customerOrders.push(data.order);
             }
+          } else {
+            const order = await getOrder(business.id, orderId).catch(() => null);
+            if (order) customerOrders.push(order);
           }
         } catch {
-          // ignore
+          try {
+            const order = await getOrder(business.id, orderId).catch(() => null);
+            if (order) customerOrders.push(order);
+          } catch {}
         }
       }
 
-      // Sort recent first
-      customerOrders.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      const targetLookupId = searchQuery.trim() || lookupOrderIdInput.trim();
+      if (targetLookupId && !customerOrders.some(o => o.id === targetLookupId || o.orderNumber === targetLookupId)) {
+        try {
+          const res = await fetch('/api/orders/track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              businessId: business.id,
+              orderId: targetLookupId,
+              customerPhone: activePhone || undefined,
+            }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.success && data.order) {
+              customerOrders.push(data.order);
+              const existingIds: string[] = JSON.parse(
+                localStorage.getItem(`storelly_my_order_ids_${business.id}`) || '[]'
+              );
+              if (!existingIds.includes(data.order.id)) {
+                existingIds.unshift(data.order.id);
+                localStorage.setItem(`storelly_my_order_ids_${business.id}`, JSON.stringify(existingIds));
+              }
+            }
+          }
+        } catch {}
+      }
 
-      // Filter by phone or search query if customer entered one
-      const filtered = customerOrders.filter((o) => {
+      customerOrders.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      const uniqueOrders = Array.from(new Map(customerOrders.map(o => [o.id, o])).values());
+
+      const filtered = uniqueOrders.filter((o) => {
         if (filterPhone && o.customerPhone && !o.customerPhone.includes(filterPhone)) return false;
         if (searchQuery && !o.orderNumber?.toLowerCase().includes(searchQuery.toLowerCase()) && !o.id.toLowerCase().includes(searchQuery.toLowerCase())) return false;
         return true;
@@ -104,9 +133,22 @@ export const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
   const confirmCancelOrder = async () => {
     if (!orderToCancel) return;
     const orderId = orderToCancel.id;
+    const activePhone = filterPhone.trim() || localStorage.getItem(`storelly_customer_phone_${business.id}`) || orderToCancel.customerPhone || '';
     try {
       setActionLoadingId(orderId);
-      await updateOrderStatus(business.id, orderId, 'cancelled');
+      const res = await fetch('/api/orders/cancel-public', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          businessId: business.id,
+          orderId,
+          customerPhone: activePhone,
+        }),
+      });
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || 'Failed to cancel order');
+      }
       setOrders((prev) =>
         prev.map((o) => (o.id === orderId ? { ...o, status: 'cancelled' as OrderStatus } : o))
       );
@@ -199,9 +241,20 @@ export const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
           </button>
         </div>
 
-        {/* Filter bar */}
-        <div className="p-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row gap-3 items-center justify-between">
-          <div className="w-full sm:w-auto flex-1">
+        {/* Filter & Lookup bar */}
+        <div className="p-4 bg-slate-50 border-b border-slate-200 flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-700">Track & Lookup Orders</span>
+            <button
+              type="button"
+              onClick={fetchStoreOrders}
+              className="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
+            </button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <input
               type="text"
               value={filterPhone}
@@ -209,18 +262,26 @@ export const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
                 setFilterPhone(e.target.value);
                 localStorage.setItem(`storelly_customer_phone_${business.id}`, e.target.value);
               }}
-              placeholder="Filter by your WhatsApp / Phone number..."
-              className="w-full px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+              placeholder="WhatsApp / Phone number..."
+              className="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
             />
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={lookupOrderIdInput}
+                onChange={(e) => setLookupOrderIdInput(e.target.value)}
+                placeholder="Order ID / #Number"
+                className="flex-1 px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+              />
+              <button
+                type="button"
+                onClick={fetchStoreOrders}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition cursor-pointer shadow-xs shrink-0"
+              >
+                Track
+              </button>
+            </div>
           </div>
-          <button
-            type="button"
-            onClick={fetchStoreOrders}
-            className="px-3.5 py-2 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 flex items-center gap-1.5 transition cursor-pointer shadow-xs shrink-0"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-            <span>Refresh Orders</span>
-          </button>
         </div>
 
         {/* Error notification banner */}

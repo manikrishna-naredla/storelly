@@ -198,3 +198,21 @@ export interface PlatformCustomDomainsConfig {
   updatedAt?: number;
 }
 
+export interface PlatformConfigData {
+  announcements: Array<{ id: string; title: string; message: string; type: 'info' | 'warning' | 'promo'; active: boolean; createdAt: number }>;
+  faqs: Array<{ id: string; question: string; answer: string; category: string }>;
+  businessTypes: Array<{ id: string; name: string; slug: string; mode: string; active: boolean }>;
+  featureFlags: {
+    maintenanceMode: boolean;
+    allowNewRegistrations: boolean;
+    aiAssistantEnabled: boolean;
+  };
+  supportConfig: {
+    whatsapp: string;
+    email: string;
+    helpCenterUrl: string;
+  };
+  updatedAt: number;
+}
+
+

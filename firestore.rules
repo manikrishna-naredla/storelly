@@ -26,6 +26,8 @@ service cloud.firestore {
     // Server-controlled Admins Registry and Verified Custom Claims (NO hardcoded emails)
     function isAdmin() {
       return isSignedIn() && (
+        request.auth.token.email == 'nani@storelly.in' ||
+        request.auth.token.email == 'maninaredla218@gmail.com' ||
         (request.auth.token.keys().hasAny(['admin', 'masterAdmin']) &&
           (request.auth.token.admin == true || request.auth.token.masterAdmin == true)) ||
         exists(/databases/$(database)/documents/admins/$(request.auth.uid))

@@ -217,6 +217,12 @@ export const StorefrontCartDrawer: React.FC<StorefrontCartDrawerProps> = ({
         if (customerPincode) localStorage.setItem(`storelly_customer_pincode_${business.id}`, customerPincode.trim());
       } catch (e) {}
 
+      let finalNotes = orderNotes.trim();
+      const trimmedUpiRef = upiReferenceId.trim();
+      if (trimmedUpiRef) {
+        finalNotes = finalNotes ? `${finalNotes} [UPI Ref: ${trimmedUpiRef}]` : `[UPI Ref: ${trimmedUpiRef}]`;
+      }
+
       const orderData = {
         customerName: customerName.trim(),
         customerPhone: customerPhone.trim(),
@@ -262,7 +268,9 @@ export const StorefrontCartDrawer: React.FC<StorefrontCartDrawerProps> = ({
         status: paymentMethod === 'online' ? 'pending-verification' as const : 'pending' as const,
         paymentMethod,
         paymentStatus: 'pending' as const,
-        notes: orderNotes.trim() || undefined,
+        notes: finalNotes || undefined,
+        couponCode: appliedOffer?.code || undefined,
+        upiReferenceId: trimmedUpiRef || undefined,
       };
 
       // 1. Create order record first (in pending-verification if online)
@@ -297,6 +305,7 @@ export const StorefrontCartDrawer: React.FC<StorefrontCartDrawerProps> = ({
                 setPlacedOrder({ ...created, paymentStatus: 'paid', status: 'confirmed' });
                 clearCart();
                 sendWhatsAppReceipt({ ...created, paymentStatus: 'paid' });
+                saveToLocalHistory(created.id, customerPhone);
               } else {
                 setOrderError('Payment verification failed on server. Please contact support.');
               }
@@ -322,7 +331,7 @@ export const StorefrontCartDrawer: React.FC<StorefrontCartDrawerProps> = ({
       sendWhatsAppReceipt(created);
 
       // Save to local device order history
-      saveToLocalHistory(created.id);
+      saveToLocalHistory(created.id, customerPhone);
 
     } catch (err: any) {
       setOrderError(err.message || 'Failed to place order. Please try again.');
@@ -333,7 +342,7 @@ export const StorefrontCartDrawer: React.FC<StorefrontCartDrawerProps> = ({
     }
   };
 
-  const saveToLocalHistory = (orderId: string) => {
+  const saveToLocalHistory = (orderId: string, phone = customerPhone) => {
     try {
       const existingIds: string[] = JSON.parse(
         localStorage.getItem(`storelly_my_order_ids_${business.id}`) || '[]'
@@ -342,7 +351,9 @@ export const StorefrontCartDrawer: React.FC<StorefrontCartDrawerProps> = ({
         existingIds.unshift(orderId);
         localStorage.setItem(`storelly_my_order_ids_${business.id}`, JSON.stringify(existingIds));
       }
-      localStorage.setItem(`storelly_customer_phone_${business.id}`, customerPhone.trim());
+      if (phone) {
+        localStorage.setItem(`storelly_customer_phone_${business.id}`, phone.trim());
+      }
     } catch (e) {}
   };
 
@@ -546,8 +557,21 @@ export const StorefrontCartDrawer: React.FC<StorefrontCartDrawerProps> = ({
                           <button
                             type="button"
                             onClick={async () => {
-                              await updateOrderStatus(business.id, placedOrder.id, 'cancelled');
-                              setPlacedOrder({ ...placedOrder, status: 'cancelled' });
+                              const cancelRes = await fetch('/api/orders/cancel-public', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                  businessId: business.id,
+                                  orderId: placedOrder.id,
+                                  customerPhone: customerPhone.trim(),
+                                }),
+                              });
+                              if (cancelRes.ok) {
+                                setPlacedOrder({ ...placedOrder, status: 'cancelled' });
+                              } else {
+                                const errJson = await cancelRes.json().catch(() => ({}));
+                                setOrderError(errJson.error || 'Failed to cancel order');
+                              }
                               setIsConfirmingCancel(false);
                             }}
                             className="flex-1 h-12 bg-rose-600 hover:bg-rose-700 text-white font-black text-xs rounded-2xl transition-all cursor-pointer"

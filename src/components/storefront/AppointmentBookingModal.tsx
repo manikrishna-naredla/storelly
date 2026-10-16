@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   CalendarCheck,
@@ -11,7 +11,7 @@ import {
   MessageCircle,
 } from 'lucide-react';
 import { BusinessProfile, CatalogItem, Booking } from '../../types';
-import { createBooking } from '../../services/firebaseService';
+import { createBooking, getBookedSlotsForDate } from '../../services/firebaseService';
 import { sanitizePhoneNumberInput } from '../../utils/phoneHelper';
 import { resolveProductPricing } from '../../utils/pricingHelper';
 
@@ -40,6 +40,30 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [placedBooking, setPlacedBooking] = useState<Booking | null>(null);
+  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+
+  useEffect(() => {
+    async function fetchBookedSlots() {
+      if (!item || !bookingDate) return;
+      try {
+        const booked = await getBookedSlotsForDate(business.id, item.id, bookingDate);
+        setBookedSlots(booked || []);
+      } catch (err) {
+        console.error('Error fetching booked slots:', err);
+      }
+    }
+    fetchBookedSlots();
+  }, [item?.id, bookingDate, business.id]);
+
+  const defaultSlots = [
+    '09:00 AM - 10:00 AM',
+    '10:00 AM - 11:00 AM',
+    '11:00 AM - 12:00 PM',
+    '01:00 PM - 02:00 PM',
+    '02:00 PM - 03:00 PM',
+    '04:00 PM - 05:00 PM',
+    '06:00 PM - 07:00 PM',
+  ];
 
   if (!isOpen || !item) return null;
 
@@ -183,13 +207,14 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
                     className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none bg-white"
                     required
                   >
-                    <option value="09:00 AM - 10:00 AM">09:00 AM - 10:00 AM</option>
-                    <option value="10:00 AM - 11:00 AM">10:00 AM - 11:00 AM</option>
-                    <option value="11:00 AM - 12:00 PM">11:00 AM - 12:00 PM</option>
-                    <option value="01:00 PM - 02:00 PM">01:00 PM - 02:00 PM</option>
-                    <option value="02:00 PM - 03:00 PM">02:00 PM - 03:00 PM</option>
-                    <option value="04:00 PM - 05:00 PM">04:00 PM - 05:00 PM</option>
-                    <option value="06:00 PM - 07:00 PM">06:00 PM - 07:00 PM</option>
+                    {defaultSlots.map((slot) => {
+                      const isBooked = bookedSlots.includes(slot);
+                      return (
+                        <option key={slot} value={slot} disabled={isBooked}>
+                          {slot} {isBooked ? '(Booked)' : ''}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
               </div>

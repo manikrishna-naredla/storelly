@@ -35,12 +35,27 @@ export const QuotePaymentView: React.FC<QuotePaymentViewProps> = ({
   const [paying, setPaying] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [upiRefInput, setUpiRefInput] = useState('');
+  const [submittingUpi, setSubmittingUpi] = useState(false);
 
   useEffect(() => {
     const fetchRequest = async () => {
       try {
         setLoading(true);
-        const data = await getCustomQuoteRequest(business.id, requestId);
+        let data: CustomQuoteRequest | null = null;
+        try {
+          const res = await fetch(`/api/quotes/public/${encodeURIComponent(business.id)}/${encodeURIComponent(requestId)}`);
+          if (res.ok) {
+            const json = await res.json();
+            if (json.success && json.quote) {
+              data = json.quote;
+            }
+          }
+        } catch {}
+
+        if (!data) {
+          data = await getCustomQuoteRequest(business.id, requestId);
+        }
         setRequest(data);
       } catch (err: any) {
         console.error('Failed to load quote request:', err);
@@ -209,7 +224,7 @@ export const QuotePaymentView: React.FC<QuotePaymentViewProps> = ({
   }
 
   const isPaid = request.paymentStatus === 'paid' || request.status === 'accepted' || request.status === 'completed';
-  const cleanPhone = (business.whatsappNumber || business.phone || '').replace(/[^0-9]/g, '');
+  const cleanPhone = (business.whatsapp || business.phone || '').replace(/[^0-9]/g, '');
   const formattedPhone = cleanPhone.startsWith('91') || cleanPhone.length > 10 ? cleanPhone : '91' + cleanPhone;
   const waChatUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(
     `Hello ${business.name}, I am contacting you regarding my quote proposal (${request.requestNumber}).`
@@ -327,25 +342,83 @@ export const QuotePaymentView: React.FC<QuotePaymentViewProps> = ({
                     Your custom order is officially approved and in progress with {business.name}.
                   </p>
                 </div>
+              ) : request.paymentStatus === 'pending-verification' ? (
+                <div className="p-5 rounded-2xl bg-amber-50 border border-amber-200 text-center space-y-2">
+                  <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mx-auto">
+                    <Clock className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-sm font-black text-amber-950">UPI Verification Pending</h3>
+                  <p className="text-[11px] text-amber-800">
+                    Your UTR reference has been submitted and is awaiting verification by {business.name}.
+                  </p>
+                </div>
               ) : (
-                <button
-                  type="button"
-                  onClick={handlePayQuote}
-                  disabled={paying}
-                  className="w-full py-4 px-6 bg-purple-600 hover:bg-purple-700 text-white font-black text-sm rounded-2xl shadow-xl shadow-purple-600/25 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                >
-                  {paying ? (
-                    <>
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                      <span>Processing Secure Payment...</span>
-                    </>
-                  ) : (
-                    <>
-                      <ShieldCheck className="w-5 h-5" />
-                      <span>Accept & Pay ₹{(request.quotedPrice || 0).toLocaleString()}</span>
-                    </>
-                  )}
-                </button>
+                <div className="space-y-4">
+                  <button
+                    type="button"
+                    onClick={handlePayQuote}
+                    disabled={paying}
+                    className="w-full py-4 px-6 bg-purple-600 hover:bg-purple-700 text-white font-black text-sm rounded-2xl shadow-xl shadow-purple-600/25 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  >
+                    {paying ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                        <span>Processing Secure Payment...</span>
+                      </>
+                    ) : (
+                      <>
+                        <ShieldCheck className="w-5 h-5" />
+                        <span>Accept & Pay ₹{(request.quotedPrice || 0).toLocaleString()}</span>
+                      </>
+                    )}
+                  </button>
+
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                    <span className="font-bold text-slate-700 text-[11px] uppercase tracking-wider block">Or Pay via UPI / Manual Transfer</span>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={upiRefInput}
+                        onChange={(e) => setUpiRefInput(e.target.value)}
+                        placeholder="Enter UPI UTR / Transaction Reference ID..."
+                        className="flex-1 px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!upiRefInput.trim()) {
+                            setErrorMessage('Please enter UTR ID');
+                            return;
+                          }
+                          try {
+                            setSubmittingUpi(true);
+                            setErrorMessage(null);
+                            const res = await fetch('/api/quotes/submit-upi', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                businessId: business.id,
+                                requestId: request.id,
+                                upiReferenceId: upiRefInput.trim(),
+                              }),
+                            });
+                            const data = await res.json();
+                            if (!res.ok || !data.success) throw new Error(data.error || 'Failed to submit UPI ref');
+                            setRequest(data.quote || { ...request, paymentStatus: 'pending-verification', paymentMethod: 'upi', upiReferenceId: upiRefInput.trim() });
+                          } catch (err: any) {
+                            setErrorMessage(err.message || 'Failed to submit UPI reference');
+                          } finally {
+                            setSubmittingUpi(false);
+                          }
+                        }}
+                        disabled={submittingUpi}
+                        className="px-4 py-2 bg-slate-900 hover:bg-black text-white font-bold text-xs rounded-xl transition cursor-pointer shrink-0"
+                      >
+                        {submittingUpi ? 'Submitting...' : 'Submit UTR'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
               )}
 
               {/* Direct WhatsApp Message Creator */}

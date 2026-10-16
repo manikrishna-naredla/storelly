@@ -301,18 +301,28 @@ export const EventCheckoutModal: React.FC<EventCheckoutModalProps> = ({
 
     try {
       if (isFree) {
-        // Free Ticket Flow
-        const { ticket } = await purchaseEventTicketTransaction(business.id, event.id, {
-          customerName: customerName.trim(),
-          customerPhone: cleanPhone,
-          customerEmail: customerEmail.trim() || undefined,
-          eventDate: selectedDate,
-          eventTime: selectedTimeString,
-          slotId: selectedSlotId || activeSlot?.id,
-          timezone: event.timezone || 'Asia/Kolkata',
-          paymentStatus: 'free',
-          seatNumber: selectedSeatNumber || undefined,
+        // Free Ticket Flow via backend API
+        const res = await fetch('/api/events/claim-free', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            businessId: business.id,
+            eventId: event.id,
+            customerName: customerName.trim(),
+            customerPhone: cleanPhone,
+            customerEmail: customerEmail.trim() || undefined,
+            eventDate: selectedDate,
+            eventTime: selectedTimeString,
+            slotId: selectedSlotId || activeSlot?.id,
+            timezone: event.timezone || 'Asia/Kolkata',
+            seatNumber: selectedSeatNumber || undefined,
+          }),
         });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Failed to claim free ticket');
+        }
+        const ticket = data.ticket;
         setConfirmedTicket(ticket);
         prepareWhatsAppConfirmation(ticket);
         if (onSuccess) onSuccess(ticket);
@@ -321,24 +331,47 @@ export const EventCheckoutModal: React.FC<EventCheckoutModalProps> = ({
 
       // Paid Event Flow: Direct UPI QR Mode
       if (paymentMode === 'upi_qr') {
-        const holdId = `hold_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-        await reserveEventSeat(business.id, event.id, holdId, 10 * 60 * 1000);
+        let holdId: string | undefined = undefined;
+        try {
+          const holdRes = await fetch('/api/events/hold-seat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              businessId: business.id,
+              eventId: event.id,
+              quantity: 1,
+              customerPhone: cleanPhone,
+              slotId: selectedSlotId || activeSlot?.id,
+            }),
+          });
+          const holdData = await holdRes.json();
+          if (holdData.success) holdId = holdData.holdId;
+        } catch (e) {}
 
-        const { ticket } = await purchaseEventTicketTransaction(business.id, event.id, {
-          customerName: customerName.trim(),
-          customerPhone: cleanPhone,
-          customerEmail: customerEmail.trim() || undefined,
-          eventDate: selectedDate,
-          eventTime: selectedTimeString,
-          slotId: selectedSlotId || activeSlot?.id,
-          timezone: event.timezone || 'Asia/Kolkata',
-          paymentStatus: 'paid',
-          paymentId: upiUtr ? `UPI-${upiUtr.trim()}` : `UPI-${Date.now()}`,
-          notes: upiUtr ? `Paid via UPI QR, UTR: ${upiUtr}` : 'Paid via UPI QR',
-          seatNumber: selectedSeatNumber || undefined,
-          holdId: holdId,
+        const res = await fetch('/api/events/create-upi-ticket', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            businessId: business.id,
+            eventId: event.id,
+            customerName: customerName.trim(),
+            customerPhone: cleanPhone,
+            customerEmail: customerEmail.trim() || undefined,
+            eventDate: selectedDate,
+            eventTime: selectedTimeString,
+            slotId: selectedSlotId || activeSlot?.id,
+            timezone: event.timezone || 'Asia/Kolkata',
+            paymentId: upiUtr ? `UPI-${upiUtr.trim()}` : `UPI-${Date.now()}`,
+            notes: upiUtr ? `Paid via UPI QR, UTR: ${upiUtr}` : 'Paid via UPI QR',
+            seatNumber: selectedSeatNumber || undefined,
+            holdId,
+          }),
         });
-
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Failed to create UPI ticket');
+        }
+        const ticket = data.ticket;
         setConfirmedTicket(ticket);
         prepareWhatsAppConfirmation(ticket);
         if (onSuccess) onSuccess(ticket);
@@ -346,9 +379,24 @@ export const EventCheckoutModal: React.FC<EventCheckoutModalProps> = ({
       }
 
       // Online Gateway Flow via Server Order Creation
-      const holdId = `hold_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+      let holdId: string | undefined = undefined;
       try {
-        await reserveEventSeat(business.id, event.id, holdId, 10 * 60 * 1000);
+        const holdRes = await fetch('/api/events/hold-seat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            businessId: business.id,
+            eventId: event.id,
+            quantity: 1,
+            customerPhone: cleanPhone,
+            slotId: selectedSlotId || activeSlot?.id,
+          }),
+        });
+        const holdData = await holdRes.json();
+        if (!holdRes.ok || !holdData.success) {
+          throw new Error(holdData.error || 'Sold Out. Unable to reserve seat within atomic limit.');
+        }
+        holdId = holdData.holdId;
       } catch (reserveErr: any) {
         setErrorMessage(reserveErr.message || 'Sold Out. Unable to reserve seat within atomic limit.');
         setLoading(false);
@@ -371,6 +419,7 @@ export const EventCheckoutModal: React.FC<EventCheckoutModalProps> = ({
               eventTime: selectedTimeString,
               slotId: selectedSlotId || activeSlot?.id,
               timezone: event.timezone || 'Asia/Kolkata',
+              holdId,
             }),
           });
 
@@ -382,14 +431,26 @@ export const EventCheckoutModal: React.FC<EventCheckoutModalProps> = ({
             throw new Error(errData?.error || "Payment couldn't be initialized. Please try again in a moment.");
           }
         } catch (fetchErr: any) {
-          await releaseEventSeat(business.id, event.id, holdId).catch(() => {});
+          if (holdId) {
+            await fetch('/api/events/release-seat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ businessId: business.id, eventId: event.id, holdId }),
+            }).catch(() => {});
+          }
           setErrorMessage(fetchErr?.message || "Payment couldn't be started. Please check your connection and try again.");
           setLoading(false);
           return;
         }
 
         if (!orderData || !orderData.rzpOrderId || !orderData.keyId) {
-          await releaseEventSeat(business.id, event.id, holdId).catch(() => {});
+          if (holdId) {
+            await fetch('/api/events/release-seat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ businessId: business.id, eventId: event.id, holdId }),
+            }).catch(() => {});
+          }
           setErrorMessage(orderData?.error || "Payment couldn't be started. Please try again in a moment.");
           setLoading(false);
           return;
@@ -400,7 +461,13 @@ export const EventCheckoutModal: React.FC<EventCheckoutModalProps> = ({
         const RazorpayClass = (window as any).Razorpay;
 
         if (!RazorpayClass) {
-          await releaseEventSeat(business.id, event.id, holdId).catch(() => {});
+          if (holdId) {
+            await fetch('/api/events/release-seat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ businessId: business.id, eventId: event.id, holdId }),
+            }).catch(() => {});
+          }
           setErrorMessage('Payment gateway SDK failed to load. Please disable ad-blockers and try again.');
           setLoading(false);
           return;
@@ -430,29 +497,20 @@ export const EventCheckoutModal: React.FC<EventCheckoutModalProps> = ({
                   eventTime: selectedTimeString,
                   slotId: selectedSlotId || activeSlot?.id,
                   timezone: event.timezone || 'Asia/Kolkata',
+                  customerName: customerName.trim(),
+                  customerPhone: cleanPhone,
+                  customerEmail: customerEmail.trim() || undefined,
+                  seatNumber: selectedSeatNumber || undefined,
+                  holdId,
                 }),
               });
 
-              if (!verifyRes.ok) {
-                const errData = await verifyRes.json().catch(() => ({}));
-                throw new Error(errData?.error || 'Payment verification failed on server');
+              const verifyData = await verifyRes.json();
+              if (!verifyRes.ok || !verifyData.success || !verifyData.ticket) {
+                throw new Error(verifyData?.error || 'Payment verification failed on server');
               }
 
-              const { ticket } = await purchaseEventTicketTransaction(business.id, event.id, {
-                customerName: customerName.trim(),
-                customerPhone: cleanPhone,
-                customerEmail: customerEmail.trim() || undefined,
-                eventDate: selectedDate,
-                eventTime: selectedTimeString,
-                slotId: selectedSlotId || activeSlot?.id,
-                timezone: event.timezone || 'Asia/Kolkata',
-                paymentStatus: 'paid',
-                paymentId: response.razorpay_payment_id,
-                razorpayOrderId: response.razorpay_order_id,
-                seatNumber: selectedSeatNumber || undefined,
-                holdId: holdId,
-              });
-
+              const ticket = verifyData.ticket;
               setConfirmedTicket(ticket);
               prepareWhatsAppConfirmation(ticket);
               if (onSuccess) onSuccess(ticket);
@@ -472,10 +530,12 @@ export const EventCheckoutModal: React.FC<EventCheckoutModalProps> = ({
           },
           modal: {
             ondismiss: async function () {
-              try {
-                await releaseEventSeat(business.id, event.id, holdId);
-              } catch (e) {
-                console.error('Failed to release seat hold on dismiss', e);
+              if (holdId) {
+                await fetch('/api/events/release-seat', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ businessId: business.id, eventId: event.id, holdId }),
+                }).catch(() => {});
               }
               setLoading(false);
             },
@@ -485,16 +545,24 @@ export const EventCheckoutModal: React.FC<EventCheckoutModalProps> = ({
         const rzp = new RazorpayClass(options);
         rzp.on('payment.failed', async function (resp: any) {
           setErrorMessage(resp.error?.description || 'Payment failed. Please try again.');
-          try {
-            await releaseEventSeat(business.id, event.id, holdId);
-          } catch (e) {
-            console.error('Failed to release seat hold on failure', e);
+          if (holdId) {
+            await fetch('/api/events/release-seat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ businessId: business.id, eventId: event.id, holdId }),
+            }).catch(() => {});
           }
           setLoading(false);
         });
         rzp.open();
       } catch (payInitErr: any) {
-        await releaseEventSeat(business.id, event.id, holdId).catch(() => {});
+        if (holdId) {
+          await fetch('/api/events/release-seat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ businessId: business.id, eventId: event.id, holdId }),
+          }).catch(() => {});
+        }
         throw payInitErr;
       }
     } catch (err: any) {

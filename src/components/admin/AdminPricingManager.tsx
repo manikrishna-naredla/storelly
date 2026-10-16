@@ -212,7 +212,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onNoti
   // Delete Plan
   const handleDeletePlan = async (plan: PlatformPricingPlan) => {
     if (plans.length <= 1) {
-      alert('You must keep at least 1 pricing plan on the platform.');
+      notify('You must keep at least 1 pricing plan on the platform.', 'error');
       return;
     }
     const confirmed = window.confirm(`Are you sure you want to permanently delete the "${plan.name}" plan?`);
@@ -273,7 +273,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onNoti
   const handleSavePlanSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!planForm.name.trim()) {
-      alert('Plan name is required.');
+      notify('Plan name is required.', 'error');
       return;
     }
 
@@ -285,7 +285,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onNoti
       loadData();
     } catch (err) {
       console.error('Failed to save plan:', err);
-      alert('Error saving plan to Firestore.');
+      notify('Error saving plan to Firestore.', 'error');
     } finally {
       setIsSavingPlan(false);
     }
@@ -301,7 +301,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onNoti
       notify('Landing page pricing CMS copy saved to system_settings/pricing_cms!');
     } catch (err) {
       console.error('Failed to save CMS copy:', err);
-      alert('Error saving CMS copy.');
+      notify('Error saving CMS copy.', 'error');
     } finally {
       setIsSavingCMS(false);
     }
@@ -316,7 +316,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onNoti
       notify('Razorpay Gateway credentials saved to system_settings/payment_config in Firestore!');
     } catch (err) {
       console.error('Failed to save Razorpay config:', err);
-      alert('Error saving Razorpay gateway settings.');
+      notify('Error saving Razorpay gateway settings.', 'error');
     } finally {
       setIsSavingRzp(false);
     }

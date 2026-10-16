@@ -31,6 +31,7 @@ interface PublicModuleUnavailableViewProps {
   message?: string;
   isExplicitPreview?: boolean;
   onBackToDashboard?: () => void;
+  onPublishModule?: () => Promise<void> | void;
 }
 
 export const PublicModuleUnavailableView: React.FC<PublicModuleUnavailableViewProps> = ({
@@ -40,6 +41,7 @@ export const PublicModuleUnavailableView: React.FC<PublicModuleUnavailableViewPr
   message,
   isExplicitPreview = false,
   onBackToDashboard,
+  onPublishModule,
 }) => {
   const getIcon = () => {
     if (business?.status === 'suspended') {
@@ -130,16 +132,27 @@ export const PublicModuleUnavailableView: React.FC<PublicModuleUnavailableViewPr
               This module is unpublished. Public visitors see this exact unavailable screen.
             </span>
           </div>
-          {onBackToDashboard && (
-            <button
-              type="button"
-              onClick={onBackToDashboard}
-              className="px-3 py-1 bg-amber-200 hover:bg-amber-300 text-amber-950 font-bold rounded-[var(--r8)] transition cursor-pointer flex items-center gap-1.5"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Dashboard</span>
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {onPublishModule && (
+              <button
+                type="button"
+                onClick={onPublishModule}
+                className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-[var(--r8)] transition cursor-pointer"
+              >
+                Publish Module Now
+              </button>
+            )}
+            {onBackToDashboard && (
+              <button
+                type="button"
+                onClick={onBackToDashboard}
+                className="px-3 py-1 bg-amber-200 hover:bg-amber-300 text-amber-950 font-bold rounded-[var(--r8)] transition cursor-pointer flex items-center gap-1.5"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Back to Dashboard</span>
+              </button>
+            )}
+          </div>
         </aside>
       )}
 

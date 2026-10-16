@@ -404,6 +404,8 @@ export interface Order {
   webhookProcessed?: boolean;
   downloadStatus?: 'not_started' | 'completed';
   digitalAccessUrl?: string; // Temporary signed URL
+  upiReferenceId?: string;
+  couponCode?: string;
   notes?: string;
   // Shipping & Courier metadata
   shippingCarrier?: string;
@@ -472,6 +474,7 @@ export interface Customer {
   firstInteractionAt: number;
   lastInteractionAt: number;
   notes?: string;
+  tags?: string[];
 }
 
 export type CanonicalAnalyticsEventType =
@@ -635,6 +638,7 @@ export interface Offer {
   minOrderValue?: number;
   startDate?: string;
   endDate?: string;
+  maxDiscount?: number;
   isActive: boolean;
   createdAt: number;
 }
@@ -1088,6 +1092,8 @@ export interface CustomQuoteRequest {
   paymentStatus?: 'pending' | 'paid';
   paymentId?: string;
   paidAt?: number;
+  upiReferenceId?: string;
+  couponCode?: string;
   
   status: QuoteRequestStatus;
   isArchived?: boolean;

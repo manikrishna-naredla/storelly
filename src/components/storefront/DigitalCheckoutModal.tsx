@@ -194,7 +194,7 @@ export const DigitalCheckoutModal: React.FC<DigitalCheckoutModalProps> = ({
         throw new Error(data.error || 'Failed to claim digital product');
       }
 
-      // 2. Log order in Firestore as DELIVERED
+      // 2. Log order in Firestore as DELIVERED & PAID
       const newOrder = await createOrder(business.id, {
         customerName: customerName.trim(),
         customerPhone: cleanPhone,

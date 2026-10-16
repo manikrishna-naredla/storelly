@@ -72,7 +72,7 @@ export const AdminClientsManager: React.FC<AdminClientsManagerProps> = ({ onNoti
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
-      alert('File size must be under 5MB.');
+      notify('File size must be under 5MB.', 'error');
       return;
     }
     setUploadingImage(true);
@@ -84,7 +84,7 @@ export const AdminClientsManager: React.FC<AdminClientsManagerProps> = ({ onNoti
       setUploadingImage(false);
     };
     reader.onerror = () => {
-      alert('Failed to read image file.');
+      notify('Failed to read image file.', 'error');
       setUploadingImage(false);
     };
     reader.readAsDataURL(file);
@@ -141,7 +141,7 @@ export const AdminClientsManager: React.FC<AdminClientsManagerProps> = ({ onNoti
 
   const handleDelete = async (client: PlatformClientBrand) => {
     if (clients.length <= 1) {
-      alert('You must keep at least 1 client brand in the carousel.');
+      notify('You must keep at least 1 client brand in the carousel.', 'error');
       return;
     }
     const confirmed = window.confirm(`Remove "${client.name}" from Happy Clients carousel?`);
@@ -179,7 +179,7 @@ export const AdminClientsManager: React.FC<AdminClientsManagerProps> = ({ onNoti
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim()) {
-      alert('Client brand name is required.');
+      notify('Client brand name is required.', 'error');
       return;
     }
 
@@ -191,7 +191,7 @@ export const AdminClientsManager: React.FC<AdminClientsManagerProps> = ({ onNoti
       loadData();
     } catch (err) {
       console.error('Failed to save client brand:', err);
-      alert('Error saving client brand.');
+      notify('Error saving client brand.', 'error');
     } finally {
       setIsSaving(false);
     }

@@ -1206,3 +1206,78 @@ export async function adminSaveCustomDomains(domains: PlatformCustomDomainMappin
   }
 }
 
+export interface PlatformConfigData {
+  announcements: Array<{ id: string; title: string; message: string; type: 'info' | 'warning' | 'promo'; active: boolean; createdAt: number }>;
+  faqs: Array<{ id: string; question: string; answer: string; category: string }>;
+  businessTypes: Array<{ id: string; name: string; slug: string; mode: string; active: boolean }>;
+  featureFlags: {
+    maintenanceMode: boolean;
+    allowNewRegistrations: boolean;
+    aiAssistantEnabled: boolean;
+  };
+  supportConfig: {
+    whatsapp: string;
+    email: string;
+    helpCenterUrl: string;
+  };
+  updatedAt: number;
+}
+
+export const DEFAULT_PLATFORM_CONFIG: PlatformConfigData = {
+  announcements: [
+    { id: 'ann_1', title: 'Welcome to Storelly OS', message: 'Platform v2.0 is now live with enhanced storefront performance and instant UPI settlements.', type: 'info', active: true, createdAt: Date.now() },
+  ],
+  faqs: [
+    { id: 'faq_1', question: 'How do I publish my storefront?', answer: 'Complete onboarding, add your products or services, and share your unique store link or QR code instantly.', category: 'Getting Started' },
+    { id: 'faq_2', question: 'Are there any transaction fees?', answer: 'Storelly charges 0% commission on your direct WhatsApp and UPI customer orders.', category: 'Payments' },
+  ],
+  businessTypes: [
+    { id: 'bt_1', name: 'Retail Store', slug: 'retail', mode: 'vendor', active: true },
+    { id: 'bt_2', name: 'Restaurant & Cafe', slug: 'restaurant', mode: 'vendor', active: true },
+    { id: 'bt_3', name: 'Digital Creator Studio', slug: 'digital_creator', mode: 'creator', active: true },
+    { id: 'bt_4', name: 'Service Professional', slug: 'services', mode: 'vendor', active: true },
+  ],
+  featureFlags: {
+    maintenanceMode: false,
+    allowNewRegistrations: true,
+    aiAssistantEnabled: true,
+  },
+  supportConfig: {
+    whatsapp: '+919876543210',
+    email: 'support@storelly.com',
+    helpCenterUrl: 'https://storelly.com/help',
+  },
+  updatedAt: Date.now(),
+};
+
+export async function adminGetPlatformConfig(): Promise<PlatformConfigData> {
+  try {
+    const snap = await getDoc(doc(db, 'platform_settings', 'config'));
+    if (snap.exists()) {
+      const data = snap.data() as PlatformConfigData;
+      return { ...DEFAULT_PLATFORM_CONFIG, ...data };
+    }
+  } catch (err) {
+    console.warn('Error fetching platform config from Firestore:', err);
+  }
+  try {
+    const saved = localStorage.getItem('storelly_admin_platform_config');
+    if (saved) return JSON.parse(saved);
+  } catch {}
+  return DEFAULT_PLATFORM_CONFIG;
+}
+
+export async function adminSavePlatformConfig(config: Partial<PlatformConfigData>): Promise<void> {
+  const current = await adminGetPlatformConfig();
+  const payload: PlatformConfigData = {
+    ...current,
+    ...config,
+    updatedAt: Date.now(),
+  };
+  await setDoc(doc(db, 'platform_settings', 'config'), payload);
+  try {
+    localStorage.setItem('storelly_admin_platform_config', JSON.stringify(payload));
+  } catch {}
+}
+
+

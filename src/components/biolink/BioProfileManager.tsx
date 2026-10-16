@@ -380,17 +380,6 @@ export const BioProfileManager: React.FC<Props> = ({ business, onBusinessUpdated
     };
     try {
       await updateBusinessProfile(business.id, updates);
-      try {
-        localStorage.setItem(`storelly_biz_${business.id}`, JSON.stringify(updatedBiz));
-        const all = JSON.parse(localStorage.getItem('storelly_businesses') || '[]');
-        const idx = all.findIndex((b: any) => b.id === business.id);
-        if (idx >= 0) {
-          all[idx] = updatedBiz;
-          localStorage.setItem('storelly_businesses', JSON.stringify(all));
-        }
-      } catch (e) {
-        console.warn('Local storage sync warning:', e);
-      }
       onBusinessUpdated?.(updatedBiz);
     } catch (err) {
       console.error('Failed to update business profile:', err);
@@ -448,20 +437,6 @@ export const BioProfileManager: React.FC<Props> = ({ business, onBusinessUpdated
         showPortfolioOnBio: updatedTheme.showPortfolioLink === true,
         showOfficialLinksBadge: updatedTheme.showOfficialLinksBadge === true,
       });
-      try {
-        localStorage.setItem(`storelly_biz_${business.id}`, JSON.stringify(updatedBiz));
-        if (business.slug) {
-          localStorage.setItem(`storelly_biz_${business.slug.toLowerCase()}`, JSON.stringify(updatedBiz));
-        }
-        const all = JSON.parse(localStorage.getItem('storelly_businesses') || '[]');
-        const idx = all.findIndex((b: any) => b.id === business.id);
-        if (idx >= 0) {
-          all[idx] = updatedBiz;
-          localStorage.setItem('storelly_businesses', JSON.stringify(all));
-        }
-      } catch (e) {
-        console.warn('Local storage sync warning:', e);
-      }
       onBusinessUpdated?.(updatedBiz);
       setHasUnsavedChanges(false);
       setSaveStatus('saved');
@@ -517,20 +492,6 @@ export const BioProfileManager: React.FC<Props> = ({ business, onBusinessUpdated
           socialLinks: mergedSocialLinks,
           bioTheme: theme,
         });
-
-        try {
-          localStorage.setItem(`storelly_biz_${business.id}`, JSON.stringify(updatedBiz));
-          if (business.slug) {
-            localStorage.setItem(`storelly_biz_${business.slug.toLowerCase()}`, JSON.stringify(updatedBiz));
-          }
-          const all = JSON.parse(localStorage.getItem('storelly_businesses') || '[]');
-          const idx = all.findIndex((b: any) => b.id === business.id);
-          if (idx >= 0) {
-            all[idx] = updatedBiz;
-            localStorage.setItem('storelly_businesses', JSON.stringify(all));
-          }
-        } catch (e) {}
-
         onBusinessUpdated?.(updatedBiz);
         setHasUnsavedChanges(false);
         setSaveStatus('saved');

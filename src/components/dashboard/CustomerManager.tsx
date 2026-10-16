@@ -27,10 +27,16 @@ import {
   Loader2,
   Check,
   CheckCircle2,
+  Eye,
+  Mail,
+  MapPin,
 } from 'lucide-react';
 import { BusinessProfile, Customer, Expense } from '../../types';
 import {
   getCustomers,
+  createCustomerManual,
+  updateCustomer,
+  deleteCustomer,
   getExpenses,
   createExpense,
   updateExpense,
@@ -38,6 +44,8 @@ import {
 } from '../../services/firebaseService';
 import { exportToCSV } from '../../utils/export';
 import { isCreatorProfile } from '../../utils/profileHelper';
+import { ConfirmActionModal } from '../common/ConfirmActionModal';
+import { sanitizePhoneNumberInput } from '../../utils/phoneHelper';
 
 interface CustomerManagerProps {
   business: BusinessProfile;
@@ -51,6 +59,21 @@ export const CustomerManager: React.FC<CustomerManagerProps> = ({ business }) =>
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedModuleFilter, setSelectedModuleFilter] = useState<string>('all');
+
+  // Customer Modal & Details State
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [custName, setCustName] = useState('');
+  const [custPhone, setCustPhone] = useState('');
+  const [custEmail, setCustEmail] = useState('');
+  const [custAddress, setCustAddress] = useState('');
+  const [custNotes, setCustNotes] = useState('');
+  const [isSavingCustomer, setIsSavingCustomer] = useState(false);
+  const [customerError, setCustomerError] = useState<string | null>(null);
+
+  const [selectedCustomerDetails, setSelectedCustomerDetails] = useState<Customer | null>(null);
+  const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(null);
+  const [isDeletingCustomer, setIsDeletingCustomer] = useState(false);
 
   // Expense Modal State
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
@@ -84,6 +107,75 @@ export const CustomerManager: React.FC<CustomerManagerProps> = ({ business }) =>
   useEffect(() => {
     loadData();
   }, [business.id]);
+
+  const handleOpenCustomerModal = (cust?: Customer) => {
+    if (cust) {
+      setEditingCustomer(cust);
+      setCustName(cust.name || '');
+      setCustPhone(cust.phone || '');
+      setCustEmail(cust.email || '');
+      setCustAddress(cust.address || '');
+      setCustNotes(cust.notes || '');
+    } else {
+      setEditingCustomer(null);
+      setCustName('');
+      setCustPhone('');
+      setCustEmail('');
+      setCustAddress('');
+      setCustNotes('');
+    }
+    setCustomerError(null);
+    setIsCustomerModalOpen(true);
+  };
+
+  const handleSaveCustomer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!custName.trim() || !custPhone.trim()) {
+      setCustomerError('Customer name and phone number are required.');
+      return;
+    }
+
+    try {
+      setIsSavingCustomer(true);
+      setCustomerError(null);
+      const payload = {
+        name: custName.trim(),
+        phone: custPhone.trim(),
+        whatsapp: custPhone.trim(),
+        email: custEmail.trim() || undefined,
+        address: custAddress.trim() || undefined,
+        notes: custNotes.trim() || undefined,
+      };
+
+      if (editingCustomer) {
+        await updateCustomer(business.id, editingCustomer.id, payload);
+      } else {
+        await createCustomerManual(business.id, payload);
+      }
+
+      setIsCustomerModalOpen(false);
+      await loadData();
+    } catch (err: any) {
+      setCustomerError(err.message || 'Failed to save customer record.');
+    } finally {
+      setIsSavingCustomer(false);
+    }
+  };
+
+  const handleDeleteCustomerConfirm = async () => {
+    if (!customerToDelete) return;
+    try {
+      setIsDeletingCustomer(true);
+      await deleteCustomer(business.id, customerToDelete.id);
+      setCustomerToDelete(null);
+      setSelectedCustomerDetails(null);
+      await loadData();
+    } catch (err) {
+      console.error('Error deleting customer:', err);
+    } finally {
+      setIsDeletingCustomer(false);
+    }
+  };
 
   const handleOpenExpenseModal = (exp?: Expense) => {
     if (exp) {
@@ -248,454 +340,603 @@ export const CustomerManager: React.FC<CustomerManagerProps> = ({ business }) =>
   const totalExpenseAmount = expenses.reduce((acc, e) => acc + (e.amount || 0), 0);
   const netProfitLoss = totalCustomerRevenue - totalExpenseAmount;
 
-  const filteredExpenses = expenses.filter((e) =>
-    e.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    e.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (e.notes && e.notes.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
-
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
-      {/* Header */}
+      {/* Header & Tabs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-heading">
-            {isCreator ? 'Audience, Clients & Financials' : 'Customer CRM & Expense Tracker'}
+          <h2 className="text-xl sm:text-2xl font-black text-[var(--t1)] font-heading">
+            {activeTab === 'crm' ? 'Customer Directory & CRM' : 'Business Expenses & P&L'}
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Manage customer records, track operational costs, and view real-time Profit &amp; Loss.
+          <p className="text-xs sm:text-sm text-[var(--t2)] mt-0.5">
+            {activeTab === 'crm'
+              ? 'Track your customers, contact leads via WhatsApp, and view lifetime purchase stats.'
+              : 'Log store expenses, cost of goods, overheads, and compute net profit.'}
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          {activeTab === 'expenses' ? (
+        <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+          <div className="bg-[var(--card)] p-1 rounded-[var(--r12)] border border-[var(--border)] shadow-[var(--shadow-xs)] flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setActiveTab('crm')}
+              className={`px-3.5 py-1.5 rounded-[var(--r8)] text-xs font-bold transition cursor-pointer ${
+                activeTab === 'crm'
+                  ? 'bg-[var(--g600)] text-white shadow-[var(--shadow-xs)]'
+                  : 'text-[var(--t2)] hover:text-[var(--t1)]'
+              }`}
+            >
+              CRM Customers ({customers.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('expenses')}
+              className={`px-3.5 py-1.5 rounded-[var(--r8)] text-xs font-bold transition cursor-pointer ${
+                activeTab === 'expenses'
+                  ? 'bg-[var(--g600)] text-white shadow-[var(--shadow-xs)]'
+                  : 'text-[var(--t2)] hover:text-[var(--t1)]'
+              }`}
+            >
+              Expenses & P&L
+            </button>
+          </div>
+
+          {activeTab === 'crm' ? (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleOpenCustomerModal()}
+                className="ds-btn-primary min-h-[44px] px-3.5 text-xs font-bold shadow-[var(--shadow-xs)] flex items-center gap-1.5 cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>+ Add Customer</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleExportCSV}
+                className="ds-btn-secondary min-h-[44px] px-3.5 text-xs font-bold shadow-[var(--shadow-xs)] flex items-center gap-1.5 cursor-pointer"
+              >
+                <Download className="w-4 h-4 text-[var(--g600)]" />
+                <span>Export CSV</span>
+              </button>
+            </div>
+          ) : (
             <button
               type="button"
               onClick={() => handleOpenExpenseModal()}
-              className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-2 cursor-pointer"
+              className="ds-btn-primary min-h-[44px] px-3.5 text-xs font-bold shadow-[var(--shadow-xs)] flex items-center gap-1.5 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              <span>Record New Expense</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleExportCSV}
-              className="px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Export CSV</span>
+              <span>Log Expense</span>
             </button>
           )}
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
-        <button
-          type="button"
-          onClick={() => setActiveTab('crm')}
-          className={`px-4 py-2 font-bold text-xs rounded-xl transition cursor-pointer flex items-center gap-2 ${
-            activeTab === 'crm'
-              ? 'bg-slate-900 text-white shadow-xs'
-              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-          }`}
-        >
-          <Users className="w-4 h-4" />
-          <span>Customer Directory ({customers.length})</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('expenses')}
-          className={`px-4 py-2 font-bold text-xs rounded-xl transition cursor-pointer flex items-center gap-2 ${
-            activeTab === 'expenses'
-              ? 'bg-slate-900 text-white shadow-xs'
-              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-          }`}
-        >
-          <Receipt className="w-4 h-4" />
-          <span>Expense Tracker &amp; P&amp;L ({expenses.length})</span>
-        </button>
-      </div>
-
-      {activeTab === 'expenses' ? (
-        <div className="space-y-6">
-          {/* P&L Financial Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-1">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Total Revenue</span>
-              <div className="text-xl font-extrabold text-emerald-700 font-heading">
-                {business.currencySymbol}{totalCustomerRevenue.toLocaleString()}
-              </div>
-              <p className="text-[10px] text-slate-400">Direct sales &amp; bookings</p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-1">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Total Operating Expenses</span>
-              <div className="text-xl font-extrabold text-rose-600 font-heading">
-                {business.currencySymbol}{totalExpenseAmount.toLocaleString()}
-              </div>
-              <p className="text-[10px] text-slate-400">{expenses.length} expense records logged</p>
-            </div>
-
-            <div className={`p-4 rounded-2xl border shadow-2xs space-y-1 ${
-              netProfitLoss >= 0 ? 'bg-emerald-50/70 border-emerald-200' : 'bg-rose-50/70 border-rose-200'
-            }`}>
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Net Profit / Loss</span>
-                {netProfitLoss >= 0 ? <TrendingUp className="w-4 h-4 text-emerald-600" /> : <TrendingDown className="w-4 h-4 text-rose-600" />}
-              </div>
-              <div className={`text-xl font-extrabold font-heading ${netProfitLoss >= 0 ? 'text-emerald-800' : 'text-rose-800'}`}>
-                {business.currencySymbol}{netProfitLoss.toLocaleString()}
-              </div>
-              <p className="text-[10px] text-slate-500 font-medium">
-                {netProfitLoss >= 0 ? 'Positive Operating Profit 🎉' : 'Operating Deficit'}
-              </p>
-            </div>
+      {/* Overview Cards */}
+      {activeTab === 'crm' ? (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="p-4 sm:p-5 rounded-[var(--r16)] bg-[var(--card)] border border-[var(--border)] shadow-[var(--shadow-xs)] space-y-1">
+            <span className="text-[11px] font-bold text-[var(--t3)] uppercase tracking-wider">Total CRM Contacts</span>
+            <div className="text-2xl font-black text-[var(--t1)] font-heading">{customers.length}</div>
+            <p className="text-[11px] text-[var(--t2)]">Captured across storefront & modules</p>
           </div>
-
-          {/* Search Bar for Expenses */}
-          <div className="relative w-full">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search expenses by title, category, notes..."
-              className="w-full pl-10 pr-4 py-2.5 text-xs border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-emerald-500 bg-white"
-            />
+          <div className="p-4 sm:p-5 rounded-[var(--r16)] bg-[var(--card)] border border-[var(--border)] shadow-[var(--shadow-xs)] space-y-1">
+            <span className="text-[11px] font-bold text-[var(--t3)] uppercase tracking-wider">Lifetime Revenue</span>
+            <div className="text-2xl font-black text-emerald-700 font-heading">
+              {business.currencySymbol}{totalCustomerRevenue.toLocaleString()}
+            </div>
+            <p className="text-[11px] text-[var(--t2)]">Realized from orders & bookings</p>
           </div>
-
-          {/* Expenses Table */}
-          {isLoading ? (
-            <div className="p-8 text-center"><Loader2 className="w-6 h-6 animate-spin text-slate-400 mx-auto" /></div>
-          ) : filteredExpenses.length > 0 ? (
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs divide-y divide-slate-100 overflow-hidden">
-              {filteredExpenses.map((exp) => (
-                <div key={exp.id} className="p-4 flex items-center justify-between gap-4 hover:bg-slate-50/70 transition">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-slate-900 text-xs">{exp.title}</h4>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-slate-100 text-slate-700 border border-slate-200">
-                        {exp.category}
-                      </span>
-                    </div>
-                    <div className="text-[11px] text-slate-400 flex items-center gap-2">
-                      <Calendar className="w-3 h-3" />
-                      <span>{exp.date}</span>
-                      {exp.notes && <span>• {exp.notes}</span>}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <span className="font-extrabold text-rose-600 text-sm">
-                      -{business.currencySymbol}{exp.amount}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => handleOpenExpenseModal(exp)}
-                      className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition"
-                      title="Edit Expense"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteExpense(exp.id)}
-                      className="p-1.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
-                      title="Delete Expense"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+          <div className="p-4 sm:p-5 rounded-[var(--r16)] bg-[var(--card)] border border-[var(--border)] shadow-[var(--shadow-xs)] space-y-1">
+            <span className="text-[11px] font-bold text-[var(--t3)] uppercase tracking-wider">Net Business Balance</span>
+            <div className={`text-2xl font-black font-heading ${netProfitLoss >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>
+              {business.currencySymbol}{netProfitLoss.toLocaleString()}
             </div>
-          ) : (
-            <div className="p-12 text-center bg-white rounded-3xl border border-dashed border-slate-200 space-y-3">
-              <Receipt className="w-8 h-8 text-slate-300 mx-auto" />
-              <h3 className="font-bold text-slate-800 text-sm">No Expenses Logged</h3>
-              <p className="text-xs text-slate-500">Record costs like inventory, rent, or marketing to compute net profit.</p>
-              <button
-                type="button"
-                onClick={() => handleOpenExpenseModal()}
-                className="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl cursor-pointer"
-              >
-                Add First Expense
-              </button>
-            </div>
-          )}
+            <p className="text-[11px] text-[var(--t2)]">Revenue minus logged expenses</p>
+          </div>
         </div>
       ) : (
-        /* CRM TAB */
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="p-4 sm:p-5 rounded-[var(--r16)] bg-[var(--card)] border border-[var(--border)] shadow-[var(--shadow-xs)] space-y-1">
+            <span className="text-[11px] font-bold text-[var(--t3)] uppercase tracking-wider">Total Gross Revenue</span>
+            <div className="text-2xl font-black text-emerald-700 font-heading">
+              {business.currencySymbol}{totalCustomerRevenue.toLocaleString()}
+            </div>
+          </div>
+          <div className="p-4 sm:p-5 rounded-[var(--r16)] bg-[var(--card)] border border-[var(--border)] shadow-[var(--shadow-xs)] space-y-1">
+            <span className="text-[11px] font-bold text-[var(--t3)] uppercase tracking-wider">Total Expenses</span>
+            <div className="text-2xl font-black text-rose-600 font-heading">
+              {business.currencySymbol}{totalExpenseAmount.toLocaleString()}
+            </div>
+          </div>
+          <div className="p-4 sm:p-5 rounded-[var(--r16)] bg-[var(--card)] border border-[var(--border)] shadow-[var(--shadow-xs)] space-y-1">
+            <span className="text-[11px] font-bold text-[var(--t3)] uppercase tracking-wider">Net Profit</span>
+            <div className={`text-2xl font-black font-heading ${netProfitLoss >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>
+              {business.currencySymbol}{netProfitLoss.toLocaleString()}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CRM Tab Content */}
+      {activeTab === 'crm' && (
         <div className="space-y-4">
-          <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
-            <div className="relative w-full">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <div className="flex flex-col sm:flex-row items-center gap-3 bg-[var(--card)] p-3 rounded-[var(--r12)] border border-[var(--border)] shadow-[var(--shadow-xs)]">
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--t3)]" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={`Search ${isCreator ? 'clients' : 'customers'} by name, phone, or email...`}
-                className="w-full pl-10 pr-4 py-2 text-xs border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-emerald-500 bg-slate-50/50"
+                placeholder="Search customers by name, phone, email..."
+                className="w-full pl-10 pr-4 py-2 text-xs border border-[var(--border)] rounded-[var(--r8)] bg-[var(--bg)] text-[var(--t1)] focus:outline-[var(--g400)]"
               />
             </div>
 
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider pl-1 mr-1 flex items-center gap-1">
-                <Filter className="w-3 h-3" /> Filter:
-              </span>
-              {[
-                { id: 'all', label: 'All Contacts' },
-                ...(isCreator
-                  ? [
-                      { id: 'digital_store', label: 'Digital Store' },
-                      { id: 'consultation', label: '1:1 Consultations' },
-                      { id: 'event', label: 'Event Tickets' },
-                      { id: 'quote', label: 'Custom Quotes' },
-                      { id: 'review', label: 'Reviewers' },
-                    ]
-                  : [
-                      { id: 'storefront', label: 'Store Orders' },
-                      { id: 'consultation', label: 'Bookings' },
-                      { id: 'quote', label: 'Custom Quotes' },
-                    ]),
-              ].map((filt) => (
-                <button
-                  key={filt.id}
-                  type="button"
-                  onClick={() => setSelectedModuleFilter(filt.id)}
-                  className={`px-2.5 py-1 rounded-lg font-bold text-xs shrink-0 transition cursor-pointer ${
-                    selectedModuleFilter === filt.id
-                      ? 'bg-slate-900 text-white shadow-2xs'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  {filt.label}
-                </button>
-              ))}
-            </div>
+            <select
+              value={selectedModuleFilter}
+              onChange={(e) => setSelectedModuleFilter(e.target.value)}
+              className="w-full sm:w-48 px-3 py-2 text-xs border border-[var(--border)] rounded-[var(--r8)] bg-[var(--card)] text-[var(--t1)] font-medium"
+            >
+              <option value="all">All Sources</option>
+              <option value="storefront">Storefront Orders</option>
+              <option value="digital_store">Digital Store</option>
+              <option value="consultation">1:1 Session</option>
+              <option value="event">Event Ticket</option>
+              <option value="quote">Custom Quote</option>
+              <option value="review">Testimonial</option>
+            </select>
           </div>
 
           {isLoading ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-20 bg-white rounded-2xl border border-slate-200 animate-pulse" />
+                <div key={i} className="h-20 bg-[var(--card)] rounded-[var(--r16)] border border-[var(--border)] animate-pulse" />
               ))}
             </div>
           ) : filteredCustomers.length > 0 ? (
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs divide-y divide-slate-100 overflow-hidden">
+            <div className="bg-[var(--card)] rounded-[var(--r16)] border border-[var(--border)] shadow-[var(--shadow-xs)] divide-y divide-[var(--border)] overflow-hidden">
               {filteredCustomers.map((cust) => (
                 <div
                   key={cust.id}
-                  className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/60 transition"
+                  className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[var(--bg)] transition"
                 >
-                  <div className="flex items-center gap-3.5">
-                    <div className={`w-11 h-11 rounded-2xl font-extrabold text-sm flex items-center justify-center shrink-0 ${
-                      isCreator ? 'bg-purple-100 text-purple-800' : 'bg-emerald-100/70 text-emerald-800'
-                    }`}>
-                      {cust.name ? cust.name.slice(0, 2).toUpperCase() : 'CU'}
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-heading font-extrabold text-sm text-[var(--t1)]">
+                        {cust.name}
+                      </span>
+                      {getSourceBadge(cust.sourceModule, cust.sourceModules)}
                     </div>
 
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-xs font-bold text-slate-900">{cust.name}</h3>
-                      </div>
-                      <div className="text-[11px] text-slate-500 flex items-center gap-2 flex-wrap">
-                        <span>{cust.phone}</span>
-                        {cust.email && (
-                          <>
-                            <span>•</span>
-                            <span>{cust.email}</span>
-                          </>
-                        )}
-                      </div>
-                      {getSourceBadge(cust.sourceModule, cust.sourceModules)}
-                      {cust.address && (
-                        <p className="text-[10px] text-slate-400 truncate max-w-sm mt-0.5">{cust.address}</p>
+                    <div className="text-xs text-[var(--t2)] flex items-center gap-2 flex-wrap pt-0.5 font-mono">
+                      <span>📱 {cust.phone}</span>
+                      {cust.email && (
+                        <>
+                          <span>•</span>
+                          <span>✉️ {cust.email}</span>
+                        </>
                       )}
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between sm:justify-end gap-5 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
-                    <div className="flex items-center gap-4 text-xs">
-                      {cust.totalOrders > 0 && (
-                        <div className="text-center">
-                          <div className="font-extrabold text-slate-900">{cust.totalOrders}</div>
-                          <div className="text-[10px] text-slate-400">{isCreator ? 'Sales' : 'Orders'}</div>
-                        </div>
-                      )}
-
-                      {cust.totalBookings > 0 && (
-                        <div className="text-center">
-                          <div className="font-extrabold text-slate-900">{cust.totalBookings}</div>
-                          <div className="text-[10px] text-slate-400">Bookings</div>
-                        </div>
-                      )}
-
-                      <div className="text-center">
-                        <div className="font-extrabold text-emerald-700">
-                          {business.currencySymbol}{cust.totalSpent || 0}
-                        </div>
-                        <div className="text-[10px] text-slate-400">Total Spent</div>
+                  <div className="flex items-center justify-between sm:justify-end gap-4 pt-2 sm:pt-0 border-t sm:border-t-0 border-[var(--border)]">
+                    <div className="text-left sm:text-right text-xs">
+                      <div className="text-[var(--t3)]">
+                        {cust.totalOrders || 0} orders • {cust.totalBookings || 0} bookings
+                      </div>
+                      <div className="font-extrabold text-sm text-emerald-700 font-heading">
+                        Spent: {business.currencySymbol}{cust.totalSpent || 0}
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => handleWhatsApp(cust)}
-                      className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
-                    >
-                      <MessageCircle className="w-3.5 h-3.5" />
-                      <span>WhatsApp</span>
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => handleWhatsApp(cust)}
+                        className="p-2 text-emerald-700 hover:bg-emerald-50 border border-emerald-200 rounded-[var(--r8)] transition cursor-pointer"
+                        title="Chat on WhatsApp"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCustomerDetails(cust)}
+                        className="p-2 text-[var(--t2)] hover:bg-[var(--bg)] border border-[var(--border)] rounded-[var(--r8)] transition cursor-pointer"
+                        title="View Details"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleOpenCustomerModal(cust)}
+                        className="p-2 text-[var(--t2)] hover:bg-[var(--bg)] border border-[var(--border)] rounded-[var(--r8)] transition cursor-pointer"
+                        title="Edit Customer"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setCustomerToDelete(cust)}
+                        className="p-2 text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-[var(--r8)] transition cursor-pointer"
+                        title="Delete Customer"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="p-12 text-center bg-white rounded-3xl border border-dashed border-slate-200 space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center mx-auto">
+            <div className="p-12 text-center bg-[var(--card)] rounded-[var(--r16)] border border-dashed border-[var(--border)] space-y-3">
+              <div className="w-12 h-12 rounded-[var(--r12)] bg-[var(--g100)] text-[var(--g600)] flex items-center justify-center mx-auto">
                 <Users className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-bold text-slate-900">No Contacts Found</h3>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                {isCreator
-                  ? 'Client records will be automatically logged here as clients purchase digital products, book 1:1 sessions, buy event tickets, or request quotes.'
-                  : 'Customers will be automatically recorded here as soon as they place orders or submit bookings on your storefront.'}
+              <h3 className="text-base font-bold text-[var(--t1)] font-heading">No Customers Found</h3>
+              <p className="text-xs text-[var(--t2)] max-w-sm mx-auto">
+                Customers will automatically appear here when they place orders, book sessions, or register for events.
               </p>
             </div>
           )}
         </div>
       )}
 
-      {/* RECORD / EDIT EXPENSE MODAL */}
-      {isExpenseModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden flex flex-col shadow-2xl border border-slate-200">
-            <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <div>
-                <h3 className="font-bold text-slate-900 text-base">
-                  {editingExpense ? 'Edit Expense Record' : 'Record Business Expense'}
-                </h3>
-                <p className="text-[11px] text-slate-500">Track costs for accurate P&amp;L reporting.</p>
+      {/* Expenses Tab Content */}
+      {activeTab === 'expenses' && (
+        <div className="space-y-4">
+          {expenses.length > 0 ? (
+            <div className="bg-[var(--card)] rounded-[var(--r16)] border border-[var(--border)] shadow-[var(--shadow-xs)] divide-y divide-[var(--border)] overflow-hidden">
+              {expenses.map((exp) => (
+                <div key={exp.id} className="p-4 sm:p-5 flex items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-sm text-[var(--t1)]">{exp.title}</span>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-100 text-slate-700">
+                        {exp.category}
+                      </span>
+                    </div>
+                    <p className="text-xs text-[var(--t3)]">Date: {exp.date} {exp.notes ? `• ${exp.notes}` : ''}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="font-black text-rose-600 text-base font-heading">
+                      -{business.currencySymbol}{exp.amount}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenExpenseModal(exp)}
+                      className="p-1.5 text-slate-500 hover:text-slate-800 rounded"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteExpense(exp.id)}
+                      className="p-1.5 text-rose-600 hover:text-rose-800 rounded"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-12 text-center bg-[var(--card)] rounded-[var(--r16)] border border-dashed border-[var(--border)] space-y-3">
+              <div className="w-12 h-12 rounded-[var(--r12)] bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+                <Receipt className="w-6 h-6" />
               </div>
+              <h3 className="text-base font-bold text-[var(--t1)] font-heading">No Expenses Logged</h3>
+              <p className="text-xs text-[var(--t2)] max-w-sm mx-auto">
+                Keep track of inventory purchases, marketing costs, and creator expenses here.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* CUSTOMER ADD / EDIT MODAL */}
+      {isCustomerModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="relative w-full max-w-md bg-[var(--card)] rounded-[var(--r16)] shadow-[var(--shadow-xl)] border border-[var(--border)] p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+              <h3 className="text-base font-bold text-[var(--t1)] font-heading">
+                {editingCustomer ? 'Edit CRM Customer' : 'Add New Customer'}
+              </h3>
               <button
                 type="button"
-                onClick={() => setIsExpenseModalOpen(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition"
+                onClick={() => setIsCustomerModalOpen(false)}
+                className="p-1.5 text-[var(--t3)] hover:text-[var(--t1)] rounded-[var(--r8)] cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveExpense} className="p-6 space-y-4">
-              {expenseError && (
-                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
-                  {expenseError}
+            <form onSubmit={handleSaveCustomer} className="space-y-4 pt-2 text-xs">
+              {customerError && (
+                <div className="p-3 rounded-[var(--r8)] bg-rose-50 border border-rose-200 text-rose-700 font-semibold">
+                  {customerError}
                 </div>
               )}
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Description / Title <span className="text-rose-500">*</span>
-                </label>
+              <div className="space-y-1">
+                <label className="font-bold text-[var(--t1)]">Customer Name *</label>
                 <input
                   type="text"
+                  value={custName}
+                  onChange={(e) => setCustName(e.target.value)}
+                  placeholder="Full name..."
+                  className="w-full px-3 py-2 border border-[var(--border)] rounded-[var(--r8)] bg-[var(--bg)] text-[var(--t1)]"
                   required
-                  value={expenseTitle}
-                  onChange={(e) => setExpenseTitle(e.target.value)}
-                  placeholder="e.g. Raw materials inventory, Shop Rent, Google Ads"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    Category
-                  </label>
-                  <select
-                    value={expenseCategory}
-                    onChange={(e) => setExpenseCategory(e.target.value as any)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-semibold focus:bg-white focus:ring-2 focus:ring-emerald-500"
-                  >
-                    <option value="inventory">Inventory / Stock</option>
-                    <option value="rent">Rent / Premises</option>
-                    <option value="utilities">Utilities &amp; Bills</option>
-                    <option value="salaries">Salaries &amp; Wages</option>
-                    <option value="marketing">Marketing &amp; Ads</option>
-                    <option value="software">SaaS &amp; Software</option>
-                    <option value="logistics">Logistics &amp; Courier</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    Amount ({business.currencySymbol}) <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    required
-                    value={expenseAmount || ''}
-                    onChange={(e) => setExpenseAmount(Number(e.target.value))}
-                    placeholder="500"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-extrabold text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Expense Date
-                </label>
+              <div className="space-y-1">
+                <label className="font-bold text-[var(--t1)]">WhatsApp / Phone *</label>
                 <input
-                  type="date"
+                  type="tel"
+                  value={custPhone}
+                  onChange={(e) => setCustPhone(sanitizePhoneNumberInput(e.target.value))}
+                  placeholder="9876543210"
+                  className="w-full px-3 py-2 border border-[var(--border)] rounded-[var(--r8)] bg-[var(--bg)] text-[var(--t1)] font-mono"
                   required
-                  value={expenseDate}
-                  onChange={(e) => setExpenseDate(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-medium focus:bg-white focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Notes (Optional)
-                </label>
+              <div className="space-y-1">
+                <label className="font-bold text-[var(--t1)]">Email Address</label>
+                <input
+                  type="email"
+                  value={custEmail}
+                  onChange={(e) => setCustEmail(e.target.value)}
+                  placeholder="customer@example.com"
+                  className="w-full px-3 py-2 border border-[var(--border)] rounded-[var(--r8)] bg-[var(--bg)] text-[var(--t1)]"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold text-[var(--t1)]">Delivery Address</label>
                 <input
                   type="text"
-                  value={expenseNotes}
-                  onChange={(e) => setExpenseNotes(e.target.value)}
-                  placeholder="e.g. Paid via UPI reference #12345"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500"
+                  value={custAddress}
+                  onChange={(e) => setCustAddress(e.target.value)}
+                  placeholder="Street address, city..."
+                  className="w-full px-3 py-2 border border-[var(--border)] rounded-[var(--r8)] bg-[var(--bg)] text-[var(--t1)]"
                 />
               </div>
 
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsExpenseModalOpen(false)}
-                  className="px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition"
-                >
-                  Cancel
-                </button>
+              <div className="space-y-1">
+                <label className="font-bold text-[var(--t1)]">Internal CRM Notes</label>
+                <textarea
+                  value={custNotes}
+                  onChange={(e) => setCustNotes(e.target.value)}
+                  rows={3}
+                  placeholder="Preferences, tags, or notes..."
+                  className="w-full px-3 py-2 border border-[var(--border)] rounded-[var(--r8)] bg-[var(--bg)] text-[var(--t1)] resize-none"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center gap-2">
                 <button
                   type="submit"
-                  disabled={isSavingExpense}
-                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-2"
+                  disabled={isSavingCustomer}
+                  className="flex-1 ds-btn-primary py-2.5 font-bold text-xs cursor-pointer"
                 >
-                  {isSavingExpense ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                  <span>{editingExpense ? 'Update Expense' : 'Save Expense'}</span>
+                  {isSavingCustomer ? 'Saving...' : 'Save Customer'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsCustomerModalOpen(false)}
+                  className="px-4 py-2.5 bg-[var(--bg)] text-[var(--t2)] font-bold text-xs rounded-[var(--r8)] border border-[var(--border)] cursor-pointer"
+                >
+                  Cancel
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      {/* CUSTOMER DETAILS SLIDE-OVER / MODAL */}
+      {selectedCustomerDetails && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="relative w-full max-w-lg bg-[var(--card)] rounded-[var(--r16)] shadow-[var(--shadow-xl)] border border-[var(--border)] p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+              <div>
+                <h3 className="text-base font-bold text-[var(--t1)] font-heading">
+                  {selectedCustomerDetails.name}
+                </h3>
+                <p className="text-xs text-[var(--t3)] font-mono">{selectedCustomerDetails.phone}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedCustomerDetails(null)}
+                className="p-1.5 text-[var(--t3)] hover:text-[var(--t1)] rounded-[var(--r8)] cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              <div className="grid grid-cols-3 gap-3">
+                <div className="p-3 bg-[var(--bg)] rounded-[var(--r12)] border border-[var(--border)] text-center">
+                  <span className="text-[10px] text-[var(--t3)] uppercase font-bold block">Orders</span>
+                  <span className="text-lg font-black text-[var(--t1)]">{selectedCustomerDetails.totalOrders || 0}</span>
+                </div>
+                <div className="p-3 bg-[var(--bg)] rounded-[var(--r12)] border border-[var(--border)] text-center">
+                  <span className="text-[10px] text-[var(--t3)] uppercase font-bold block">Bookings</span>
+                  <span className="text-lg font-black text-[var(--t1)]">{selectedCustomerDetails.totalBookings || 0}</span>
+                </div>
+                <div className="p-3 bg-[var(--bg)] rounded-[var(--r12)] border border-[var(--border)] text-center">
+                  <span className="text-[10px] text-[var(--t3)] uppercase font-bold block">Total Spent</span>
+                  <span className="text-lg font-black text-emerald-700">{business.currencySymbol}{selectedCustomerDetails.totalSpent || 0}</span>
+                </div>
+              </div>
+
+              <div className="p-4 bg-[var(--bg)] rounded-[var(--r12)] border border-[var(--border)] space-y-2">
+                <span className="font-bold text-[var(--t3)] uppercase text-[10px] tracking-wider block">Contact Information</span>
+                {selectedCustomerDetails.email && (
+                  <div className="flex items-center gap-2 text-[var(--t1)]">
+                    <Mail className="w-4 h-4 text-[var(--t3)]" />
+                    <span>{selectedCustomerDetails.email}</span>
+                  </div>
+                )}
+                {selectedCustomerDetails.address && (
+                  <div className="flex items-center gap-2 text-[var(--t1)]">
+                    <MapPin className="w-4 h-4 text-[var(--t3)]" />
+                    <span>{selectedCustomerDetails.address}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 text-[var(--t1)]">
+                  <Phone className="w-4 h-4 text-[var(--t3)]" />
+                  <span>{selectedCustomerDetails.phone}</span>
+                </div>
+              </div>
+
+              {selectedCustomerDetails.notes && (
+                <div className="p-4 bg-amber-50/70 border border-amber-200 rounded-[var(--r12)] space-y-1">
+                  <span className="font-bold text-amber-900 text-[10px] uppercase tracking-wider block">CRM Notes</span>
+                  <p className="text-amber-800 leading-relaxed">{selectedCustomerDetails.notes}</p>
+                </div>
+              )}
+
+              <div className="pt-2 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleWhatsApp(selectedCustomerDetails)}
+                  className="w-full ds-btn-primary py-3 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-[var(--shadow-xs)]"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>Chat on WhatsApp</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* EXPENSE ADD / EDIT MODAL */}
+      {isExpenseModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="relative w-full max-w-md bg-[var(--card)] rounded-[var(--r16)] shadow-[var(--shadow-xl)] border border-[var(--border)] p-6 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+              <h3 className="text-base font-bold text-[var(--t1)] font-heading">
+                {editingExpense ? 'Edit Expense Record' : 'Log Business Expense'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsExpenseModalOpen(false)}
+                className="p-1.5 text-[var(--t3)] hover:text-[var(--t1)] rounded-[var(--r8)]"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveExpense} className="space-y-4 pt-2 text-xs">
+              {expenseError && (
+                <div className="p-3 rounded-[var(--r8)] bg-rose-50 border border-rose-200 text-rose-700 font-semibold">
+                  {expenseError}
+                </div>
+              )}
+
+              <div className="space-y-1">
+                <label className="font-bold text-[var(--t1)]">Expense Title / Description *</label>
+                <input
+                  type="text"
+                  value={expenseTitle}
+                  onChange={(e) => setExpenseTitle(e.target.value)}
+                  placeholder="e.g. Raw materials, Packaging, Server hosting..."
+                  className="w-full px-3 py-2 border border-[var(--border)] rounded-[var(--r8)] bg-[var(--bg)] text-[var(--t1)]"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="font-bold text-[var(--t1)]">Category</label>
+                  <select
+                    value={expenseCategory}
+                    onChange={(e) => setExpenseCategory(e.target.value as any)}
+                    className="w-full px-3 py-2 border border-[var(--border)] rounded-[var(--r8)] bg-[var(--card)] text-[var(--t1)] font-medium"
+                  >
+                    <option value="inventory">Inventory & Stock</option>
+                    <option value="marketing">Marketing & Ads</option>
+                    <option value="utilities">Utilities & Tech</option>
+                    <option value="salary">Salary & Payroll</option>
+                    <option value="other">Other Overhead</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="font-bold text-[var(--t1)]">Amount ({business.currencySymbol}) *</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={expenseAmount}
+                    onChange={(e) => setExpenseAmount(Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-[var(--border)] rounded-[var(--r8)] bg-[var(--bg)] text-[var(--t1)] font-mono font-bold"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold text-[var(--t1)]">Date</label>
+                <input
+                  type="date"
+                  value={expenseDate}
+                  onChange={(e) => setExpenseDate(e.target.value)}
+                  className="w-full px-3 py-2 border border-[var(--border)] rounded-[var(--r8)] bg-[var(--bg)] text-[var(--t1)]"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold text-[var(--t1)]">Notes / Receipt Ref</label>
+                <input
+                  type="text"
+                  value={expenseNotes}
+                  onChange={(e) => setExpenseNotes(e.target.value)}
+                  placeholder="Optional reference notes..."
+                  className="w-full px-3 py-2 border border-[var(--border)] rounded-[var(--r8)] bg-[var(--bg)] text-[var(--t1)]"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center gap-2">
+                <button
+                  type="submit"
+                  disabled={isSavingExpense}
+                  className="flex-1 ds-btn-primary py-2.5 font-bold text-xs cursor-pointer"
+                >
+                  {isSavingExpense ? 'Saving...' : 'Save Expense'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsExpenseModalOpen(false)}
+                  className="px-4 py-2.5 bg-[var(--bg)] text-[var(--t2)] font-bold text-xs rounded-[var(--r8)] border border-[var(--border)] cursor-pointer"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmActionModal
+        isOpen={!!customerToDelete}
+        title="Delete Customer?"
+        message={`Are you sure you want to delete customer ${customerToDelete?.name}?`}
+        confirmText="Delete"
+        cancelText="Keep"
+        isDestructive={true}
+        isLoading={isDeletingCustomer}
+        onConfirm={handleDeleteCustomerConfirm}
+        onCancel={() => setCustomerToDelete(null)}
+      />
     </div>
   );
 };
-

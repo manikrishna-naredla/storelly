@@ -179,7 +179,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
 }) => {
   // Step 0: Profile Type ('vendor' vs 'creator'). Default to vendor
   const [selectedProfileType, setSelectedProfileType] = useState<ProfileType>('vendor');
-  const [step, setStep] = useState<number>(1);
+  const [step, setStep] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -397,7 +397,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
         const now = Date.now();
         creatorModulesConfig = {
           portfolio: { enabled: isPort, published: false, updatedAt: now },
-          universal_links: { enabled: isBio, published: false, updatedAt: now },
+          universal_links: { enabled: isBio, published: true, updatedAt: now },
           digital_products: { enabled: isDigital, published: false, updatedAt: now },
           booking_appointments: { enabled: isConsult, published: false, updatedAt: now },
           custom_quotes: { enabled: isQuotes, published: false, updatedAt: now },

@@ -1425,6 +1425,61 @@ export async function updateBookingStatus(businessId: string, bookingId: string,
   }
 }
 
+export async function updateBookingDetails(
+  businessId: string,
+  bookingId: string,
+  updates: Partial<Booking>
+): Promise<void> {
+  const docRef = doc(db, 'businesses', businessId, 'bookings', bookingId);
+  const snap = await getDoc(docRef);
+  if (!snap.exists()) throw new Error('Booking not found');
+  const existing = snap.data() as Booking;
+
+  await updateDoc(docRef, sanitizeForFirestore({
+    ...updates,
+    updatedAt: Date.now(),
+  }));
+
+  if (updates.bookingDate || updates.bookingTimeSlot || updates.status) {
+    try {
+      const newDate = updates.bookingDate || existing.bookingDate;
+      const newSlot = updates.bookingTimeSlot || existing.bookingTimeSlot;
+      const newStatus = updates.status || existing.status;
+      const slotKey = `${existing.itemId}_${newDate}_${newSlot.replace(/[^a-zA-Z0-9]/g, '_')}`;
+      const slotRef = doc(db, 'businesses', businessId, 'slot_reservations', slotKey);
+      if (newStatus === 'cancelled') {
+        await deleteDoc(slotRef).catch(() => {});
+      } else {
+        await setDoc(slotRef, sanitizeForFirestore({
+          id: slotKey,
+          businessId,
+          itemId: existing.itemId,
+          bookingDate: newDate,
+          bookingTimeSlot: newSlot,
+          status: newStatus,
+          updatedAt: Date.now(),
+        }), { merge: true });
+      }
+    } catch (e) {
+      console.warn('Slot reservation sync error:', e);
+    }
+  }
+}
+
+export async function deleteBooking(businessId: string, bookingId: string): Promise<void> {
+  const docRef = doc(db, 'businesses', businessId, 'bookings', bookingId);
+  const snap = await getDoc(docRef);
+  if (snap.exists()) {
+    const booking = snap.data() as Booking;
+    if (booking.itemId && booking.bookingDate && booking.bookingTimeSlot) {
+      const slotKey = `${booking.itemId}_${booking.bookingDate}_${booking.bookingTimeSlot.replace(/[^a-zA-Z0-9]/g, '_')}`;
+      const slotRef = doc(db, 'businesses', businessId, 'slot_reservations', slotKey);
+      await deleteDoc(slotRef).catch(() => {});
+    }
+  }
+  await deleteDoc(docRef);
+}
+
 export function subscribeToBookings(businessId: string, callback: (bookings: Booking[]) => void): () => void {
   if (!businessId || !auth?.currentUser) {
     callback([]);
@@ -1465,24 +1520,95 @@ export async function getCustomers(businessId: string): Promise<Customer[]> {
   }
 }
 
-export async function upsertCustomerFromOrder(businessId: string, order: Order): Promise<void> {
-  if (!order.customerPhone) return;
-  const cleanPhone = order.customerPhone.replace(/\D/g, '');
-  const custId = 'cust_' + cleanPhone;
+export async function createCustomerManual(businessId: string, data: Partial<Customer>): Promise<Customer> {
+  const rawPhone = data.phone || data.whatsapp || '';
+  const cleanPhone = rawPhone.replace(/\D/g, '').replace(/^91(\d{10})$/, '$1');
+  const custId = cleanPhone ? 'cust_' + cleanPhone : 'cust_' + Date.now();
   const docRef = doc(db, 'businesses', businessId, 'customers', custId);
+  const now = Date.now();
+  const newCustomer: Customer = {
+    id: custId,
+    businessId,
+    name: data.name || 'Customer',
+    phone: rawPhone,
+    whatsapp: data.whatsapp || rawPhone,
+    email: data.email || '',
+    address: data.address || '',
+    notes: data.notes || '',
+    tags: data.tags || [],
+    totalOrders: data.totalOrders || 0,
+    totalBookings: data.totalBookings || 0,
+    totalSpent: data.totalSpent || 0,
+    firstInteractionAt: now,
+    lastInteractionAt: now,
+  };
+  await setDoc(docRef, sanitizeForFirestore(newCustomer));
+  return newCustomer;
+}
+
+export async function updateCustomer(businessId: string, customerId: string, updates: Partial<Customer>): Promise<void> {
+  const docRef = doc(db, 'businesses', businessId, 'customers', customerId);
+  await updateDoc(docRef, sanitizeForFirestore({
+    ...updates,
+    updatedAt: Date.now(),
+    lastInteractionAt: Date.now(),
+  }));
+}
+
+export async function deleteCustomer(businessId: string, customerId: string): Promise<void> {
+  const docRef = doc(db, 'businesses', businessId, 'customers', customerId);
+  await deleteDoc(docRef);
+}
+
+async function safeUpsertCustomer(businessId: string, customerData: {
+  name?: string;
+  phone?: string;
+  whatsapp?: string;
+  email?: string;
+  address?: string;
+  orderDelta?: number;
+  bookingDelta?: number;
+  spentDelta?: number;
+  sourceModule?: string;
+  sourceModules?: string[];
+}): Promise<void> {
+  const rawPhone = customerData.phone;
+  if (!rawPhone) return;
+  const cleanPhone = rawPhone.replace(/\D/g, '').replace(/^91(\d{10})$/, '$1');
+  if (!cleanPhone || cleanPhone.length < 10) return;
 
   try {
+    const currentUser = auth.currentUser;
+    if (!currentUser || currentUser.uid !== businessId) {
+      await fetch('/api/customers/upsert-public', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          businessId,
+          ...customerData,
+          phone: cleanPhone,
+        }),
+      }).catch(() => {});
+      return;
+    }
+
+    const custId = 'cust_' + cleanPhone;
+    const docRef = doc(db, 'businesses', businessId, 'customers', custId);
     const snap = await getDoc(docRef);
     const now = Date.now();
     if (snap.exists()) {
       const existing = snap.data() as Customer;
+      const modules = new Set(existing.sourceModules || customerData.sourceModules || []);
+      if (customerData.sourceModule) modules.add(customerData.sourceModule);
       const updatePayload = sanitizeForFirestore({
-        name: order.customerName || existing.name,
-        whatsapp: order.customerWhatsApp || existing.whatsapp || order.customerPhone,
-        email: order.customerEmail || existing.email,
-        address: order.customerAddress || existing.address,
-        totalOrders: (existing.totalOrders || 0) + 1,
-        totalSpent: (existing.totalSpent || 0) + order.total,
+        name: customerData.name || existing.name,
+        whatsapp: customerData.whatsapp || rawPhone || existing.whatsapp,
+        email: customerData.email || existing.email,
+        address: customerData.address || existing.address,
+        totalOrders: (existing.totalOrders || 0) + (customerData.orderDelta || 0),
+        totalBookings: (existing.totalBookings || 0) + (customerData.bookingDelta || 0),
+        totalSpent: (existing.totalSpent || 0) + (customerData.spentDelta || 0),
+        sourceModules: Array.from(modules),
         lastInteractionAt: now,
       });
       await updateDoc(docRef, updatePayload);
@@ -1490,194 +1616,76 @@ export async function upsertCustomerFromOrder(businessId: string, order: Order):
       const newCust: Customer = {
         id: custId,
         businessId,
-        name: order.customerName,
-        phone: order.customerPhone,
-        whatsapp: order.customerWhatsApp || order.customerPhone,
-        email: order.customerEmail,
-        address: order.customerAddress,
-        totalOrders: 1,
-        totalBookings: 0,
-        totalSpent: order.total,
+        name: customerData.name || 'Customer',
+        phone: rawPhone,
+        whatsapp: customerData.whatsapp || rawPhone,
+        email: customerData.email,
+        address: customerData.address,
+        totalOrders: customerData.orderDelta || 0,
+        totalBookings: customerData.bookingDelta || 0,
+        totalSpent: customerData.spentDelta || 0,
+        sourceModule: customerData.sourceModule || 'storefront',
+        sourceModules: customerData.sourceModules || [customerData.sourceModule || 'storefront'],
         firstInteractionAt: now,
         lastInteractionAt: now,
       };
       await setDoc(docRef, sanitizeForFirestore(newCust));
     }
   } catch (e) {
-    console.error('Customer upsert error:', e);
+    console.warn('Customer upsert notice:', e);
   }
+}
+
+export async function upsertCustomerFromOrder(businessId: string, order: Order): Promise<void> {
+  await safeUpsertCustomer(businessId, {
+    name: order.customerName,
+    phone: order.customerPhone,
+    whatsapp: order.customerWhatsApp || order.customerPhone,
+    email: order.customerEmail,
+    address: order.customerAddress,
+    orderDelta: 1,
+    spentDelta: order.total,
+    sourceModule: 'storefront',
+  });
 }
 
 export async function upsertCustomerFromBooking(businessId: string, booking: Booking): Promise<void> {
-  if (!booking.customerPhone) return;
-  const cleanPhone = booking.customerPhone.replace(/\D/g, '');
-  const custId = 'cust_' + cleanPhone;
-  const docRef = doc(db, 'businesses', businessId, 'customers', custId);
-
-  try {
-    const snap = await getDoc(docRef);
-    const now = Date.now();
-    if (snap.exists()) {
-      const existing = snap.data() as Customer;
-      const updatePayload = sanitizeForFirestore({
-        name: booking.customerName || existing.name,
-        email: booking.customerEmail || existing.email,
-        totalBookings: (existing.totalBookings || 0) + 1,
-        totalSpent: (existing.totalSpent || 0) + (booking.totalAmount || 0),
-        lastInteractionAt: now,
-      });
-      await updateDoc(docRef, updatePayload);
-    } else {
-      const newCust: Customer = {
-        id: custId,
-        businessId,
-        name: booking.customerName,
-        phone: booking.customerPhone,
-        whatsapp: booking.customerPhone,
-        email: booking.customerEmail,
-        totalOrders: 0,
-        totalBookings: 1,
-        totalSpent: booking.totalAmount || 0,
-        firstInteractionAt: now,
-        lastInteractionAt: now,
-      };
-      await setDoc(docRef, sanitizeForFirestore(newCust));
-    }
-  } catch (e) {
-    console.error('Customer booking upsert error:', e);
-  }
+  await safeUpsertCustomer(businessId, {
+    name: booking.customerName,
+    phone: booking.customerPhone,
+    email: booking.customerEmail,
+    bookingDelta: 1,
+    spentDelta: booking.totalAmount || 0,
+    sourceModule: 'consultation',
+  });
 }
 
 export async function upsertCustomerFromEventTicket(businessId: string, ticket: EventTicket): Promise<void> {
-  if (!ticket.customerPhone) return;
-  const cleanPhone = ticket.customerPhone.replace(/\D/g, '');
-  const custId = 'cust_' + cleanPhone;
-  const docRef = doc(db, 'businesses', businessId, 'customers', custId);
-
-  try {
-    const snap = await getDoc(docRef);
-    const now = Date.now();
-    if (snap.exists()) {
-      const existing = snap.data() as Customer;
-      const modules = new Set(existing.sourceModules || []);
-      modules.add('event');
-      const updatePayload = sanitizeForFirestore({
-        name: ticket.customerName || existing.name,
-        email: ticket.customerEmail || existing.email,
-        totalBookings: (existing.totalBookings || 0) + 1,
-        totalSpent: (existing.totalSpent || 0) + (ticket.price || 0),
-        sourceModule: 'event',
-        sourceModules: Array.from(modules),
-        lastInteractionAt: now,
-      });
-      await updateDoc(docRef, updatePayload);
-    } else {
-      const newCust: Customer = {
-        id: custId,
-        businessId,
-        name: ticket.customerName,
-        phone: ticket.customerPhone,
-        whatsapp: ticket.customerPhone,
-        email: ticket.customerEmail,
-        totalOrders: 0,
-        totalBookings: 1,
-        totalSpent: ticket.price || 0,
-        sourceModule: 'event',
-        sourceModules: ['event'],
-        firstInteractionAt: now,
-        lastInteractionAt: now,
-      };
-      await setDoc(docRef, sanitizeForFirestore(newCust));
-    }
-  } catch (e) {
-    console.warn('Customer event ticket upsert notice:', e);
-  }
+  await safeUpsertCustomer(businessId, {
+    name: ticket.customerName,
+    phone: ticket.customerPhone,
+    email: ticket.customerEmail,
+    bookingDelta: 1,
+    spentDelta: ticket.price || 0,
+    sourceModule: 'event',
+  });
 }
 
 export async function upsertCustomerFromQuoteRequest(businessId: string, quote: CustomQuoteRequest): Promise<void> {
-  if (!quote.customerPhone) return;
-  const cleanPhone = quote.customerPhone.replace(/\D/g, '');
-  const custId = 'cust_' + cleanPhone;
-  const docRef = doc(db, 'businesses', businessId, 'customers', custId);
-
-  try {
-    const snap = await getDoc(docRef);
-    const now = Date.now();
-    if (snap.exists()) {
-      const existing = snap.data() as Customer;
-      const modules = new Set(existing.sourceModules || []);
-      modules.add('quote');
-      const updatePayload = sanitizeForFirestore({
-        name: quote.customerName || existing.name,
-        email: quote.customerEmail || existing.email,
-        sourceModule: 'quote',
-        sourceModules: Array.from(modules),
-        lastInteractionAt: now,
-      });
-      await updateDoc(docRef, updatePayload);
-    } else {
-      const newCust: Customer = {
-        id: custId,
-        businessId,
-        name: quote.customerName,
-        phone: quote.customerPhone,
-        whatsapp: quote.customerPhone,
-        email: quote.customerEmail,
-        totalOrders: 0,
-        totalBookings: 0,
-        totalSpent: 0,
-        sourceModule: 'quote',
-        sourceModules: ['quote'],
-        firstInteractionAt: now,
-        lastInteractionAt: now,
-      };
-      await setDoc(docRef, sanitizeForFirestore(newCust));
-    }
-  } catch (e) {
-    console.warn('Customer quote request upsert notice:', e);
-  }
+  await safeUpsertCustomer(businessId, {
+    name: quote.customerName,
+    phone: quote.customerPhone,
+    email: quote.customerEmail,
+    sourceModule: 'quote',
+  });
 }
 
 export async function upsertCustomerFromReview(businessId: string, review: Review): Promise<void> {
-  if (!review.customerPhone) return;
-  const cleanPhone = review.customerPhone.replace(/\D/g, '');
-  const custId = 'cust_' + cleanPhone;
-  const docRef = doc(db, 'businesses', businessId, 'customers', custId);
-
-  try {
-    const snap = await getDoc(docRef);
-    const now = Date.now();
-    if (snap.exists()) {
-      const existing = snap.data() as Customer;
-      const modules = new Set(existing.sourceModules || []);
-      modules.add('review');
-      const updatePayload = sanitizeForFirestore({
-        name: review.customerName || existing.name,
-        sourceModule: 'review',
-        sourceModules: Array.from(modules),
-        lastInteractionAt: now,
-      });
-      await updateDoc(docRef, updatePayload);
-    } else {
-      const newCust: Customer = {
-        id: custId,
-        businessId,
-        name: review.customerName,
-        phone: review.customerPhone,
-        whatsapp: review.customerPhone,
-        totalOrders: 0,
-        totalBookings: 0,
-        totalSpent: 0,
-        sourceModule: 'review',
-        sourceModules: ['review'],
-        firstInteractionAt: now,
-        lastInteractionAt: now,
-      };
-      await setDoc(docRef, sanitizeForFirestore(newCust));
-    }
-  } catch (e) {
-    console.warn('Customer review upsert notice:', e);
-  }
+  await safeUpsertCustomer(businessId, {
+    name: review.customerName,
+    phone: review.customerPhone,
+    sourceModule: 'review',
+  });
 }
 
 /**
@@ -1735,6 +1743,20 @@ export async function replyToReview(businessId: string, reviewId: string, reply:
     reply,
     replyAt: Date.now(),
   }));
+}
+
+export async function updateReview(businessId: string, reviewId: string, updates: Partial<Review>): Promise<void> {
+  const docRef = doc(db, 'businesses', businessId, 'reviews', reviewId);
+  const updatePayload: any = {
+    ...updates,
+    updatedAt: Date.now(),
+  };
+  if (updates.reply !== undefined && updates.reply !== null && updates.reply !== '') {
+    updatePayload.repliedAt = Date.now();
+  } else if (updates.reply === '') {
+    updatePayload.repliedAt = null;
+  }
+  await updateDoc(docRef, sanitizeForFirestore(updatePayload));
 }
 
 export async function updateReviewStatus(businessId: string, reviewId: string, status: 'published' | 'hidden' | 'pending'): Promise<void> {
@@ -3311,15 +3333,46 @@ export async function getBookedSlotsForDate(
   date: string
 ): Promise<string[]> {
   try {
-    const bookingsRef = collection(db, 'businesses', businessId, 'bookings');
+    const slotsRef = collection(db, 'businesses', businessId, 'slot_reservations');
     const q = query(
-      bookingsRef,
+      slotsRef,
       where('itemId', '==', itemId),
-      where('bookingDate', '==', date),
-      where('status', 'in', ['pending', 'confirmed'])
+      where('bookingDate', '==', date)
     );
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(d => (d.data() as Booking).bookingTimeSlot);
+    const now = Date.now();
+    const slots: string[] = [];
+    snapshot.forEach(d => {
+      const data = d.data();
+      if (data.status && data.status !== 'cancelled') {
+        if (data.status === 'pending' && data.expiresAt && data.expiresAt < now) {
+          return;
+        }
+        if (data.bookingTimeSlot) {
+          slots.push(data.bookingTimeSlot);
+        }
+      }
+    });
+
+    try {
+      const bookingsRef = collection(db, 'businesses', businessId, 'bookings');
+      const bq = query(
+        bookingsRef,
+        where('itemId', '==', itemId),
+        where('bookingDate', '==', date)
+      );
+      const bSnap = await getDocs(bq);
+      bSnap.forEach(d => {
+        const data = d.data() as Booking;
+        if (data.status && data.status !== 'cancelled' && data.bookingTimeSlot) {
+          if (!slots.includes(data.bookingTimeSlot)) {
+            slots.push(data.bookingTimeSlot);
+          }
+        }
+      });
+    } catch {}
+
+    return slots;
   } catch (err) {
     console.error('Error fetching booked slots:', err);
     return [];
