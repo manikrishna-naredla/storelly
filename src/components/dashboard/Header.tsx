@@ -161,7 +161,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-30 h-16 sm:h-[68px] bg-[var(--card)]/90 backdrop-blur-md border-b border-[var(--border)] px-3 sm:px-6 lg:px-8 flex items-center justify-between transition-colors shadow-xs w-full max-w-full">
+    <header className="sticky top-0 z-30 min-h-[4rem] sm:min-h-[68px] bg-[var(--card)]/90 backdrop-blur-md border-b border-[var(--border)] px-3 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-2 sm:gap-4 transition-colors shadow-xs w-full max-w-full">
       
       {/* Toast Notification for Link Copy */}
       {showCopiedToast && (
@@ -178,26 +178,26 @@ export const Header: React.FC<HeaderProps> = ({
       )}
 
       {/* LEFT SECTION: Hamburger & Store Selector */}
-      <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1 sm:flex-initial">
+      <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 flex-1 flex-wrap">
         <button
           type="button"
           onClick={onToggleSidebar}
           aria-label="Toggle navigation menu"
-          className="lg:hidden p-2 rounded-xl text-[var(--t2)] hover:text-[var(--t1)] hover:bg-[var(--bg)] transition cursor-pointer touch-target-accessible shrink-0"
+          className="lg:hidden p-2 rounded-xl text-[var(--t2)] hover:text-[var(--t1)] hover:bg-[var(--bg)] transition cursor-pointer touch-target-accessible flex-shrink-0"
         >
           <Menu className="w-5 h-5" />
         </button>
 
         {/* Business Selector Pill */}
-        <div className="relative min-w-0" ref={bizMenuRef}>
+        <div className="relative min-w-0 flex-1 sm:flex-initial" ref={bizMenuRef}>
           <button
             type="button"
             onClick={() => setBizDropdownOpen(!bizDropdownOpen)}
-            className="flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--card)] hover:border-[var(--g400)] hover:bg-[var(--bg)] transition-all shadow-xs cursor-pointer select-none group max-w-[170px] xs:max-w-[210px] sm:max-w-none"
+            className="flex items-center gap-1.5 sm:gap-2.5 px-2 sm:px-3 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--card)] hover:border-[var(--g400)] hover:bg-[var(--bg)] transition-all shadow-xs cursor-pointer select-none group w-full sm:w-auto max-w-[180px] xs:max-w-[220px] sm:max-w-[300px] min-w-0"
             title="Switch store or create new profile"
           >
             {/* Store Monogram / Logo */}
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg overflow-hidden shrink-0 border border-[var(--border)] bg-[var(--g100)] text-[var(--g700)] flex items-center justify-center font-black text-xs shadow-xs">
+            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg overflow-hidden flex-shrink-0 border border-[var(--border)] bg-[var(--g100)] text-[var(--g700)] flex items-center justify-center font-black text-xs shadow-xs">
               {getBusinessLogo(business) ? (
                 <SafeImage
                   src={getBusinessLogo(business)!}
@@ -212,8 +212,8 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
 
             {/* Store Title & Badge */}
-            <div className="text-left min-w-0 flex-1">
-              <span className="block font-heading font-bold text-xs sm:text-sm text-[var(--t1)] truncate">
+            <div className="text-left min-w-0 flex-1 truncate">
+              <span className="block font-heading font-bold text-xs sm:text-sm text-[var(--t1)] truncate min-w-0">
                 {business ? business.name : t("header.selectStore")}
               </span>
             </div>

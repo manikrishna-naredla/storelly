@@ -284,11 +284,17 @@ export const ShippingLabelModal: React.FC<ShippingLabelModalProps> = ({
             color: #000000 !important;
             width: 4in !important;
             height: 6in !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
 
           /* Hide ALL other page elements */
+          body > *:not(.fixed) {
+            display: none !important;
+          }
+
           body * {
-            visibility: hidden;
+            visibility: hidden !important;
           }
 
           /* Show ONLY the shipping label sheet */
@@ -297,7 +303,7 @@ export const ShippingLabelModal: React.FC<ShippingLabelModalProps> = ({
           }
 
           .shipping-label-printable {
-            position: absolute !important;
+            position: fixed !important;
             left: 0 !important;
             top: 0 !important;
             width: 4in !important;
@@ -314,6 +320,7 @@ export const ShippingLabelModal: React.FC<ShippingLabelModalProps> = ({
             background: #ffffff !important;
             box-shadow: none !important;
             overflow: hidden !important;
+            z-index: 999999 !important;
             page-break-after: avoid !important;
             page-break-inside: avoid !important;
           }
