@@ -71,10 +71,10 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
   };
 
   return (
-    <div ref={menuRef} className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-35">
+    <div ref={menuRef} className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-50">
       {/* Quick Actions Menu Popup */}
       {isOpen && (
-        <div className="absolute bottom-14 sm:bottom-16 right-0 bg-white rounded-3xl shadow-2xl border border-slate-200/90 p-2.5 w-[calc(100vw-2rem)] sm:w-72 max-w-xs space-y-1.5 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-md">
+        <div className="absolute bottom-16 right-0 bg-white rounded-3xl shadow-2xl border border-slate-200/90 p-2.5 w-[calc(100vw-2rem)] sm:w-72 max-w-xs space-y-1.5 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-md z-50">
           {/* Header section tailored to profile type */}
           <div className="flex items-center justify-between px-3 py-2 border-b border-slate-100">
             <div className="flex items-center gap-2 min-w-0">

@@ -641,6 +641,8 @@ export interface Offer {
   maxDiscount?: number;
   isActive: boolean;
   createdAt: number;
+  targetType?: 'all' | 'specific_phones';
+  targetPhones?: string[];
 }
 
 export interface AnalyticsSummary {

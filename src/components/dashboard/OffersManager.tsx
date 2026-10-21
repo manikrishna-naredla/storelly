@@ -30,6 +30,8 @@ export const OffersManager: React.FC<OffersManagerProps> = ({ business }) => {
   const [discountType, setDiscountType] = useState<'percentage' | 'flat'>('percentage');
   const [discountValue, setDiscountValue] = useState<number>(10);
   const [minOrderValue, setMinOrderValue] = useState<number | undefined>(undefined);
+  const [targetType, setTargetType] = useState<'all' | 'specific_phones'>('all');
+  const [targetPhonesStr, setTargetPhonesStr] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,6 +62,8 @@ export const OffersManager: React.FC<OffersManagerProps> = ({ business }) => {
     setDiscountType('percentage');
     setDiscountValue(10);
     setMinOrderValue(undefined);
+    setTargetType('all');
+    setTargetPhonesStr('');
     setError(null);
     setIsModalOpen(true);
   };
@@ -72,6 +76,8 @@ export const OffersManager: React.FC<OffersManagerProps> = ({ business }) => {
     setDiscountType(off.discountType);
     setDiscountValue(off.discountValue);
     setMinOrderValue(off.minOrderValue);
+    setTargetType(off.targetType || 'all');
+    setTargetPhonesStr(off.targetPhones ? off.targetPhones.join(', ') : '');
     setError(null);
     setIsModalOpen(true);
   };
@@ -94,6 +100,8 @@ export const OffersManager: React.FC<OffersManagerProps> = ({ business }) => {
         discountType,
         discountValue: Number(discountValue),
         minOrderValue: minOrderValue ? Number(minOrderValue) : undefined,
+        targetType,
+        targetPhones: targetType === 'specific_phones' ? targetPhonesStr.split(',').map(s => s.trim()).filter(Boolean) : undefined,
         isActive: true,
       };
 
@@ -319,6 +327,39 @@ export const OffersManager: React.FC<OffersManagerProps> = ({ business }) => {
                   />
                 </div>
               </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Target Audience
+                </label>
+                <select
+                  value={targetType}
+                  onChange={(e) => setTargetType(e.target.value as any)}
+                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
+                >
+                  <option value="all">All Customers (Regular)</option>
+                  <option value="specific_phones">Specific VIP Customers (By Phone Numbers)</option>
+                </select>
+              </div>
+
+              {targetType === 'specific_phones' && (
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    Allowed Phone Numbers (Comma Separated) *
+                  </label>
+                  <input
+                    type="text"
+                    value={targetPhonesStr}
+                    onChange={(e) => setTargetPhonesStr(e.target.value)}
+                    placeholder="9876543210, 9123456789"
+                    className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
+                    required
+                  />
+                  <p className="text-[10px] text-slate-500 mt-1">
+                    Only customers checking out with these phone numbers will be able to apply this coupon code.
+                  </p>
+                </div>
+              )}
 
               <div className="pt-4 flex items-center justify-end gap-2 border-t border-slate-100">
                 <button

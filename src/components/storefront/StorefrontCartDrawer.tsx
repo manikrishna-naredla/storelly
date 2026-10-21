@@ -165,6 +165,19 @@ export const StorefrontCartDrawer: React.FC<StorefrontCartDrawerProps> = ({
       return;
     }
 
+    if (matched.targetType === 'specific_phones' && matched.targetPhones && matched.targetPhones.length > 0) {
+      const cleanCustomerPhone = customerPhone.replace(/\D/g, '').slice(-10);
+      if (!cleanCustomerPhone) {
+        setCouponError('Please enter your phone number below first to apply this exclusive VIP coupon.');
+        return;
+      }
+      const isAllowed = matched.targetPhones.some((p) => p.replace(/\D/g, '').slice(-10) === cleanCustomerPhone);
+      if (!isAllowed) {
+        setCouponError('This exclusive coupon code is valid only for selected VIP customers.');
+        return;
+      }
+    }
+
     setAppliedOffer(matched);
     setCouponCode(matched.code || matched.title);
   };
